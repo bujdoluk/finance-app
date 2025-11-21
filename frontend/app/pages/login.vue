@@ -1,0 +1,4 @@
+<template>
+  <AppAlert />
+</template>
+
