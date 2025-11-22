@@ -1,7 +1,14 @@
 # Node dependencies
-node_modules
+src/node_modules
+src/dist
 
 # Local env files
-.env
-.env.*
-!.env.example
+src/.env
+src/.env.*
+src/!.env.example
+
+# Files
+config/index.ts
+src/*lock.json
+src/*.log
+src/*.log.gz
