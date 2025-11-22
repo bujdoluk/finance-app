@@ -16,10 +16,10 @@
         "noEmitHelpers": true,
         "newLine": "lf",
         "resolveJsonModule": true,
-        "module": "commonjs",
+        "module": "ESNext",
+        "target": "ES2020",
         "moduleResolution": "node",
         "pretty": true,
-        "target": "es2017",
         "allowJs": true
     },
     "formatCodeOptions": {

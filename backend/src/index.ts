@@ -1,16 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
-http = require('http')
+const port = process.env.APP_PORT || 3001;
 
-async function main() {
-    /**
-     * HTTP and console logging middleware using winston package
-     */
-    app.use(initRequest)
-    app.use(logResponse)
-}
+app.use(express.json());
+app.use(cors);
 
-main();
+app.listen(port, () => {
+    console.log("Server is runnign on port 3000");
+});
