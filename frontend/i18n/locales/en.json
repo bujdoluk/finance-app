@@ -1,0 +1,23 @@
+{
+    "views": {
+        "login": {
+            "title": "Login",
+            "submit": "Login",
+            "question": "Need to create an account?",
+            "link": "Sign up",
+            "email": "Email",
+            "password": "Password",
+            "image": "Guy chasing money"
+        },
+        "signUp": {
+            "name": "Name",
+            "title": "Sign Up",
+            "submit": "Create account",
+            "question": "Already have an account?",
+            "link": "Login",
+            "email": "Email",
+            "password": "Password",
+            "image": "Guy chasing money"
+        }
+    }
+}

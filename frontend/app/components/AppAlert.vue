@@ -1,5 +1,6 @@
 <template>
   <div>
-    <h1>Welcome to the homepage</h1>
+    <UButton label="Button" size="xl" variant="soft"/>
+    <UButton label="Button" size="xl" variant="soft"/>
   </div>
 </template>
