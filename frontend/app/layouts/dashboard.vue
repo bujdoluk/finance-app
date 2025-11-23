@@ -1,28 +1,23 @@
 <template>
   
-  <UDashboardGroup>
-    <UDashboardPanel resizable>
-      <UDashboardSidebar >
-        <NuxtImg src="../public/logo.jpg" :alt="t('views.dashboard.logo')" width="100" height="50" />
-        <UNavigationMenu orientation="vertical" :items="items"  />
-        <UDashboardSidebarCollapse class="cursor-pointer"/>
-      </UDashboardSidebar>
-      
-      
+   <UDashboardGroup class="bg-stone-100">  
+    <UDashboardSidebar open class="bg-black">
       <template #header>
-        <UDashboardNavbar title="Overview"/>
-        
-        <UDashboardToolbar />
+        <div>
+          Finance
+        </div>
       </template>
-    </UDashboardPanel>
-    
-    <slot />
+      <UNavigationMenu orientation="vertical" :items="items" />
+    </UDashboardSidebar>
 
+    <UCard class="mx-4 my-4 flex w-full">
+      <slot />
+    </UCard>
   </UDashboardGroup>
 </template>
 
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui'
+import type { NavigationMenuItem } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
