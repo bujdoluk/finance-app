@@ -116,7 +116,7 @@ const columns: TableColumn<Payment>[] = [
 const columnFilters = ref([
   {
     id: 'email',
-    value: 'james'
+    value: ''
   }
 ])
 

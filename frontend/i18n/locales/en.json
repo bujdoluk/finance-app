@@ -1,4 +1,38 @@
 {
+    "components": {
+        "modals": {
+            "add": {
+                "buttons": {
+                    "add": "Add",
+                    "confirmDeletion": "Yes, Confirm Deletion",
+                    "goBack": "No, Go Back",
+                    "deleteBudget": "Delete Budget",
+                    "editBudget": "Edit Budget",
+                    "saveChanges": "Save Changes",
+                    "addNewBudget": "+ Add New Budget"
+                },
+                "description": "Choose a category to set a spending budget. These categories can help you monitor spending.",
+                "title": "Add New Budget"
+            },
+            "edit": {
+                 "buttons": {
+                    "editBudget": "Edit Budget",
+                    "saveChanges": "Save Changes"
+                },
+                "description": "As your budget change, feel free to update your spending bills",
+                "title": "Edit Budget"
+            },
+            "delete": {
+                 "buttons": {
+                    "confirmDeletion": "Yes, Confirm Deletion",
+                    "goBack": "No, Go Back",
+                    "deleteBudget": "Delete Budget"
+                },
+                "description": "Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.",
+                "title": "Delete '{budgetCategory}'?"
+            }
+        }
+    },
     "views": {
         "login": {
             "title": "Login",

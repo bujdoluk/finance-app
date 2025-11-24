@@ -10,9 +10,10 @@
       <UNavigationMenu orientation="vertical" :items="items" />
     </UDashboardSidebar>
 
-    <UCard class="mx-4 my-4 flex w-full">
+    <div class="w-full py-4 px-4 flex">
       <slot />
-    </UCard>
+    </div>
+    
   </UDashboardGroup>
 </template>
 
