@@ -39,7 +39,7 @@
 				<div>Reccuring Bills</div>
 			</div>
 
-			<div>
+			<div class="width">
 				<div class="flex justify-between">
 					<div>Budgets</div>
 					<div>See Details</div>
@@ -50,17 +50,50 @@
 						<BudgetChart />
 					</ClientOnly>
 
-					<div class="flex">
-						<div>
-							<UProgress
-								orientation="vertical"
-								class="h-48"
-								size="xs"
-							/>
+					<div class="flex flex-col">
+						<div class="flex p-2">
+							<div>
+								<USeparator
+									orientation="vertical"
+									class="h-12"
+									size="lg"
+									color="primary"
+								/>
+							</div>
+							<div>
+								<div>Entertainment</div>
+								<div>$50.00</div>
+							</div>
 						</div>
-						<div>
-							<div>Entertainment</div>
-							<div>$50.00</div>
+
+						<div class="flex p-2">
+							<div>
+								<USeparator
+									orientation="vertical"
+									class="h-12"
+									size="lg"
+									color="primary"
+								/>
+							</div>
+							<div>
+								<div>Entertainment</div>
+								<div>$50.00</div>
+							</div>
+						</div>
+
+						<div class="flex p-2">
+							<div>
+								<USeparator
+									orientation="vertical"
+									class="h-12"
+									size="lg"
+									color="primary"
+								/>
+							</div>
+							<div>
+								<div>Entertainment</div>
+								<div>$50.00</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -76,3 +109,9 @@ definePageMeta({
 	layout: 'dashboard',
 });
 </script>
+
+<style scoped>
+.width {
+	width: 400px;
+}
+</style>
