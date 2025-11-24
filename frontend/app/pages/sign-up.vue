@@ -62,19 +62,17 @@
 </template>
 
 <script setup lang="ts">
-import Joi from 'joi'
+import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const show = ref(false)
 
-const schema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().required(),
-  password: Joi.string()
-    .min(8)
-    .required()
+const schema = z.object({
+  name: z.string(),
+  email: z.string(),
+  password: z.string().min(8)
 })
 
 const formState = reactive({

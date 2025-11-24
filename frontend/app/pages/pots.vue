@@ -1,11 +1,12 @@
 <template>
   <div class="w-full">
     <div class="flex justify-between">
-      <div>Pots</div>
+      <div class="text-2xl text-black font-medium">Pots</div>
       <div>
         <UButton 
           label="+ Add New Pot"
-          color="primary"
+          color="neutral"
+          size="xl"
         />
       </div>
     </div>
@@ -15,32 +16,43 @@
         <div class="flex items-center justify-between w-full">
           <div class="flex items-center gap-2">
             <div><UChip standalone inset /></div>
-            <div>Savings</div>
+            <div class="text-xl">Savings</div>
           </div>
 
-            <div>...</div>
+            <div>
+              <UButton    
+                color="neutral"
+                variant="ghost" 
+                icon="i-solar:menu-dots-bold"
+                class="cursor-pointer"
+              />
+            </div>
         </div>
 
-        <div class="flex items-center justify-between w-full">
+        <div class="flex items-center justify-between w-full py-2">
             <div>Total saved</div>
-            <div>$159.00</div>
+            <div class="text-2xl text-black font-bold">$159.00</div>
         </div>
 
         <UProgress v-model="value" />
 
-        <div class="flex items-center justify-between w-full">
-            <div>73.3%</div>
-            <div>Target of $150</div>
+        <div class="flex items-center justify-between w-full py-2">
+            <div class="text-xs font-bold">73.3 %</div>
+            <div class="text-sm">Target of $150</div>
         </div>
 
         <div class="flex justify-around w-full">
           <UButton    
             label="+ Add Money"
-            color="primary" 
+            color="neutral" 
+            variant="outline"
+            size="xl"
           />
           <UButton     
-            label="+ Withdraw"
-            color="primary"
+            label="Withdraw"
+            color="neutral"
+            variant="outline"
+            size="xl"
           />
         </div>
       </Ucard>
