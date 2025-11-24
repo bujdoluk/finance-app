@@ -1,9 +1,9 @@
 <template>
-    <div>Reccuring bills</div>
+	<div>Reccuring bills</div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({
-  layout: 'dashboard',
-})
+	layout: 'dashboard',
+});
 </script>

@@ -1,6 +1,14 @@
 <template>
-  <div>
-    <UButton label="Button" size="xl" variant="soft"/>
-    <UButton label="Button" size="xl" variant="soft"/>
-  </div>
+	<div>
+		<UButton
+			label="Button"
+			size="xl"
+			variant="soft"
+		/>
+		<UButton
+			label="Button"
+			size="xl"
+			variant="soft"
+		/>
+	</div>
 </template>
