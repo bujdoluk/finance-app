@@ -1,22 +1,27 @@
 # Node dependencies
-src/node_modules
+node_modules/
+**/node_modules/
 
 # TypeScript build output
-src/dist
+dist/
+**/dist/
 
 # Local env files
-src/.env
-src/.env.*
-src/!.env.example
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
 
 # OS generated files
 .DS_Store
 
-# Files and logs
-config/index.ts
-src/*lock.json
-src/*.log
-src/*.log.gz
+# Logs
+*.log
+*.log.gz
+**/*.log
+**/*.log.gz
 
 # Test coverage
-src/coverage
+coverage/
+**/coverage/
