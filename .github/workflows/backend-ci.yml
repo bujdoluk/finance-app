@@ -1,45 +1,59 @@
-name: Backend CI
+name: Back-end CI
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "backend/**"
+  pull_request:
+    paths:
+      - "backend/**"
 
 jobs:
   quality-checks:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "backend/src"
+        working-directory: backend
 
     steps:
+      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js using .nvmrc
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.19.0
+          node-version-file: backend/.nvmrc
           cache: npm
-          cache-dependency-path: backend/src/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # 4. Run tests
       - name: Run tests
         run: npm run test:run
 
+      # 5. TypeScript type checking
       - name: Run TypeScript type checking
         run: npm run type-check
 
+      # 6. ESLint and fix
       - name: Run ESLint and fix
         run: npm run lint:fix
 
+      # 7. Prettier formatting
       - name: Format with Prettier
         run: npm run format
 
-      - name: Check for remaining ESLint errors
+      # 8. Check for remaining ESLint errors
+      - name: Check ESLint
         run: npm run lint
 
-      - name: Check for remaining formatting issues
+      # 9. Check for remaining formatting issues
+      - name: Check Prettier formatting
         run: npm run format:check
