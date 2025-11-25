@@ -1,6 +1,12 @@
 {
+    "extends": "@tsconfig/node22/tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist",
+        "rootDir": "./",
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"],
+        },
         "removeComments": false,
         "preserveConstEnums": true,
         "sourceMap": true,
@@ -26,12 +32,9 @@
         "indentSize": 2,
         "tabSize": 2
     },
-    "include": [
-        "**/*.ts",
-        "config/**/*.ts"
-    ],
+    "include": ["src/**/*", "**/*.ts", "config/**/*.ts"],
     "exclude": [
         "node_modules",
         "dist/"
-    ]
+    ],
 }

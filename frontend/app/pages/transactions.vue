@@ -26,7 +26,6 @@
 					:filter-options="{
 						getFilteredRowModel: getFilteredRowModel(),
 					}"
-					class="flex-1"
 				/>
 
 				<div class="flex justify-center border-t border-default pt-4">
