@@ -3,6 +3,14 @@
 		<div class="text-3xl pb-8 font-medium">
 			Overview
 		</div>
+		<ul>
+			<li
+				v-for="user in users"
+				:key="user.id"
+			>
+				{{ user.name }} ({{ user.email }})
+			</li>
+		</ul>
 		<div class="grid grid-cols-3">
 			<div class="bg-black rounded-lg p-4 text-white ">
 				<div class="text-sm">
@@ -107,6 +115,37 @@ import BudgetChart from '~/components/BudgetChart.client.vue';
 
 definePageMeta({
 	layout: 'dashboard',
+});
+
+interface User {
+	id: string;
+	name: string;
+	email: string;
+}
+
+const users = ref<Array<User>>([]);
+const loading = ref(false);
+const error = ref<string | null>(null);
+const config = useRuntimeConfig();
+
+const fetchUsers = async () => {
+	loading.value = true;
+	error.value = null;
+	try {
+		// $fetch automatically handles JSON response
+		users.value = await $fetch(`${config.public.apiBase}/users`);
+	}
+	catch (err) {
+		error.value = 'Failed to fetch users.';
+		console.error(err);
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+onMounted(() => {
+	fetchUsers();
 });
 </script>
 

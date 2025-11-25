@@ -10,6 +10,11 @@ export default defineNuxtConfig({
 	ssr: false,
 	devtools: { enabled: true },
 	css: ['~/assets/css/main.css'],
+	runtimeConfig: {
+		public: {
+			apiBase: 'http://localhost:3001',
+		},
+	},
 	compatibilityDate: '2025-07-15',
 	eslint: {
 		config: {
