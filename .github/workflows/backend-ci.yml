@@ -4,13 +4,18 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "back-end/**"
+  pull_request:
+    paths:
+      - "back-end/**"
 
 jobs:
   quality-checks:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/src
+        working-directory: backend/**
 
     steps:
       - name: Checkout code
