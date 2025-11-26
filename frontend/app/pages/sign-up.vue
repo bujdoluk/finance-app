@@ -16,7 +16,7 @@
 					class="space-y-4"
 					@submit="onSubmit"
 				>
-					<h3>{{ t('views.signUp.title') }}</h3>
+					<h3>{{ t('pages.signUp.title') }}</h3>
 					<UFormField
 						:label="t('views.signUp.name')"
 						name="name"
@@ -29,7 +29,7 @@
 					</UFormField>
 
 					<UFormField
-						:label="t('views.signUp.email')"
+						:label="t('pages.signUp.email')"
 						name="email"
 					>
 						<UInput
@@ -40,7 +40,7 @@
 					</UFormField>
 
 					<UFormField
-						:label="t('views.signUp.password')"
+						:label="t('pages.signUp.password')"
 						name="password"
 					>
 						<UInput
@@ -70,12 +70,12 @@
 						type="submit"
 						class="bg-black w-full justify-center hover:bg-gray-800 active:bg-gray-800 cursor-pointer"
 					>
-						{{ t('views.signUp.submit') }}
+						{{ t('pages.signUp.submit') }}
 					</UButton>
 
 					<p>
-						{{ t('views.signUp.question') }}
-						<NuxtLink to="/login">{{ t('views.signUp.link') }}</NuxtLink>
+						{{ t('pages.signUp.question') }}
+						<NuxtLink to="/login">{{ t('pages.signUp.link') }}</NuxtLink>
 					</p>
 				</UForm>
 			</UCard>

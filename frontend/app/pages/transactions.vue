@@ -1,23 +1,24 @@
 <template>
 	<div>
 		<div class="px-4 py-3 text-xl font-semibold">
-			Transactions Header
+			Transactions
 		</div>
 
 		<div class="flex flex-col flex-1 w-full">
-			<div class="flex px-4 py-3.5 border-b border-accented w-full">
+			<div class="flex px-4 py-4 border-b border-accented w-full">
 				<UInput
-					:model-value="table?.tableApi?.getColumn('email')?.getFilterValue() as string"
-					placeholder="Filter emails..."
-					@update:model-value="table?.tableApi?.getColumn('email')?.setFilterValue($event)"
+					:model-value="table?.tableApi?.getColumn('userName')?.getFilterValue() as string"
+					placeholder="Filter usernames..."
+					@update:model-value="table?.tableApi?.getColumn('userName')?.setFilterValue($event)"
 				/>
 			</div>
 
-			<div class="w-full space-y-4 pb-4">
+			<div class="w-full">
 				<UTable
 					ref="table"
 					v-model:pagination="pagination"
 					v-model:column-filters="columnFilters"
+					class="flex-1"
 					:data="data"
 					:columns="columns"
 					:pagination-options="{
@@ -26,9 +27,40 @@
 					:filter-options="{
 						getFilteredRowModel: getFilteredRowModel(),
 					}"
-				/>
+					:ui="{
+						td: 'p-2 pl-4',
+					}"
+				>
+					<template #userName-cell="{ row }">
+						<div class="flex items-center gap-3">
+							<UAvatar
+								src="https://github.com/benjamincanac.png"
+								size="md"
+								:alt="`${row.original.userName} avatar`"
+							/>
+							<div>
+								<p class="font-medium text-highlighted">
+									{{ row.original.userName }}
+								</p>
+							</div>
+						</div>
+					</template>
+					<template #action-cell="{ row }">
+						<UDropdownMenu
+							:items="getDropdownActions(row.original)"
+							class="cursor-pointer"
+						>
+							<UButton
+								icon="i-lucide-ellipsis-vertical"
+								color="neutral"
+								variant="ghost"
+								aria-label="Actions"
+							/>
+						</UDropdownMenu>
+					</template>
+				</UTable>
 
-				<div class="flex justify-center border-t border-default pt-4">
+				<div class="flex justify-end border-t border-default pt-4 pr-4">
 					<UPagination
 						:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
 						:items-per-page="table?.tableApi?.getState().pagination.pageSize"
@@ -42,30 +74,76 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue';
+import { h } from 'vue';
 import { getPaginationRowModel, getFilteredRowModel } from '@tanstack/vue-table';
-import type { TableColumn } from '@nuxt/ui';
+import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
+import { useClipboard } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 
 definePageMeta({
 	layout: 'dashboard',
 });
 
 const table = useTemplateRef('table');
+const { t } = useI18n();
+const toast = useToast();
+const { copy } = useClipboard();
 
 const pagination = ref({
 	pageIndex: 0,
 	pageSize: 5,
 });
 
-const columns: TableColumn<Payment>[] = [
+function getDropdownActions(transaction: Transaction): DropdownMenuItem[][] {
+	return [
+		[
+			{
+				label: 'Copy user Id',
+				icon: 'i-lucide-copy',
+				onSelect: () => {
+					copy(transaction.id.toString());
+
+					toast.add({
+						title: 'User ID copied to clipboard!',
+						color: 'success',
+						icon: 'i-lucide-circle-check',
+					});
+				},
+			},
+		],
+		[
+			{
+				label: 'Delete',
+				icon: 'i-lucide-trash',
+				color: 'error',
+			},
+		],
+	];
+}
+
+const columns: TableColumn<Transaction>[] = [
 	{
 		accessorKey: 'id',
-		header: '#',
+		header: `${t('components.tables.transaction.column.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
+		accessorKey: 'userName',
+		header: `${t('components.tables.transaction.column.userName')}`,
+		cell: ({ row }) => {
+			return row.getValue('userName');
+		},
+	},
+	{
+		accessorKey: 'category',
+		header: `${t('components.tables.transaction.column.category')}`,
+		cell: ({ row }) => {
+			return row.getValue('category');
+		},
+	},
+	{
 		accessorKey: 'date',
-		header: 'Date',
+		header: `${t('components.tables.transaction.column.date')}`,
 		cell: ({ row }) => {
 			return new Date(row.getValue('date')).toLocaleString('en-US', {
 				day: 'numeric',
@@ -77,27 +155,8 @@ const columns: TableColumn<Payment>[] = [
 		},
 	},
 	{
-		accessorKey: 'status',
-		header: 'Status',
-		cell: ({ row }) => {
-			const color = {
-				paid: 'success' as const,
-				failed: 'error' as const,
-				refunded: 'neutral' as const,
-			}[row.getValue('status') as string];
-
-			return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-				row.getValue('status'),
-			);
-		},
-	},
-	{
-		accessorKey: 'email',
-		header: 'Email',
-	},
-	{
 		accessorKey: 'amount',
-		header: () => h('div', { class: 'text-right' }, 'Amount'),
+		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transaction.column.amount')}`),
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue('amount'));
 
@@ -106,90 +165,84 @@ const columns: TableColumn<Payment>[] = [
 				currency: 'EUR',
 			}).format(amount);
 
-			return h('div', { class: 'text-right font-medium' }, formatted);
+			return h('div', { class: amount > 0
+				? 'text-right font-medium text-green-600 text-lg'
+				: 'text-right font-medium text-red-500 text-lg' }, formatted);
 		},
+	},
+	{
+		id: 'action',
 	},
 ];
 
 const columnFilters = ref([
 	{
-		id: 'email',
+		id: 'userName',
 		value: '',
 	},
 ]);
 
-const UBadge = resolveComponent('UBadge');
-
-type Payment = {
-	id: string;
+type Transaction = {
+	id: number;
+	userName: string;
 	date: string;
-	status: 'paid' | 'failed' | 'refunded';
-	email: string;
+	category: string;
 	amount: number;
+	createdAt: string;
+	updatedAt: string;
+	deletedAt: string;
 };
 
-const data = ref<Payment[]>([
+const data = ref<Transaction[]>([
 	{
-		id: '4600',
+		id: 4600,
+		userName: 'Martin',
 		date: '2024-03-11T15:30:00',
-		status: 'paid',
-		email: 'james.anderson@example.com',
+		category: 'General',
 		amount: 594,
+		createdAt: '2024-03-11T15:30:00',
+		updatedAt: '2024-03-11T15:30:00',
+		deletedAt: '',
 	},
 	{
-		id: '4599',
+		id: 4599,
+		userName: 'Luke',
 		date: '2024-03-11T10:10:00',
-		status: 'failed',
-		email: 'mia.white@example.com',
+		category: 'General',
 		amount: 276,
+		createdAt: '2024-03-11T15:30:00',
+		updatedAt: '2024-03-11T15:30:00',
+		deletedAt: '',
 	},
 	{
-		id: '4598',
+		id: 4598,
+		userName: 'Jane',
 		date: '2024-03-11T08:50:00',
-		status: 'refunded',
-		email: 'william.brown@example.com',
+		category: 'General',
 		amount: 315,
+		createdAt: '2024-03-11T15:30:00',
+		updatedAt: '2024-03-11T15:30:00',
+		deletedAt: '',
 	},
 	{
-		id: '4597',
+		id: 4597,
+		userName: 'Patrik',
 		date: '2024-03-10T19:45:00',
-		status: 'paid',
-		email: 'emma.davis@example.com',
-		amount: 529,
+		category: 'General',
+		amount: -529,
+		createdAt: '2024-03-11T15:30:00',
+		updatedAt: '2024-03-11T15:30:00',
+		deletedAt: '',
 	},
 	{
-		id: '4596',
+		id: 4596,
+		userName: 'Tomas',
 		date: '2024-03-10T15:55:00',
-		status: 'paid',
-		email: 'ethan.harris@example.com',
+		category: 'General',
 		amount: 639,
-	},
-	{
-		id: '4596',
-		date: '2024-03-10T15:55:00',
-		status: 'paid',
-		email: 'ethan.harris@example.com',
-		amount: 639,
-	},
-	{
-		id: '4596',
-		date: '2024-03-10T15:55:00',
-		status: 'paid',
-		email: 'ethan.harris@example.com',
-		amount: 639,
-	},
-	{
-		id: '4596',
-		date: '2024-03-10T15:55:00',
-		status: 'paid',
-		email: 'ethan.harris@example.com',
-		amount: 639,
-	}, {
-		id: '4596',
-		date: '2024-03-10T15:55:00',
-		status: 'paid',
-		email: 'ethan.harris@example.com',
-		amount: 639,
+		createdAt: '2024-03-11T15:30:00',
+		updatedAt: '2024-03-11T15:30:00',
+		deletedAt: '',
 	},
 ]);
 </script>

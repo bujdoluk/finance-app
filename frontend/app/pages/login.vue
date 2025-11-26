@@ -3,7 +3,7 @@
 		<div class="w-1/3 flex items-center justify-center">
 			<NuxtImg
 				src="../public/guy-chasing-money.jpg"
-				:alt="t('views.login.image')"
+				:alt="t('pages.login.image')"
 				width="500"
 				height="300"
 			/>
@@ -16,9 +16,9 @@
 					class="space-y-4 w-full max-w-sm"
 					@submit="onSubmit"
 				>
-					<h3>{{ t('views.login.title') }}</h3>
+					<h3>{{ t('pages.login.title') }}</h3>
 					<UFormField
-						:label="t('views.login.email')"
+						:label="t('pages.login.email')"
 						name="email"
 					>
 						<UInput
@@ -28,7 +28,7 @@
 					</UFormField>
 
 					<UFormField
-						:label="t('views.login.password')"
+						:label="t('pages.login.password')"
 						name="password"
 					>
 						<UInput
@@ -42,12 +42,12 @@
 						type="submit"
 						class="bg-black w-full justify-center hover:bg-gray-800 active:bg-gray-800 cursor-pointer"
 					>
-						{{ t('views.login.submit') }}
+						{{ t('pages.login.submit') }}
 					</UButton>
 
 					<p>
-						{{ t('views.login.question') }}
-						<u><NuxtLink to="/sign-up">{{ t('views.login.link') }}</NuxtLink></u>
+						{{ t('pages.login.question') }}
+						<u><NuxtLink to="/sign-up">{{ t('pages.login.link') }}</NuxtLink></u>
 					</p>
 				</UForm>
 			</UCard>

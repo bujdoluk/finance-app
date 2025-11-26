@@ -1,11 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 
 const app = express();
 app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
 
-const port = process.env.APP_PORT ?? process.env.PORT ?? "9001";
+const port = Number(process.env.APP_PORT ?? process.env.PORT ?? "9001");
 
 let users = [
   { id: 1, name: 'John Doe', email: 'john@example.com' },

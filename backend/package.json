@@ -48,6 +48,7 @@
     "js-yaml": "4.1.1",
     "json-to-pretty-yaml": "1.2.2",
     "kuuid": "3.0.1",
+    "morgan": "1.10.1",
     "multer": "2.0.2",
     "njwt": "2.0.1",
     "pg": "8.16.3",

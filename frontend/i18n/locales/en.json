@@ -31,9 +31,20 @@
                 "description": "Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.",
                 "title": "Delete '{budgetCategory}'?"
             }
+        },
+        "tables": {
+            "transaction": {
+                "column": {
+                    "id": "# ID",
+                    "userName": "Recipient/Sender",
+                    "category": "Category",
+                    "date": "Transaction date",
+                    "amount": "Amount"
+                }
+            }
         }
     },
-    "views": {
+    "pages": {
         "login": {
             "title": "Login",
             "submit": "Login",
