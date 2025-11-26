@@ -4,11 +4,12 @@
 			<div class="text-2xl text-black font-medium p-4">
 				{{ t('pages.pots.title') }}
 			</div>
-			<div>
+			<div class="p-4">
 				<UButton
 					:label="t('pages.pots.buttons.addNewPot')"
 					color="neutral"
 					size="xl"
+					class="cursor-pointer"
 				/>
 			</div>
 		</div>

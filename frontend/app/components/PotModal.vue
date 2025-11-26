@@ -14,10 +14,23 @@
 	>
 		<template #body>
 			<div class="flex flex-col gap-4 w-full">
-				<USelect
-					v-model="budgetCategory"
-					:items="budgetCategories"
-				/>
+				<UInput
+					v-model="pot"
+					:maxlength="maxLength"
+					aria-describedby="character-count"
+					:ui="{ trailing: 'pointer-events-none' }"
+				>
+					<template #trailing>
+						<div
+							id="character-count"
+							class="text-xs text-muted tabular-nums"
+							aria-live="polite"
+							role="status"
+						>
+							{{ pot?.length }}/{{ maxLength }}
+						</div>
+					</template>
+				</UInput>
 				<UInputNumber
 					v-model="value2"
 					orientation="vertical"
@@ -52,9 +65,8 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-
-const budgetCategories = ref(['Entertainment', 'Rent', 'Food', 'Utilities', 'Insurance', 'Internet']);
-const budgetCategory = ref('Entertainment');
+const pot = ref<string>();
+const maxLength = 15;
 
 const colors = ref(['Green', 'Yellow', 'Cyan', 'Navy', 'Red', 'Purple', 'Turquoise']);
 const color = ref('Green');
@@ -63,37 +75,37 @@ const value2 = ref(5);
 
 const title = computed(() => {
 	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.title');
+		return t('components.potModal.add.title');
 	}
 	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.title');
+		return t('components.potModal.edit.title');
 	}
 	else {
-		return t('components.budgetModal.delete.title', { budgetCategory: budgetCategory.value });
+		return t('components.potModal.delete.title', { pot: pot.value });
 	}
 });
 
 const description = computed(() => {
 	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.description');
+		return t('components.potModal.add.description');
 	}
 	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.description');
+		return t('components.potModal.edit.description');
 	}
 	else {
-		return t('components.budgetModal.delete.description');
+		return t('components.potModal.delete.description');
 	}
 });
 
 const footerButtonLabel = computed(() => {
 	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.buttons.addBudget');
+		return t('components.potModal.add.buttons.addPot');
 	}
 	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.buttons.saveChanges');
+		return t('components.potModal.edit.buttons.saveChanges');
 	}
 	else {
-		return t('components.budgetModal.delete.buttons.confirmDeletion');
+		return t('components.potModal.delete.buttons.confirmDeletion');
 	}
 });
 </script>

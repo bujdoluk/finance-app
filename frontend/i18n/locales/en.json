@@ -1,9 +1,9 @@
 {
     "components": {
-        "modals": {
+        "budgetModal": {
             "add": {
                 "buttons": {
-                    "add": "Add",
+                    "addBudget": "Add Budget",
                     "confirmDeletion": "Yes, Confirm Deletion",
                     "goBack": "No, Go Back",
                     "deleteBudget": "Delete Budget",
@@ -25,11 +25,41 @@
             "delete": {
                  "buttons": {
                     "confirmDeletion": "Yes, Confirm Deletion",
-                    "goBack": "No, Go Back",
-                    "deleteBudget": "Delete Budget"
+                    "goBack": "No, Go Back"
                 },
                 "description": "Are you sure you want to delete this budget? This action cannot be reversed, and all the data inside it will be removed forever.",
                 "title": "Delete '{budgetCategory}'?"
+            }
+        },
+        "potModal": {
+            "add": {
+                "buttons": {
+                    "addPot": "Add Pot",
+                    "confirmDeletion": "Yes, Confirm Deletion",
+                    "goBack": "No, Go Back",
+                    "deletePot": "Delete Pot",
+                    "editPot": "Edit Pot",
+                    "saveChanges": "Save Changes",
+                    "addNewPot": "+ Add New pot"
+                },
+                "description": "Create a pot to set savings targets. These can help keep you on track as you save for your special purchases.",
+                "title": "Add New Pot"
+            },
+            "edit": {
+                 "buttons": {
+                    "editPot": "Edit Pot",
+                    "saveChanges": "Save Changes"
+                },
+                "description": "If your savings targets change, feel free to update your pots.",
+                "title": "Edit Pot"
+            },
+            "delete": {
+                 "buttons": {
+                    "confirmDeletion": "Yes, Confirm Deletion",
+                    "goBack": "No, Go Back"
+                },
+                "description": "Are you sure you want to delete this pot? This action cannot be reversed, and all the data inside it will be removed forever.",
+                "title": "Delete '{pot}'?"
             }
         },
         "potDetail": {
