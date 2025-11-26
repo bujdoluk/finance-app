@@ -1,90 +1,74 @@
 <template>
 	<div class="w-full">
 		<div class="flex justify-between">
-			<div class="text-2xl text-black font-medium">
-				Pots
+			<div class="text-2xl text-black font-medium p-4">
+				{{ t('pages.pots.title') }}
 			</div>
 			<div>
 				<UButton
-					label="+ Add New Pot"
+					:label="t('pages.pots.buttons.addNewPot')"
 					color="neutral"
 					size="xl"
 				/>
 			</div>
 		</div>
 
-		<div class="width">
-			<Ucard>
-				<div class="flex items-center justify-between w-full">
-					<div class="flex items-center gap-2">
-						<div>
-							<UChip
-								standalone
-								inset
-							/>
-						</div>
-						<div class="text-xl">
-							Savings
-						</div>
-					</div>
-
-					<div>
-						<UButton
-							color="neutral"
-							variant="ghost"
-							icon="i-solar:menu-dots-bold"
-							class="cursor-pointer"
-						/>
-					</div>
-				</div>
-
-				<div class="flex items-center justify-between w-full py-2">
-					<div>Total saved</div>
-					<div class="text-2xl text-black font-bold">
-						$159.00
-					</div>
-				</div>
-
-				<UProgress v-model="value" />
-
-				<div class="flex items-center justify-between w-full py-2">
-					<div class="text-xs font-bold">
-						73.3 %
-					</div>
-					<div class="text-sm">
-						Target of $150
-					</div>
-				</div>
-
-				<div class="flex justify-around w-full">
-					<UButton
-						label="+ Add Money"
-						color="neutral"
-						variant="outline"
-						size="xl"
-					/>
-					<UButton
-						label="Withdraw"
-						color="neutral"
-						variant="outline"
-						size="xl"
-					/>
-				</div>
-			</Ucard>
+		<div class="w-full flex gap-4 p-4">
+			<div
+				v-for="pot in pots"
+				:key="pot.id"
+				class="w-1/4 min-w-[300px]"
+			>
+				<PotDetail :pot="pot" />
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 definePageMeta({
 	layout: 'dashboard',
 });
 
-const value = ref(50);
+const pots = [
+	{
+		id: 1,
+		name: 'Savings',
+		target: 2000,
+		theme: 'primary',
+		saved: 159,
+	},
+	{
+		id: 2,
+		name: 'Gift',
+		target: 60,
+		theme: 'primary',
+		saved: 40,
+	},
+	{
+		id: 2,
+		name: 'Gift',
+		target: 60,
+		theme: 'primary',
+		saved: 40,
+	},
+	{
+		id: 2,
+		name: 'Gift',
+		target: 60,
+		theme: 'primary',
+		saved: 40,
+	},
+	{
+		id: 2,
+		name: 'Gift',
+		target: 60,
+		theme: 'primary',
+		saved: 40,
+	},
+];
 </script>
-
-<style scoped>
-.width {
-  width: 300px;
-}
-</style>

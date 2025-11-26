@@ -32,6 +32,14 @@
                 "title": "Delete '{budgetCategory}'?"
             }
         },
+        "potDetail": {
+            "buttons": {
+                "addMoney": "+ Add Money",
+                "withdraw": "Withdraw"
+            },
+            "target": "Target of ${target}",
+            "totalSaved": "Total saved"
+        },
         "tables": {
             "transaction": {
                 "column": {
@@ -63,6 +71,12 @@
             "email": "Email",
             "password": "Password",
             "image": "Guy chasing money"
+        },
+        "pots": {
+            "title": "Pots",
+            "buttons": {
+                "addNewPot": "+ Add New Pot"
+            }
         }
     }
 }
