@@ -124,26 +124,26 @@ function getDropdownActions(transaction: Transaction): DropdownMenuItem[][] {
 const columns: TableColumn<Transaction>[] = [
 	{
 		accessorKey: 'id',
-		header: `${t('components.tables.transaction.column.id')}`,
+		header: `${t('components.tables.transaction.columns.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
 		accessorKey: 'userName',
-		header: `${t('components.tables.transaction.column.userName')}`,
+		header: `${t('components.tables.transaction.columns.userName')}`,
 		cell: ({ row }) => {
 			return row.getValue('userName');
 		},
 	},
 	{
 		accessorKey: 'category',
-		header: `${t('components.tables.transaction.column.category')}`,
+		header: `${t('components.tables.transaction.columns.category')}`,
 		cell: ({ row }) => {
 			return row.getValue('category');
 		},
 	},
 	{
 		accessorKey: 'date',
-		header: `${t('components.tables.transaction.column.date')}`,
+		header: `${t('components.tables.transaction.columns.date')}`,
 		cell: ({ row }) => {
 			return new Date(row.getValue('date')).toLocaleString('en-US', {
 				day: 'numeric',
@@ -156,7 +156,7 @@ const columns: TableColumn<Transaction>[] = [
 	},
 	{
 		accessorKey: 'amount',
-		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transaction.column.amount')}`),
+		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transaction.columns.amount')}`),
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue('amount'));
 

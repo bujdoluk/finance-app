@@ -72,13 +72,30 @@
         },
         "tables": {
             "transaction": {
-                "column": {
+                "columns": {
                     "id": "# ID",
                     "userName": "Recipient/Sender",
                     "category": "Category",
                     "date": "Transaction date",
                     "amount": "Amount"
                 }
+            },
+            "reccuringBills": {
+                "columns": {
+                    "id": "# ID",
+                    "billTitle": "Bill Title",
+                    "dueDate": "Due Date",
+                    "amount": "Amount"
+                },
+                "filters": {
+                    "sortBy": "Sort by",
+                    "latest": "Latest",
+                    "oldest": "Oldest",
+                    "atoz": "A to Zs",
+                    "ztoa": "Z to A",
+                    "highest": "Highest",
+                    "lowest": "Lowest"
+                }  
             }
         }
     },
@@ -107,6 +124,14 @@
             "buttons": {
                 "addNewPot": "+ Add New Pot"
             }
+        },
+        "reccuringBills": {
+            "title": "Reccuring Bills",
+            "totalBills": "Total Bills",
+            "summary": "Summary",
+            "paidBills": "Paid Bills",
+            "totalUpcoming": "Total Upcoming",
+            "dueSoon": "Due Soon"
         }
     }
 }
