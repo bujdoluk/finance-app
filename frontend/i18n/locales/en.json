@@ -1,5 +1,9 @@
 {
     "components": {
+        "budgetChart": {
+            "limit": "{spend} of {maximum} limit",
+            "spendingSummary": "Spending Summary"
+        },
         "budgetModal": {
             "add": {
                 "buttons": {
@@ -78,7 +82,17 @@
                     "category": "Category",
                     "date": "Transaction date",
                     "amount": "Amount"
-                }
+                },
+                "filters": {
+                    "sortBy": "Sort by",
+                    "latest": "Latest",
+                    "oldest": "Oldest",
+                    "atoz": "A to Zs",
+                    "ztoa": "Z to A",
+                    "highest": "Highest",
+                    "lowest": "Lowest",
+                    "category": "Category"
+                } 
             },
             "reccuringBills": {
                 "columns": {
@@ -132,6 +146,14 @@
             "paidBills": "Paid Bills",
             "totalUpcoming": "Total Upcoming",
             "dueSoon": "Due Soon"
+        },
+        "budgets": {
+            "title": "Budgets",
+            "maximumOf": "Maximum of ${maximum}",
+            "spent": "Spent",
+            "free": "Free",
+            "latestSpending": "Latest Spending",
+            "seeAll": "See All"
         }
     }
 }

@@ -1,5 +1,5 @@
 <template>
-	<div class="px-4">
+	<div>
 		<div class="p-4 text-xl font-semibold">
 			{{ t('pages.reccuringBills.title') }}
 		</div>
@@ -109,7 +109,7 @@
 
 <script setup lang="ts">
 import { h } from 'vue';
-import { getPaginationRowModel, getFilteredRowModel } from '@tanstack/vue-table';
+import { getFilteredRowModel } from '@tanstack/vue-table';
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';

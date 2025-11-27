@@ -1,13 +1,43 @@
 <template>
-	<apexchart
-		type="donut"
-		height="350"
-		:options="chartData.options"
-		:series="chartData.series"
-	/>
+	<div>
+		<apexchart
+			type="donut"
+			height="350"
+			:options="chartData.options"
+			:series="chartData.series"
+		/>
+
+		<div>
+			<div>{{ t('components.budgetChart.spendingSummary') }}</div>
+
+			<div class="flex justify-between">
+				<div>Entertaiment</div>
+				<div>$15.00 of $50.00</div>
+			</div>
+
+			<div class="flex justify-between">
+				<div>Entertaiment</div>
+				<div>$15.00 of $50.00</div>
+			</div>
+
+			<div class="flex justify-between">
+				<div>Entertaiment</div>
+				<div>$15.00 of $50.00</div>
+			</div>
+
+			<div class="flex justify-between">
+				<div>Entertaiment</div>
+				<div>$15.00 of $50.00</div>
+			</div>
+		</div>
+	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 const chartData = {
 	series: [500, 600, 100, 200],
 	options: {

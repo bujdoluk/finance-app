@@ -4,16 +4,33 @@
 			Transactions
 		</div>
 
-		<div class="flex flex-col flex-1 w-full">
-			<div class="flex px-4 py-4 border-b border-accented w-full">
+		<div class="flex flex-col bg-white rounded mx-4">
+			<div class="flex p-4 w-full items-center">
 				<UInput
 					:model-value="table?.tableApi?.getColumn('userName')?.getFilterValue() as string"
 					placeholder="Filter usernames..."
 					@update:model-value="table?.tableApi?.getColumn('userName')?.setFilterValue($event)"
 				/>
+
+				<div class="ml-auto pr-2">
+					{{ t('components.tables.transaction.filters.sortBy') }}
+				</div>
+				<USelect
+					v-model="sortedValue"
+					class="mr-2"
+					:items="filters"
+				/>
+
+				<div class="pr-2">
+					{{ t('components.tables.transaction.filters.category') }}
+				</div>
+				<USelect
+					v-model="category"
+					:items="categories"
+				/>
 			</div>
 
-			<div class="w-full">
+			<div class="w-full p-4">
 				<UTable
 					ref="table"
 					v-model:pagination="pagination"
@@ -93,6 +110,24 @@ const pagination = ref({
 	pageIndex: 0,
 	pageSize: 5,
 });
+
+const sortedValue = ref<string>('Latest');
+const category = ref<string>('Entertaiment');
+
+const filters = ref([
+	t('components.tables.reccuringBills.filters.latest'),
+	t('components.tables.reccuringBills.filters.oldest'),
+	t('components.tables.reccuringBills.filters.atoz'),
+	t('components.tables.reccuringBills.filters.ztoa'),
+	t('components.tables.reccuringBills.filters.highest'),
+	t('components.tables.reccuringBills.filters.lowest'),
+]);
+
+const categories = ref([
+	t('components.tables.reccuringBills.filters.latest'),
+	t('components.tables.reccuringBills.filters.oldest'),
+	t('components.tables.reccuringBills.filters.atoz'),
+]);
 
 function getDropdownActions(transaction: Transaction): DropdownMenuItem[][] {
 	return [
