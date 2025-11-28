@@ -6,6 +6,7 @@ export default defineNuxtConfig({
 		'nuxt-posthog',
 		'@nuxt/ui',
 		'@nuxt/image',
+		'@nuxtjs/tailwindcss',
 	],
 	ssr: false,
 	devtools: { enabled: true },
