@@ -3,7 +3,6 @@ export default defineNuxtConfig({
 	modules: [
 		'@nuxt/eslint',
 		'@nuxtjs/i18n',
-		'nuxt-posthog',
 		'@nuxt/ui',
 		'@nuxt/image',
 		'@nuxtjs/tailwindcss',
@@ -17,6 +16,12 @@ export default defineNuxtConfig({
 		},
 	},
 	compatibilityDate: '2025-07-15',
+	postcss: {
+		plugins: {
+			tailwindcss: {},
+			autoprefixer: {},
+		},
+	},
 	eslint: {
 		config: {
 			stylistic: {
