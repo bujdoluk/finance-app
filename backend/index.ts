@@ -1,9 +1,11 @@
-import express from 'express';
+import express, { Request, Response, Router } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import os from "os";
 
 const app = express();
+const router: Router = Router();
+
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
@@ -48,15 +50,17 @@ let users: User[] = [
   }
 ];
 
-app.get("/users", (req, res) => res.json(users.filter(u => !u.deleted_at)));
+router.get("/users", async (req: Request, res: Response) => {
+  res.json(users.filter(u => !u.deleted_at));
+});
 
-app.get("/users/:id", (req, res) => {
+router.get("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
   res.json(user);
 });
 
-app.post("/users", (req, res) => {
+router.post("/users", (req: Request, res: Response) => {
   const { first_name, last_name, email, password } = req.body;
   if (!first_name || !last_name || !email || !password)
     return res.status(400).json({ message: "All fields are required" });
@@ -76,7 +80,7 @@ app.post("/users", (req, res) => {
   res.status(201).json({ message: "User created", user: newUser });
 });
 
-app.patch("/users/:id", (req, res) => {
+router.patch("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -92,7 +96,7 @@ app.patch("/users/:id", (req, res) => {
   res.json({ message: "User updated", user });
 });
 
-app.delete("/users/:id", (req, res) => {
+router.delete("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -102,15 +106,15 @@ app.delete("/users/:id", (req, res) => {
 });
 
 
-app.get("/users", (req, res) => res.json(users.filter(u => !u.deleted_at)));
+router.get("/users", (req: Request, res: Response) => res.json(users.filter(u => !u.deleted_at)));
 
-app.get("/users/:id", (req, res) => {
+router.get("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
   res.json(user);
 });
 
-app.post("/users", (req, res) => {
+router.post("/users", (req: Request, res: Response) => {
   const { first_name, last_name, email, password } = req.body;
   if (!first_name || !last_name || !email || !password)
     return res.status(400).json({ message: "All fields are required" });
@@ -132,7 +136,7 @@ app.post("/users", (req, res) => {
 
 interface UserUpdate extends Partial<Pick<User, "first_name" | "last_name" | "email" | "password">> {}
 
-app.patch("/users/:id", (req, res) => {
+router.patch("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -148,7 +152,7 @@ app.patch("/users/:id", (req, res) => {
   res.json({ message: "User updated", user });
 });
 
-app.delete("/users/:id", (req, res) => {
+router.delete("/users/:id", (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
   if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -194,15 +198,15 @@ const transactions: Array<Transaction> = [
   }
 ];
 
-app.get("/transactions", (req, res) => res.json(transactions.filter(t => !t.deleted_at)));
+router.get("/transactions", (req: Request, res: Response) => res.json(transactions.filter(t => !t.deleted_at)));
 
-app.get("/transactions/:id", (req, res) => {
+router.get("/transactions/:id", (req: Request, res: Response) => {
   const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
   if (!transaction) return res.status(404).json({ message: "Transaction not found" });
   res.json(transaction);
 });
 
-app.post("/transactions", (req, res) => {
+router.post("/transactions", (req: Request, res: Response) => {
   const { date, category, amount, sender, sender_picture } = req.body;
   if (!date || !category || amount === undefined || !sender || !sender_picture)
     return res.status(400).json({ message: "All fields are required" });
@@ -221,6 +225,15 @@ app.post("/transactions", (req, res) => {
 
   transactions.push(newTransaction);
   res.status(201).json({ message: "Transaction created", transaction: newTransaction });
+});
+
+router.delete("/transactions/:id", (req: Request, res: Response) => {
+  const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
+  if (!transaction) return res.status(404).json({ message: "Pot not found" });
+
+  transaction.deleted_at = true;
+  transaction.updated_at = new Date().toISOString();
+  res.json({ message: "Transaction soft deleted", transaction });
 });
 
 interface Pot {
@@ -249,15 +262,15 @@ let pots: Pot[] = [
   },
 ];
 
-app.get("/pots", (req, res) => res.json(pots.filter(p => !p.deleted_at)));
+router.get("/pots", (req: Request, res: Response) => res.json(pots.filter(p => !p.deleted_at)));
 
-app.get("/pots/:id", (req, res) => {
+router.get("/pots/:id", (req: Request, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
   if (!pot) return res.status(404).json({ message: "Pot not found" });
   res.json(pot);
 });
 
-app.post("/pots", (req, res) => {
+router.post("/pots", (req: Request, res: Response) => {
   const { total_saved, target, theme, name, amount } = req.body;
   if (total_saved === undefined || target === undefined || !theme || !name || !amount)
     return res.status(400).json({ message: "total_saved and target are required" });
@@ -278,7 +291,7 @@ app.post("/pots", (req, res) => {
   res.status(201).json({ message: "Pot created", pot: newPot });
 });
 
-app.patch("/pots/:id", (req, res) => {
+router.patch("/pots/:id", (req: Request, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
   if (!pot) return res.status(404).json({ message: "Pot not found" });
 
@@ -290,7 +303,7 @@ app.patch("/pots/:id", (req, res) => {
   res.json({ message: "Pot updated", pot });
 });
 
-app.delete("/pots/:id", (req, res) => {
+router.delete("/pots/:id", (req: Request, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
   if (!pot) return res.status(404).json({ message: "Pot not found" });
 
@@ -299,7 +312,7 @@ app.delete("/pots/:id", (req, res) => {
   res.json({ message: "Pot soft deleted", pot });
 });
 
-app.post("/pots/:id/deposit", (req, res) => {
+router.post("/pots/:id/deposit", (req: Request, res: Response) => {
   const potId = Number(req.params.id);
   const pot = pots.find(p => p.id === potId && !p.deleted_at);
   if (!pot) return res.status(404).json({ message: 'Pot not found'});
@@ -315,7 +328,7 @@ app.post("/pots/:id/deposit", (req, res) => {
   res.json({ message: `Deposited $${amount} to pot`, pot });
 });
 
-app.post('/pots/:id/withdraw', (req, res) => {
+router.post('/pots/:id/withdraw', (req: Request, res: Response) => {
   const potId = Number(req.params.id);
   const pot = pots.find(p => p.id === potId && !p.deleted_at);
   if (!pot) return res.status(404).json({ message: 'Pot not found' });
@@ -357,17 +370,17 @@ let recurringBills: RecurringBill[] = [
   }
 ];
 
-app.get("/bills", (req, res) => {
+router.get("/bills", (req: Request, res: Response) => {
   res.json(recurringBills.filter(b => !b.deleted_at));
 });
 
-app.get("/bills/:id", (req, res) => {
+router.get("/bills/:id", (req: Request, res: Response) => {
   const bill = recurringBills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
   if (!bill) return res.status(404).json({ message: "Bill not found" });
   res.json(bill);
 });
 
-app.post("/bills", (req, res) => {
+router.post("/bills", (req: Request, res: Response) => {
   const { name, amount, frequency, next_run } = req.body;
 
   if (!name || !amount || !frequency || !next_run)
@@ -390,7 +403,7 @@ app.post("/bills", (req, res) => {
 
 interface BillUpdate extends Partial<Pick<RecurringBill, "name" | "amount" | "frequency" | "next_run">> {}
 
-app.patch("/bills/:id", (req, res) => {
+router.patch("/bills/:id", (req: Request, res: Response) => {
   const bill = recurringBills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
   if (!bill) return res.status(404).json({ message: "Bill not found" });
 
@@ -406,7 +419,7 @@ app.patch("/bills/:id", (req, res) => {
   res.json({ message: "Bill updated", bill });
 });
 
-app.delete("/bills/:id", (req, res) => {
+router.delete("/bills/:id", (req: Request, res: Response) => {
   const bill = recurringBills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
   if (!bill) return res.status(404).json({ message: "Bill not found" });
 
@@ -440,17 +453,17 @@ let budgets: Budget[] = [
   }
 ];
 
-app.get("/budgets", (req, res) => {
+router.get("/budgets", (req: Request, res: Response) => {
   res.json(budgets.filter(b => !b.deleted_at));
 });
 
-app.get("/budgets/:id", (req, res) => {
+router.get("/budgets/:id", (req: Request, res: Response) => {
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
   if (!budget) return res.status(404).json({ message: "Budget not found" });
   res.json(budget);
 });
 
-app.post("/budgets", (req, res) => {
+router.post("/budgets", (req: Request, res: Response) => {
   const { name, maximumSpending, theme, amount } = req.body;
 
   if (!name || maximumSpending === undefined || !theme || !amount)
@@ -471,7 +484,7 @@ app.post("/budgets", (req, res) => {
   res.status(201).json({ message: "Budget created", budget: newBudget });
 });
 
-app.patch("/budgets/:id", (req, res) => {
+router.patch("/budgets/:id", (req: Request, res: Response) => {
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) return res.status(404).json({ message: "Budget not found" });
@@ -487,7 +500,7 @@ app.patch("/budgets/:id", (req, res) => {
   res.json({ message: "Budget updated", budget });
 });
 
-app.delete("/budgets/:id", (req, res) => {
+router.delete("/budgets/:id", (req: Request, res: Response) => {
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
   if (!budget) return res.status(404).json({ message: "Budget not found" });
 
@@ -497,7 +510,7 @@ app.delete("/budgets/:id", (req, res) => {
   res.json({ message: "Budget soft deleted", budget });
 });
 
-app.post("/budgets/:id/deposit", (req, res) => {
+router.post("/budgets/:id/deposit", (req: Request, res: Response) => {
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) return res.status(404).json({ message: "Budget not found" });
@@ -513,7 +526,7 @@ app.post("/budgets/:id/deposit", (req, res) => {
   res.json({ message: `Deposited $${amount} to budget`, budget });
 });
 
-app.post("/budgets/:id/withdraw", (req, res) => {
+router.post("/budgets/:id/withdraw", (req: Request, res: Response) => {
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) return res.status(404).json({ message: "Budget not found" });
@@ -532,7 +545,7 @@ app.post("/budgets/:id/withdraw", (req, res) => {
   res.json({ message: `Withdrew $${amount} from budget`, budget });
 });
 
-app.get("/health", (req, res) => {
+router.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
     status: "ok",
     timestamp: new Date().toISOString()
@@ -540,7 +553,7 @@ app.get("/health", (req, res) => {
 });
 
 
-app.get("/perf", async (req, res) => {
+router.get("/perf", async (req: Request, res: Response) => {
   const start = process.hrtime.bigint(); 
 
   const memory = process.memoryUsage();
