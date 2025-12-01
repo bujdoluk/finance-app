@@ -1,6 +1,13 @@
 import { Router } from "express";
 
 import {
+  createBill,
+  deleteBill,
+  getAllBills,
+  getBillById,
+  updateBill
+} from "../bill/controller";
+import {
   createBudget,
   deleteBudget,
   depositToBudget,
@@ -8,7 +15,7 @@ import {
   getBudgetById,
   updateBudget,
   withdrawFromBudget
-} from "../budget/budget-controller";
+} from "../budget/controller";
 import {
   createPot,
   deletePot,
@@ -17,20 +24,20 @@ import {
   getPotById,
   updatePot,
   withdrawFromPot,
-} from "../pot/pot-controller";
+} from "../pot/controller";
 import {
   createTransaction,
   deleteTransaction,
   getAllTransactions,
   getTransactionById
-} from "../transaction/transaction-controller";
+} from "../transaction/controller";
 import {
   createUser,
   deleteUser,
   getAllUsers,
   getUserById,
   updateUser
-} from "../user/user-controller";
+} from "../user/controller";
 import { getHealth } from '../utils/health-controller';
 import { getPerformanceInfo } from '../utils/perf-controller';
 
@@ -55,7 +62,6 @@ router.get("/pots/:id", getPotById);
 router.post("/pots", createPot);
 router.patch("/pots/:id", updatePot);
 router.delete("/pots/:id", deletePot);
-
 router.post("/pots/:id/deposit", depositToPot);
 router.post("/pots/:id/withdraw", withdrawFromPot);
 
@@ -66,5 +72,11 @@ router.patch("/budgets/:id", updateBudget);
 router.delete("/budgets/:id", deleteBudget);
 router.post("/budgets/:id/deposit", depositToBudget);
 router.post("/budgets/:id/withdraw", withdrawFromBudget);
+
+router.get("/bills", getAllBills);
+router.get("/bills/:id", getBillById);
+router.post("/bills", createBill);
+router.patch("/bills/:id", updateBill);
+router.delete("/bills/:id", deleteBill);
 
 export default router;

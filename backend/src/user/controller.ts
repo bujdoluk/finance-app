@@ -1,47 +1,7 @@
 import  { Request, Response } from 'express';
 
-import { User, UserCreateBody, users, UserUpdateBody } from "../user/index";
+import { User, UserCreateBody, users, UserUpdateBody } from "./index";
 
-/**
- * @openapi
- * /v1/users:
- *   get:
- *     summary: Get all users
- *     tags:
- *       - Users
- *     responses:
- *       200:
- *         description: List of users
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
- * 
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         first_name:
- *           type: string
- *         last_name:
- *           type: string
- *         email:
- *           type: string
- *         created_at:
- *           type: string
- *           format: date-time
- *         updated_at:
- *           type: string
- *           format: date-times
- *         deleted_at:
- *           type: string
- *           format: date-time
- */
 export const getAllUsers = (req: Request, res: Response) => {
   res.json(users.filter(u => !u.deleted_at));
 };
