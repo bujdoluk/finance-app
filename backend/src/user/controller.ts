@@ -1,62 +1,42 @@
-import  { Request, Response } from 'express';
-import {
-	StatusCodes,
-} from 'http-status-codes';
+import { Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 
-import { User, UserCreateBody, users, UserUpdateBody } from "./index";
+import { UserCreateBody, UserUpdateBody } from "./index";
+import userService from "./service";
+import { validateCreateUser, validateUpdateUser } from "./validation";
 
-export const getAllUsers = (req: Request, res: Response) => {
-  res.json(users.filter(u => !u.deleted_at));
+export const getAllUsers = (_req: Request, res: Response) => {
+  const users = userService.getAllUsers();
+  res.json(users);
 };
 
-export const getUserById = (req: Request, res: Response) => {
-  const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
+export const getUserById = (req: Request<{ id: string }>, res: Response) => {
+  const user = userService.getUserById(Number(req.params.id));
   if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
   res.json(user);
 };
 
-export const createUser = (req: Request<Record<string, string>, object, UserCreateBody>, res: Response) => {
-  const { email, first_name, last_name, password } = req.body;
+export const createUser = (req: Request<object, object, UserCreateBody>, res: Response) => {
+  const error = validateCreateUser(req.body);
+  if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
 
-  if (!first_name || !last_name || !email || !password) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
-  }
-
-  const newUser: User = {
-    created_at: new Date().toISOString(),
-    deleted_at: false,
-    email,
-    first_name,
-    id: users.length ? users[users.length - 1].id + 1 : 1,
-    last_name,
-    password,
-    updated_at: new Date().toISOString()
-  };
-
-  return res.status(StatusCodes.CREATED).json({ message: "User created", user: newUser });
+  const user = userService.createUser(req.body);
+  res.status(StatusCodes.CREATED).json({ message: "User created", user });
 };
 
 export const updateUser = (req: Request<{ id: string }, object, UserUpdateBody>, res: Response) => {
-  const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
+  const error = validateUpdateUser(req.body);
+  if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+
+  const user = userService.updateUser(Number(req.params.id), req.body);
   if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
 
-  const body = req.body;
-
-  if (body.first_name !== undefined) user.first_name = body.first_name;
-  if (body.last_name !== undefined) user.last_name = body.last_name;
-  if (body.email !== undefined) user.email = body.email;
-  if (body.password !== undefined) user.password = body.password;
-
-  user.updated_at = new Date().toISOString();
-
-  return res.json({ message: "User updated", user });
+  res.json({ message: "User updated", user });
 };
 
-export const deleteUser = (req: Request, res: Response) => {
-  const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
+export const deleteUser = (req: Request<{ id: string }>, res: Response) => {
+  const user = userService.deleteUser(Number(req.params.id));
   if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
 
-  user.deleted_at = true;
-  user.updated_at = new Date().toISOString();
   res.json({ message: "User soft deleted", user });
 };

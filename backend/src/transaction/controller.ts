@@ -1,52 +1,32 @@
 import { Request, Response } from "express";
-import {
-	StatusCodes,
-} from 'http-status-codes';
+import { StatusCodes } from "http-status-codes";
 
-import { Transaction, TransactionCreateBody, transactions } from "../transaction/index"; 
+import { TransactionCreateBody } from "./index";
+import transactionService from "./service";
+import { validateCreateTransaction } from "./validation";
 
-export const getAllTransactions = (req: Request, res: Response) => {
-  return res.json(transactions.filter(t => !t.deleted_at));
+export const getAllTransactions = (_req: Request, res: Response) => {
+  const transactions = transactionService.getAllTransactions();
+  res.json(transactions);
 };
 
 export const getTransactionById = (req: Request<{ id: string }>, res: Response) => {
-  const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
+  const transaction = transactionService.getTransactionById(Number(req.params.id));
   if (!transaction) return res.status(StatusCodes.NOT_FOUND).json({ message: "Transaction not found" });
-  return res.json(transaction);
+  res.json(transaction);
 };
 
-export const createTransaction = (
-  req: Request<unknown, unknown, TransactionCreateBody>,
-  res: Response
-) => {
-  const { amount, category, date, sender, sender_picture } = req.body;
+export const createTransaction = (req: Request<object, object, TransactionCreateBody>, res: Response) => {
+  const error = validateCreateTransaction(req.body);
+  if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
 
-  if (!date || !category || !sender || !sender_picture) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
-  }
-
-  const newTransaction: Transaction = {
-    amount,
-    category,
-    created_at: new Date().toISOString(),
-    date,
-    deleted_at: false,
-    id: transactions.length ? transactions[transactions.length - 1].id + 1 : 1,
-    sender,
-    sender_picture,
-    updated_at: new Date().toISOString(),
-  };
-
-  transactions.push(newTransaction);
-
-  return res.status(StatusCodes.CREATED).json({ message: "Transaction created", transaction: newTransaction });
+  const transaction = transactionService.createTransaction(req.body);
+  res.status(StatusCodes.CREATED).json({ message: "Transaction created", transaction });
 };
 
 export const deleteTransaction = (req: Request<{ id: string }>, res: Response) => {
-  const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
+  const transaction = transactionService.deleteTransaction(Number(req.params.id));
   if (!transaction) return res.status(StatusCodes.NOT_FOUND).json({ message: "Transaction not found" });
 
-  transaction.deleted_at = true;
-  transaction.updated_at = new Date().toISOString();
-  return res.json({ message: "Transaction soft deleted", transaction });
+  res.json({ message: "Transaction soft deleted", transaction });
 };
