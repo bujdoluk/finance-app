@@ -1,64 +1,65 @@
-import { Budget, BudgetAmountBody, BudgetCreateBody, budgets, BudgetUpdateBody } from "./index";
+import { Budget, BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
+import mapToBudgetEntity from "./mapper";
+import budgetRepository from "./repository";
 
 const budgetService = {
-  createBudget: (data: BudgetCreateBody): Budget => {
+  createBudget(body: BudgetCreateBody): Budget {
+    const allBudgets = budgetRepository.findAll();
+    const newId = allBudgets.length ? allBudgets[allBudgets.length - 1].id + 1 : 1;
+
     const newBudget: Budget = {
-      id: budgets.length ? budgets[budgets.length - 1].id + 1 : 1,
-      ...data,
+      amount: body.amount,
       created_at: new Date().toISOString(),
       deleted_at: false,
-      updated_at: new Date().toISOString(),
+      id: newId,
+      maximumSpending: body.maximumSpending,
+      name: body.name,
+      theme: body.theme,
+      updated_at: new Date().toISOString()
     };
-    budgets.push(newBudget);
-    return newBudget;
+
+    const createdBudget = budgetRepository.create(newBudget);
+    return mapToBudgetEntity(createdBudget);
   },
 
-  deleteBudget: (id: number): Budget | undefined => {
-    const budget = budgets.find(b => b.id === id && !b.deleted_at);
+  deleteBudget(id: number): Budget | undefined {
+    const budget = budgetRepository.findById(id);
+    if (!budget) return undefined;
+    return mapToBudgetEntity(budgetRepository.softDelete(budget));
+  },
+
+  depositToBudget(id: number, body: BudgetAmountBody): Budget | undefined {
+    const budget = budgetRepository.findById(id);
+    if (!budget) return undefined;
+    return mapToBudgetEntity(budgetRepository.deposit(budget, body));
+  },
+
+  getAllBudgets(): Budget[] {
+    return budgetRepository.findAll().map(mapToBudgetEntity);
+  },
+
+  getBudgetById(id: number): Budget | undefined {
+    const budget = budgetRepository.findById(id);
+    return budget ? mapToBudgetEntity(budget) : undefined;
+  },
+
+  updateBudget(id: number, body: BudgetUpdateBody): Budget | undefined {
+    const budget = budgetRepository.findById(id);
     if (!budget) return undefined;
 
-    budget.deleted_at = true;
-    budget.updated_at = new Date().toISOString();
-    return budget;
+    if (body.name !== undefined) budget.name = body.name;
+    if (body.theme !== undefined) budget.theme = body.theme;
+    if (body.amount !== undefined) budget.amount = body.amount;
+    if (body.maximumSpending !== undefined) budget.maximumSpending = body.maximumSpending;
+
+    return mapToBudgetEntity(budgetRepository.update(budget));
   },
 
-  depositToBudget: (id: number, data: BudgetAmountBody): Budget | undefined => {
-    const budget = budgets.find(b => b.id === id && !b.deleted_at);
-    if (!budget) return undefined;
-
-    budget.maximumSpending += data.amount;
-    budget.updated_at = new Date().toISOString();
-    return budget;
-  },
-
-  getAllBudgets: (): Budget[] => {
-    return budgets.filter(b => !b.deleted_at);
-  },
-
-  getBudgetById: (id: number): Budget | undefined => {
-    return budgets.find(b => b.id === id && !b.deleted_at);
-  },
-
-  updateBudget: (id: number, data: BudgetUpdateBody): Budget | undefined => {
-    const budget = budgets.find(b => b.id === id && !b.deleted_at);
-    if (!budget) return undefined;
-
-    if (data.name !== undefined) budget.name = data.name;
-    if (data.maximumSpending !== undefined) budget.maximumSpending = data.maximumSpending;
-    if (data.theme !== undefined) budget.theme = data.theme;
-
-    budget.updated_at = new Date().toISOString();
-    return budget;
-  },
-
-  withdrawFromBudget: (id: number, data: BudgetAmountBody): Budget | undefined => {
-    const budget = budgets.find(b => b.id === id && !b.deleted_at);
-    if (!budget || data.amount > budget.maximumSpending) return undefined;
-
-    budget.maximumSpending -= data.amount;
-    budget.updated_at = new Date().toISOString();
-    return budget;
-  },
+  withdrawFromBudget(id: number, body: BudgetAmountBody): Budget | null {
+    const budget = budgetRepository.findById(id);
+    if (!budget) return null;
+    return budgetRepository.withdraw(budget, body);
+  }
 };
 
 export default budgetService;

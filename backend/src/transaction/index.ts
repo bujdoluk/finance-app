@@ -10,10 +10,13 @@ export interface Transaction {
   updated_at: string;
 }
 
-export type TransactionCreateBody = Omit<
-  Transaction,
-  "created_at" | "deleted_at" | "id" | "updated_at"
->;
+export interface TransactionCreateBody {
+  amount: number;
+  category: string;
+  date: string;
+  sender: string;
+  sender_picture: string;
+}
 
 export const transactions: Transaction[] = [
   {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import os from "os";
 
-export const getPerformanceInfo = (req: Request, res: Response) => {
+export const getPerformanceInfo = (_req: Request, res: Response) => {
   const start = process.hrtime.bigint(); 
   const memory = process.memoryUsage();
 

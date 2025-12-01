@@ -1,46 +1,54 @@
-import { Bill, BillCreateBody, bills, BillUpdateBody } from "./index";
+import { Bill, BillCreateBody, BillUpdateBody } from "./index";
+import mapToBillEntity from "./mapper";
+import billRepository from "./repository";
 
 const billService = {
-  createBill: (data: BillCreateBody): Bill => {
+  createBill(body: BillCreateBody): Bill {
+    const allBills = billRepository.findAll();
+    const nextId = allBills.length ? allBills[allBills.length - 1].id + 1 : 1;
+
     const newBill: Bill = {
-      id: bills.length ? bills[bills.length - 1].id + 1 : 1,
-      ...data,
+      amount: body.amount,
       created_at: new Date().toISOString(),
       deleted_at: false,
+      frequency: body.frequency,
+      id: nextId,
+      name: body.name,
+      next_run: body.next_run,
       updated_at: new Date().toISOString(),
     };
-    bills.push(newBill);
-    return newBill;
+
+    return mapToBillEntity(billRepository.create(newBill));
   },
 
-  deleteBill: (id: number): Bill | undefined => {
-    const bill = bills.find(b => b.id === id && !b.deleted_at);
+  deleteBill(id: number): Bill | undefined {
+    const bill = billRepository.findById(id);
     if (!bill) return undefined;
 
-    bill.deleted_at = true;
-    bill.updated_at = new Date().toISOString();
-    return bill;
+    return mapToBillEntity(billRepository.softDelete(bill));
   },
 
-  getAllBills: (): Bill[] => {
-    return bills.filter(b => !b.deleted_at);
+  getAllBills(): Bill[] {
+    return billRepository.findAll().map(mapToBillEntity);
   },
 
-  getBillById: (id: number): Bill | undefined => {
-    return bills.find(b => b.id === id && !b.deleted_at);
+  getBillById(id: number): Bill | undefined {
+    const bill = billRepository.findById(id);
+    return bill ? mapToBillEntity(bill) : undefined;
   },
 
-  updateBill: (id: number, data: BillUpdateBody): Bill | undefined => {
-    const bill = bills.find(b => b.id === id && !b.deleted_at);
+  updateBill(id: number, body: BillUpdateBody): Bill | undefined {
+    const bill = billRepository.findById(id);
     if (!bill) return undefined;
 
-    if (data.name !== undefined) bill.name = data.name;
-    if (data.amount !== undefined) bill.amount = data.amount;
-    if (data.frequency !== undefined) bill.frequency = data.frequency;
-    if (data.next_run !== undefined) bill.next_run = data.next_run;
+    if (body.name !== undefined) bill.name = body.name;
+    if (body.amount !== undefined) bill.amount = body.amount;
+    if (body.frequency !== undefined) bill.frequency = body.frequency;
+    if (body.next_run !== undefined) bill.next_run = body.next_run;
 
     bill.updated_at = new Date().toISOString();
-    return bill;
+
+    return mapToBillEntity(billRepository.update(bill));
   },
 };
 

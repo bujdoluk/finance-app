@@ -1,3 +1,4 @@
+
 export interface Budget {
   amount: number;
   created_at: string;
@@ -13,24 +14,34 @@ export interface BudgetAmountBody {
   amount: number;
 }
 
-export type BudgetCreateBody = Omit<
-  Budget,
-  "created_at" | "deleted_at" | "id" | "updated_at"
->;
+export interface BudgetCreateBody {
+  amount: number;
+  maximumSpending: number;
+  name: string;
+  theme: string;
+}
 
-export type BudgetUpdateBody = Partial<
-  Pick<Budget, "maximumSpending" | "name" | "theme">
->;
+export type BudgetUpdateBody = Partial<BudgetCreateBody>;
 
 export const budgets: Budget[] = [
   {
-    amount: 0,
+    amount: 500,
     created_at: new Date().toISOString(),
     deleted_at: false,
     id: 1,
-    maximumSpending: 300,
+    maximumSpending: 500,
     name: "Groceries",
-    theme: "green",
+    theme: "Food",
+    updated_at: new Date().toISOString()
+  },
+  {
+    amount: 1000,
+    created_at: new Date().toISOString(),
+    deleted_at: false,
+    id: 2,
+    maximumSpending: 1000,
+    name: "Vacation",
+    theme: "Travel",
     updated_at: new Date().toISOString()
   }
 ];

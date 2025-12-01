@@ -1,16 +1,16 @@
 import { BillCreateBody, BillUpdateBody } from "./index";
 
-export const validateCreateBill = (data: BillCreateBody) => {
-  const { amount, name, next_run } = data;
-  if (!name || !amount || !next_run) {
-    return "name, amount, and next_run are required";
-  }
+export const validateCreateBill = (body: BillCreateBody): null | string => {
+  if (!body.name) return "Name is required";
+  if (!body.amount) return "Amount is required";
+  if (!body.next_run) return "Next run date is required";
   return null;
 };
 
-export const validateUpdateBill = (data: BillUpdateBody) => {
-  if (data.amount !== undefined && typeof data.amount !== "number") {
-    return "amount must be a number";
-  }
+export const validateUpdateBill = (body: BillUpdateBody): null | string => {
+  if (
+    body.amount !== undefined &&
+    (typeof body.amount !== "number" || body.amount <= 0)
+  ) return "Amount must be a positive number";
   return null;
 };

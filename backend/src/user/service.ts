@@ -1,47 +1,58 @@
-import { User, UserCreateBody, users, UserUpdateBody } from "./index";
+import { User, UserCreateBody, UserUpdateBody } from "./index";
+import mapToUserEntity from "./mapper";
+import userRepository from "./repository";
 
-const userService = {
-  createUser: (data: UserCreateBody): User => {
+export const userService = {
+  createUser(body: UserCreateBody) {
     const newUser: User = {
-      id: users.length ? users[users.length - 1].id + 1 : 1,
-      ...data,
       created_at: new Date().toISOString(),
       deleted_at: false,
-      updated_at: new Date().toISOString(),
+      email: body.email,
+      first_name: body.first_name,
+      id: Date.now(), 
+      last_name: body.last_name,
+      password: body.password, 
+      updated_at: new Date().toISOString()
     };
-    users.push(newUser);
-    return newUser;
+
+    const stored = userRepository.create(newUser);
+    return mapToUserEntity(stored);
   },
 
-  deleteUser: (id: number): undefined | User => {
-    const user = users.find(u => u.id === id && !u.deleted_at);
-    if (!user) return undefined;
+  deleteUser(id: number) {
+    const user = userRepository.findById(id);
+    if (!user) return null;
 
     user.deleted_at = true;
     user.updated_at = new Date().toISOString();
-    return user;
+
+    userRepository.softDelete(user);
+    return mapToUserEntity(user);
   },
 
-  getAllUsers: (): User[] => {
-    return users.filter(u => !u.deleted_at);
+  getAllUsers() {
+    return userRepository.findAll().map(mapToUserEntity);
   },
 
-  getUserById: (id: number): undefined | User => {
-    return users.find(u => u.id === id && !u.deleted_at);
+  getUserById(id: number) {
+    const user = userRepository.findById(id);
+    return user ? mapToUserEntity(user) : null;
   },
 
-  updateUser: (id: number, data: UserUpdateBody): undefined | User => {
-    const user = users.find(u => u.id === id && !u.deleted_at);
-    if (!user) return undefined;
+  updateUser(id: number, body: UserUpdateBody) {
+    const user = userRepository.findById(id);
+    if (!user) return null;
 
-    if (data.first_name !== undefined) user.first_name = data.first_name;
-    if (data.last_name !== undefined) user.last_name = data.last_name;
-    if (data.email !== undefined) user.email = data.email;
-    if (data.password !== undefined) user.password = data.password;
+    if (body.first_name !== undefined) user.first_name = body.first_name;
+    if (body.last_name !== undefined) user.last_name = body.last_name;
+    if (body.email !== undefined) user.email = body.email;
+    if (body.password !== undefined) user.password = body.password;
 
     user.updated_at = new Date().toISOString();
-    return user;
-  },
+
+    userRepository.update(user);
+    return mapToUserEntity(user);
+  }
 };
 
 export default userService;

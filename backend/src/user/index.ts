@@ -7,16 +7,21 @@ export interface User {
   last_name: string;
   password: string;
   updated_at: string;
-}
+};
 
 export interface UserCreateBody {
   email: string;
   first_name: string;
   last_name: string;
   password: string;
-}
+};
 
-export type UserUpdateBody = Partial<UserCreateBody>;
+export interface UserUpdateBody {
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  password?: string;
+};
 
 export const users: User[] = [
   {

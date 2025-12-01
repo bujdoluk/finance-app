@@ -1,22 +1,21 @@
 import { BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
 
-export const validateCreateBudget = (data: BudgetCreateBody) => {
-  const { amount, maximumSpending, name, theme } = data;
-  if (!name || !theme || !maximumSpending || !amount) {
-    return "name, maximumSpending, theme and amount are required";
+export const validateCreateBudget = (body: BudgetCreateBody): null | string => {
+  if (!body.name || !body.theme || !body.amount || !body.maximumSpending) {
+    return "name, theme, amount, and maximumSpending are required";
   }
   return null;
 };
 
-export const validateUpdateBudget = (data: BudgetUpdateBody) => {
-  if (data.maximumSpending !== undefined && typeof data.maximumSpending !== "number") {
-    return "maximumSpending must be a number";
+export const validateUpdateBudget = (body: BudgetUpdateBody): null | string => {
+  if (!body.name && !body.theme && !body.amount && !body.maximumSpending) {
+    return "At least one field must be provided to update";
   }
   return null;
 };
 
-export const validateDepositWithdraw = (data: BudgetAmountBody) => {
-  if (typeof data.amount !== "number" || data.amount <= 0) {
+export const validateDepositWithdraw = (body: BudgetAmountBody): null | string => {
+  if (typeof body.amount !== "number" || body.amount <= 0) {
     return "Amount must be a positive number";
   }
   return null;

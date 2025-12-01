@@ -7,13 +7,13 @@ import { validateCreateBudget, validateDepositWithdraw, validateUpdateBudget } f
 
 export const getAllBudgets = (_req: Request, res: Response) => {
   const budgets = budgetService.getAllBudgets();
-  res.json(budgets);
+  return res.json(budgets);
 };
 
 export const getBudgetById = (req: Request<{ id: string }>, res: Response) => {
   const budget = budgetService.getBudgetById(Number(req.params.id));
   if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
-  res.json(budget);
+  return res.json(budget);
 };
 
 export const createBudget = (req: Request<object, object, BudgetCreateBody>, res: Response) => {
@@ -21,7 +21,7 @@ export const createBudget = (req: Request<object, object, BudgetCreateBody>, res
   if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
 
   const budget = budgetService.createBudget(req.body);
-  res.status(StatusCodes.CREATED).json({ budget, message: "Budget created" });
+  return res.status(StatusCodes.CREATED).json({ budget, message: "Budget created" });
 };
 
 export const updateBudget = (req: Request<{ id: string }, object, BudgetUpdateBody>, res: Response) => {
@@ -31,14 +31,14 @@ export const updateBudget = (req: Request<{ id: string }, object, BudgetUpdateBo
   const budget = budgetService.updateBudget(Number(req.params.id), req.body);
   if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
 
-  res.json({ budget, message: "Budget updated" });
+  return res.json({ budget, message: "Budget updated" });
 };
 
 export const deleteBudget = (req: Request<{ id: string }>, res: Response) => {
   const budget = budgetService.deleteBudget(Number(req.params.id));
   if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
 
-  res.json({ budget, message: "Budget soft deleted" });
+  return res.json({ budget, message: "Budget soft deleted" });
 };
 
 export const depositToBudget = (req: Request<{ id: string }, object, BudgetAmountBody>, res: Response) => {
@@ -48,7 +48,7 @@ export const depositToBudget = (req: Request<{ id: string }, object, BudgetAmoun
   const budget = budgetService.depositToBudget(Number(req.params.id), req.body);
   if (!budget) return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
 
-  res.json({ budget, message: `Deposited $${String(req.body.amount)} to budget` });
+  return res.json({ budget, message: `Deposited $${String(req.body.amount)} to budget` });
 };
 
 export const withdrawFromBudget = (req: Request<{ id: string }, object, BudgetAmountBody>, res: Response) => {
@@ -58,5 +58,5 @@ export const withdrawFromBudget = (req: Request<{ id: string }, object, BudgetAm
   const budget = budgetService.withdrawFromBudget(Number(req.params.id), req.body);
   if (!budget) return res.status(StatusCodes.BAD_REQUEST).json({ message: "Insufficient funds or budget not found" });
 
-  res.json({ budget, message: `Withdrew $${String(req.body.amount)} from budget` });
+  return res.json({ budget, message: `Withdrew $${String(req.body.amount)} from budget` });
 };
