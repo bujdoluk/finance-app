@@ -1,4 +1,7 @@
 import  { Request, Response } from 'express';
+import {
+	StatusCodes,
+} from 'http-status-codes';
 
 import { User, UserCreateBody, users, UserUpdateBody } from "./index";
 
@@ -8,7 +11,7 @@ export const getAllUsers = (req: Request, res: Response) => {
 
 export const getUserById = (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
-  if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
   res.json(user);
 };
 
@@ -16,7 +19,7 @@ export const createUser = (req: Request<Record<string, string>, object, UserCrea
   const { email, first_name, last_name, password } = req.body;
 
   if (!first_name || !last_name || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
   }
 
   const newUser: User = {
@@ -30,12 +33,12 @@ export const createUser = (req: Request<Record<string, string>, object, UserCrea
     updated_at: new Date().toISOString()
   };
 
-  return res.status(201).json({ message: "User created", user: newUser });
+  return res.status(StatusCodes.CREATED).json({ message: "User created", user: newUser });
 };
 
 export const updateUser = (req: Request<{ id: string }, object, UserUpdateBody>, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
-  if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
 
   const body = req.body;
 
@@ -51,7 +54,7 @@ export const updateUser = (req: Request<{ id: string }, object, UserUpdateBody>,
 
 export const deleteUser = (req: Request, res: Response) => {
   const user = users.find(u => u.id === Number(req.params.id) && !u.deleted_at);
-  if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
 
   user.deleted_at = true;
   user.updated_at = new Date().toISOString();

@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import {
+	StatusCodes,
+} from 'http-status-codes';
 
 import { Pot, PotCreateBody, PotDepositWithdrawBody, pots, PotUpdateBody } from "../pot/index";
 
@@ -8,7 +11,7 @@ export const getAllPots = (req: Request, res: Response) => {
 
 export const getPotById = (req: Request<{ id: string }>, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
-  if (!pot) return res.status(404).json({ message: "Pot not found" });
+  if (!pot) return res.status(StatusCodes.NOT_FOUND).json({ message: "Pot not found" });
   res.json(pot);
 };
 
@@ -16,7 +19,7 @@ export const createPot = (req: Request<unknown, unknown, PotCreateBody>, res: Re
   const { amount, name, target, theme, total_saved } = req.body;
 
   if (!name || !theme || !target || !total_saved || !amount) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
   }
 
   const newPot: Pot = {
@@ -32,12 +35,12 @@ export const createPot = (req: Request<unknown, unknown, PotCreateBody>, res: Re
   };
 
   pots.push(newPot);
-  return res.status(201).json({ message: "Pot created", pot: newPot });
+  return res.status(StatusCodes.CREATED).json({ message: "Pot created", pot: newPot });
 };
 
 export const updatePot = (req: Request<{ id: string }, unknown, PotUpdateBody>, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
-  if (!pot) return res.status(404).json({ message: "Pot not found" });
+  if (!pot) return res.status(StatusCodes.NOT_FOUND).json({ message: "Pot not found" });
 
   const body = req.body;
   if (body.total_saved !== undefined) pot.total_saved = body.total_saved;
@@ -49,7 +52,7 @@ export const updatePot = (req: Request<{ id: string }, unknown, PotUpdateBody>, 
 
 export const deletePot = (req: Request<{ id: string }>, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
-  if (!pot) return res.status(404).json({ message: "Pot not found" });
+  if (!pot) return res.status(StatusCodes.NOT_FOUND).json({ message: "Pot not found" });
 
   pot.deleted_at = true;
   pot.updated_at = new Date().toISOString();
@@ -58,11 +61,11 @@ export const deletePot = (req: Request<{ id: string }>, res: Response) => {
 
 export const depositToPot = (req: Request<{ id: string }, unknown, PotDepositWithdrawBody>, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
-  if (!pot) return res.status(404).json({ message: "Pot not found" });
+  if (!pot) return res.status(StatusCodes.NOT_FOUND).json({ message: "Pot not found" });
 
   const { amount } = req.body;
   if (typeof amount !== "number" || amount <= 0)
-    return res.status(400).json({ message: "Amount must be a positive number" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Amount must be a positive number" });
 
   pot.total_saved += amount;
   pot.updated_at = new Date().toISOString();
@@ -72,14 +75,14 @@ export const depositToPot = (req: Request<{ id: string }, unknown, PotDepositWit
 
 export const withdrawFromPot = (req: Request<{ id: string }, unknown, PotDepositWithdrawBody>, res: Response) => {
   const pot = pots.find(p => p.id === Number(req.params.id) && !p.deleted_at);
-  if (!pot) return res.status(404).json({ message: "Pot not found" });
+  if (!pot) return res.status(StatusCodes.NOT_FOUND).json({ message: "Pot not found" });
 
   const { amount } = req.body;
   if (typeof amount !== "number" || amount <= 0)
-    return res.status(400).json({ message: "Amount must be a positive number" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Amount must be a positive number" });
 
   if (amount > pot.total_saved)
-    return res.status(400).json({ message: "Insufficient funds in pot" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Insufficient funds in pot" });
 
   pot.total_saved -= amount;
   pot.updated_at = new Date().toISOString();

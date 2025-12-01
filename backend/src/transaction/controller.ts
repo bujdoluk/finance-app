@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import {
+	StatusCodes,
+} from 'http-status-codes';
 
 import { Transaction, TransactionCreateBody, transactions } from "../transaction/index"; 
 
@@ -8,7 +11,7 @@ export const getAllTransactions = (req: Request, res: Response) => {
 
 export const getTransactionById = (req: Request<{ id: string }>, res: Response) => {
   const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
-  if (!transaction) return res.status(404).json({ message: "Transaction not found" });
+  if (!transaction) return res.status(StatusCodes.NOT_FOUND).json({ message: "Transaction not found" });
   return res.json(transaction);
 };
 
@@ -19,7 +22,7 @@ export const createTransaction = (
   const { amount, category, date, sender, sender_picture } = req.body;
 
   if (!date || !category || !sender || !sender_picture) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
   }
 
   const newTransaction: Transaction = {
@@ -36,12 +39,12 @@ export const createTransaction = (
 
   transactions.push(newTransaction);
 
-  return res.status(201).json({ message: "Transaction created", transaction: newTransaction });
+  return res.status(StatusCodes.CREATED).json({ message: "Transaction created", transaction: newTransaction });
 };
 
 export const deleteTransaction = (req: Request<{ id: string }>, res: Response) => {
   const transaction = transactions.find(t => t.id === Number(req.params.id) && !t.deleted_at);
-  if (!transaction) return res.status(404).json({ message: "Transaction not found" });
+  if (!transaction) return res.status(StatusCodes.NOT_FOUND).json({ message: "Transaction not found" });
 
   transaction.deleted_at = true;
   transaction.updated_at = new Date().toISOString();

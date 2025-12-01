@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import {
+	StatusCodes,
+} from 'http-status-codes';
 
 import { Bill, BillCreateBody, bills, BillUpdateBody } from "../bill/index";
 
@@ -11,7 +14,7 @@ export const getBillById = (
   res: Response
 ) => {
   const bill = bills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
-  if (!bill) return res.status(404).json({ message: "Bill not found" });
+  if (!bill) return res.status(StatusCodes.NOT_FOUND).json({ message: "Bill not found" });
 
   return res.json(bill);
 };
@@ -23,7 +26,7 @@ export const createBill = (
   const { amount, frequency, name, next_run } = req.body;
 
   if (!name || !amount || !next_run) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
   }
 
   const newBill: Bill = {
@@ -38,7 +41,7 @@ export const createBill = (
   };
 
   bills.push(newBill);
-  return res.status(201).json({ bill: newBill, message: "Bill created" });
+  return res.status(StatusCodes.CREATED).json({ bill: newBill, message: "Bill created" });
 };
 
 export const updateBill = (
@@ -46,7 +49,7 @@ export const updateBill = (
   res: Response
 ) => {
   const bill = bills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
-  if (!bill) return res.status(404).json({ message: "Bill not found" });
+  if (!bill) return res.status(StatusCodes.NOT_FOUND).json({ message: "Bill not found" });
 
   const body = req.body;
 
@@ -62,7 +65,7 @@ export const updateBill = (
 
 export const deleteBill = (req: Request<{ id: string }>, res: Response) => {
   const bill = bills.find(b => b.id === Number(req.params.id) && !b.deleted_at);
-  if (!bill) return res.status(404).json({ message: "Bill not found" });
+  if (!bill) return res.status(StatusCodes.NOT_FOUND).json({ message: "Bill not found" });
 
   bill.deleted_at = true;
   bill.updated_at = new Date().toISOString();

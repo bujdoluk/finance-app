@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import {
+	StatusCodes,
+} from 'http-status-codes';
 
 import {
   Budget,
@@ -19,7 +22,7 @@ export const getBudgetById = (
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) {
-    return res.status(404).json({ message: "Budget not found" });
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
   }
 
   return res.json(budget);
@@ -32,7 +35,7 @@ export const createBudget = (
   const { amount, maximumSpending, name, theme } = req.body;
 
   if (!name || !maximumSpending || !theme || !amount) {
-    return res.status(400).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
       message: "name, maximumSpending, theme and amount are required"
     });
   }
@@ -49,7 +52,7 @@ export const createBudget = (
   };
 
   budgets.push(newBudget);
-  return res.status(201).json({ budget: newBudget, message: "Budget created" });
+  return res.status(StatusCodes.CREATED).json({ budget: newBudget, message: "Budget created" });
 };
 
 export const updateBudget = (
@@ -59,7 +62,7 @@ export const updateBudget = (
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) {
-    return res.status(404).json({ message: "Budget not found" });
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
   }
 
   const body = req.body;
@@ -80,7 +83,7 @@ export const deleteBudget = (
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) {
-    return res.status(404).json({ message: "Budget not found" });
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
   }
 
   budget.deleted_at = true;
@@ -96,13 +99,13 @@ export const depositToBudget = (
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) {
-    return res.status(404).json({ message: "Budget not found" });
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
   }
 
   const { amount } = req.body;
 
   if (typeof amount !== "number" || amount <= 0) {
-    return res.status(400).json({ message: "Amount must be a positive number" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Amount must be a positive number" });
   }
 
   budget.maximumSpending += amount;
@@ -118,17 +121,17 @@ export const withdrawFromBudget = (
   const budget = budgets.find(b => b.id === Number(req.params.id) && !b.deleted_at);
 
   if (!budget) {
-    return res.status(404).json({ message: "Budget not found" });
+    return res.status(StatusCodes.NOT_FOUND).json({ message: "Budget not found" });
   }
 
   const { amount } = req.body;
 
   if (typeof amount !== "number" || amount <= 0) {
-    return res.status(400).json({ message: "Amount must be a positive number" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Amount must be a positive number" });
   }
 
   if (amount > budget.maximumSpending) {
-    return res.status(400).json({ message: "Insufficient funds" });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: "Insufficient funds" });
   }
 
   budget.maximumSpending -= amount;
