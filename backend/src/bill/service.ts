@@ -1,10 +1,12 @@
 import { Resource } from "../utils/jsonapi/resource";
-import { Bill, BillCreateBody, BillUpdateBody } from "./index";
+import { Bill } from "./index";
 import { mapToBillResource } from "./mapper";
 import billRepository from "./repository";
 
+export type BillCreateData = Pick<Bill, "amount" | "frequency" | "name" | "next_run">;
+
 const billService = {
-  createBill(body: BillCreateBody): Resource {
+  createBill(body: BillCreateData): Resource {
     const allBills = billRepository.findAll();
     const nextId = allBills.length ? allBills[allBills.length - 1].id + 1 : 1;
 
@@ -13,7 +15,7 @@ const billService = {
       created_at: new Date().toISOString(),
       deleted_at: false,
       id: nextId,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     const created = billRepository.create(newBill);
@@ -37,7 +39,7 @@ const billService = {
     return bill ? mapToBillResource(bill) : undefined;
   },
 
-  updateBill(id: number, body: BillUpdateBody): Resource | undefined {
+  updateBill(id: number, body: Partial<Bill>): Resource | undefined {
     const bill = billRepository.findById(id);
     if (!bill) return undefined;
 
@@ -46,7 +48,7 @@ const billService = {
 
     const updated = billRepository.update(bill);
     return mapToBillResource(updated);
-  }
+  },
 };
 
 export default billService;

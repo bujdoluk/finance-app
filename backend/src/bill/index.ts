@@ -9,15 +9,6 @@ export interface Bill {
   updated_at: string;
 }
 
-export interface BillCreateBody {
-  amount: number;
-  frequency?: string;
-  name: string;
-  next_run: string;
-}
-
-export type BillUpdateBody = Partial<BillCreateBody>;
-
 export const bills: Bill[] = [
   {
     amount: 100,

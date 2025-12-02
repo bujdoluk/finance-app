@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { UserCreateBody, UserUpdateBody } from "user";
 
+import { UserCreateBody, UserUpdateBody } from "./index";
 import userService from "./service";
 import { validateCreateUser, validateUpdateUser } from "./validation";
 
