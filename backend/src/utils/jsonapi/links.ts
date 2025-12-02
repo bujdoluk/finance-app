@@ -1,3 +1,4 @@
+// For more information visit https://jsonapi.org/
 import { Meta } from "./meta";
 
 export type Link = LinkObject | null | string;

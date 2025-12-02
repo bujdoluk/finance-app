@@ -1,3 +1,4 @@
+// For more information visit https://jsonapi.org/
 import { Link } from "./links";
 import { Meta } from "./meta";
 import { ResourceIdentifier } from "./resource-identifier";

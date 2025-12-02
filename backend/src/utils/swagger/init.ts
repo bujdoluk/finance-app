@@ -1,3 +1,4 @@
+// For more information visit https://swagger.io/
 import swaggerJsDoc from "swagger-jsdoc";
 
 export const options = {

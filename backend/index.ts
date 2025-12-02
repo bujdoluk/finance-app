@@ -4,11 +4,21 @@ import morgan from 'morgan';
 import router from "./src/routes/index";
 import swaggerUI from "swagger-ui-express";
 import specs from "./src/utils/swagger/init";
+import limiter from "./src/utils/rate-limit";
+import hpp from "hpp";
+import helmet from "helmet";
 
 const app = express();
-app.use(cors());
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL, 
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+}));
+app.use(limiter);
+app.use(hpp());
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(express.json());
 app.use("/v1", router);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
