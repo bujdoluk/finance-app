@@ -9,6 +9,7 @@
             "@db/*": ["./database/*"]
         },
         "removeComments": false,
+        "allowSyntheticDefaultImports": true,
         "preserveConstEnums": true,
         "sourceMap": true,
         "declaration": true,
