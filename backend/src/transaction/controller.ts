@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { TransactionCreateBody } from "transaction";
+import { TransactionCreateBody } from "index";
 
 import transactionService from "./service";
 import { validateCreateTransaction } from "./validation";
