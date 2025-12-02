@@ -27,7 +27,6 @@ export const createUser = (
   return res.status(StatusCodes.CREATED).json({ message: "User created", user });
 };
 
-
 export const updateUser = (
   req: Request<{ id: string }, unknown, UserUpdateBody>,
   res: Response
@@ -40,7 +39,6 @@ export const updateUser = (
 
   return res.json({ message: "User updated", user });
 };
-
 
 export const deleteUser = (req: Request, res: Response) => {
   const user = userService.deleteUser(Number(req.params.id));

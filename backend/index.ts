@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import router from "./src/routes/routes";
+import router from "./src/routes/index";
 import swaggerUI from "swagger-ui-express";
 import specs from "./src/swagger/init";
 
