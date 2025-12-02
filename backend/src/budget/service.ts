@@ -1,64 +1,66 @@
-import { Budget, BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
-import mapToBudgetEntity from "./mapper";
+import { Resource } from "../utils/jsonapi/resource";
+import { 
+  Budget, 
+  BudgetAmountBody, 
+  BudgetCreateBody, 
+  BudgetUpdateBody 
+} from "./index";
+import { mapToBudgetResource } from "./mapper";
 import budgetRepository from "./repository";
 
 const budgetService = {
-  createBudget(body: BudgetCreateBody): Budget {
+  createBudget(body: BudgetCreateBody): Resource {
     const allBudgets = budgetRepository.findAll();
     const newId = allBudgets.length ? allBudgets[allBudgets.length - 1].id + 1 : 1;
 
     const newBudget: Budget = {
-      amount: body.amount,
+      ...body,
       created_at: new Date().toISOString(),
       deleted_at: false,
       id: newId,
-      maximumSpending: body.maximumSpending,
-      name: body.name,
-      theme: body.theme,
       updated_at: new Date().toISOString()
     };
 
     const createdBudget = budgetRepository.create(newBudget);
-    return mapToBudgetEntity(createdBudget);
+    return mapToBudgetResource(createdBudget);
   },
 
-  deleteBudget(id: number): Budget | undefined {
+  deleteBudget(id: number): Resource | undefined {
     const budget = budgetRepository.findById(id);
     if (!budget) return undefined;
-    return mapToBudgetEntity(budgetRepository.softDelete(budget));
+    return mapToBudgetResource(budgetRepository.softDelete(budget));
   },
 
-  depositToBudget(id: number, body: BudgetAmountBody): Budget | undefined {
+  depositToBudget(id: number, body: BudgetAmountBody): Resource | undefined {
     const budget = budgetRepository.findById(id);
     if (!budget) return undefined;
-    return mapToBudgetEntity(budgetRepository.deposit(budget, body));
+    return mapToBudgetResource(budgetRepository.deposit(budget, body));
   },
 
-  getAllBudgets(): Budget[] {
-    return budgetRepository.findAll().map(mapToBudgetEntity);
+  getAllBudgets(): Resource[] {
+    return budgetRepository.findAll().map(mapToBudgetResource);
   },
 
-  getBudgetById(id: number): Budget | undefined {
+  getBudgetById(id: number): Resource | undefined {
     const budget = budgetRepository.findById(id);
-    return budget ? mapToBudgetEntity(budget) : undefined;
+    return budget ? mapToBudgetResource(budget) : undefined;
   },
 
-  updateBudget(id: number, body: BudgetUpdateBody): Budget | undefined {
+  updateBudget(id: number, body: BudgetUpdateBody): Resource | undefined {
     const budget = budgetRepository.findById(id);
     if (!budget) return undefined;
 
-    if (body.name !== undefined) budget.name = body.name;
-    if (body.theme !== undefined) budget.theme = body.theme;
-    if (body.amount !== undefined) budget.amount = body.amount;
-    if (body.maximumSpending !== undefined) budget.maximumSpending = body.maximumSpending;
+    Object.assign(budget, body);
 
-    return mapToBudgetEntity(budgetRepository.update(budget));
+    return mapToBudgetResource(budgetRepository.update(budget));
   },
 
-  withdrawFromBudget(id: number, body: BudgetAmountBody): Budget | null {
+  withdrawFromBudget(id: number, body: BudgetAmountBody): null | Resource {
     const budget = budgetRepository.findById(id);
     if (!budget) return null;
-    return budgetRepository.withdraw(budget, body);
+
+    const updated = budgetRepository.withdraw(budget, body);
+    return updated ? mapToBudgetResource(updated) : null;
   }
 };
 
