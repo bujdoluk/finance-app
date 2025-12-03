@@ -1,17 +1,40 @@
 version: "3.9"
 services:
-  db: 
+  database:
     image: postgres:15
     container_name: database
     restart: always
     environment:
-      POSTGRES_PASSWORD: password123
-      POSTGRES_USER: user123
-      POSTGRES_DB: db123
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_DB: '${POSTGRES_DB}'
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: api
+    restart: always
+    environment:
+      PORT: '${APP_PORT}'
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
 
 volumes:
   postgres_data:
