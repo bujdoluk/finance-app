@@ -1,29 +1,42 @@
+import { StatusCodes } from "http-status-codes";
+import Joi from "joi";
+
+import { joiToErrors } from "../utils/jsonapi/error";
 import { PotCreateBody, PotDepositWithdrawBody, PotUpdateBody } from "./index";
 
-export function validateCreatePot(body: PotCreateBody): null | string {
-  if (!body.name || !body.theme || !body.target || !body.total_saved || !body.amount) {
-    return "All fields are required";
-  }
+const potSchema = Joi.object({
+  amount: Joi.number().positive(),
+  name: Joi.string().max(100),
+  target: Joi.number().positive(),
+  theme: Joi.string().max(50),
+  total_saved: Joi.number().min(0),
+});
+
+export const createPotSchema = potSchema.fork(
+  ["name", "theme", "target", "total_saved", "amount"],
+  (field) => field.required()
+);
+
+export const updatePotSchema = potSchema.min(1);
+
+export const depositWithdrawSchema = Joi.object({
+  amount: Joi.number().positive().required(),
+});
+
+export const validateCreatePot = (body: PotCreateBody) => {
+  const result = createPotSchema.validate(body, { abortEarly: false });
+  if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
-}
+};
 
-export function validateDepositWithdraw(body: PotDepositWithdrawBody): null | string {
-  if (typeof body.amount !== "number" || body.amount <= 0) {
-    return "Amount must be a positive number";
-  }
+export const validateUpdatePot = (body: PotUpdateBody) => {
+  const result = updatePotSchema.validate(body, { abortEarly: false });
+  if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
-}
+};
 
-export function validateUpdatePot(body: PotUpdateBody): null | string {
-  if (
-    body.total_saved !== undefined &&
-    typeof body.total_saved !== "number"
-  ) return "total_saved must be a number";
-
-  if (
-    body.target !== undefined &&
-    typeof body.target !== "number"
-  ) return "target must be a number";
-
+export const validateDepositWithdraw = (body: PotDepositWithdrawBody) => {
+  const result = depositWithdrawSchema.validate(body, { abortEarly: false });
+  if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
-}
+};

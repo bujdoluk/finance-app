@@ -1,33 +1,41 @@
-import * as Joi from "joi";
+import Joi from "joi";
 
-export const isNameValid = (name: unknown, required = true): boolean => {
-  const schema = required
-    ? Joi.string().max(100).required()
-    : Joi.string().max(100).optional();
-  const { error } = schema.validate(name);
-  return !error;
-};
+export const billSchema = Joi.object({
+  amount: Joi.number()
+    .positive()
+    .messages({
+      "any.required": "Amount is required",
+      "number.base": "Amount must be a number",
+      "number.positive": "Amount must be a positive integer",
+    }),
 
-export const isAmountValid = (amount: unknown, required = true): boolean => {
-  const schema = required
-    ? Joi.number().positive().required()
-    : Joi.number().positive().optional();
-  const { error } = schema.validate(amount);
-  return !error;
-};
+  frequency: Joi.string()
+    .valid("daily", "weekly", "monthly")
+    .messages({
+      "any.only": "Frequency must be one of: daily, weekly, monthly",
+      "any.required": "Frequency is required",
+      "string.base": "Frequency must be a string"
+    }),
 
-export const isNextRunValid = (next_run: unknown, required = true): boolean => {
-  const schema = required
-    ? Joi.string().required()
-    : Joi.string().optional();
-  const { error } = schema.validate(next_run);
-  return !error;
-};
+  name: Joi.string()
+    .max(100)
+    .messages({
+      "any.required": "Name is required",
+      "string.base": "Name must be a string",
+      "string.empty": "Name cannot be empty",
+      "string.max": "Name cannot be longer than 100 characters",
+    }),
 
-export const isFrequencyValid = (frequency: unknown, required = false): boolean => {
-  const schema = required
-    ? Joi.string().valid("daily", "weekly", "monthly").required()
-    : Joi.string().valid("daily", "weekly", "monthly").optional();
-  const { error } = schema.validate(frequency);
-  return !error;
-};
+  next_run: Joi.string()
+    .messages({
+      "any.required": "Next run date is required",
+      "string.base": "Next run must be a valid date string",
+    }),
+});
+
+export const createBillSchema = billSchema.fork(
+  ["name", "amount", "next_run", "frequency"],
+  (field) => field.required()
+);
+
+export const updateBillSchema = billSchema.min(1);

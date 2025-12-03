@@ -1,48 +1,126 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import { createError, createErrorDocument, joiToErrors } from "../utils/jsonapi/error";
 import { UserCreateBody, UserUpdateBody } from "./index";
 import userService from "./service";
-import { validateCreateUser, validateUpdateUser } from "./validation";
+import { createUserSchema, updateUserSchema } from "./validation";
 
 export const getAllUsers = (_req: Request, res: Response) => {
-  return res.json(userService.getAllUsers());
+  try {
+    const users = userService.getAllUsers();
+    return res.json(users);
+  } catch (err) {
+    return res.json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          "Internal Server Error",
+          err instanceof Error ? err.message : "Something went wrong"
+        ),
+      ])
+    );
+  }
 };
 
-export const getUserById = (req: Request, res: Response) => {
-  const user = userService.getUserById(Number(req.params.id));
-  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
-
-  return res.json(user);
+export const getUserById = (req: Request<{ id: string }>, res: Response) => {
+  try {
+    const user = userService.getUserById(Number(req.params.id));
+    if (!user) {
+      return res.json(
+        createErrorDocument([
+          createError(StatusCodes.NOT_FOUND, "Not Found", "User not found", { pointer: "/data/id" }),
+        ])
+      );
+    }
+    return res.json(user);
+  } catch (err) {
+    return res.json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          "Internal Server Error",
+          err instanceof Error ? err.message : "Something went wrong"
+        ),
+      ])
+    );
+  }
 };
 
-export const createUser = (
-  req: Request<unknown, unknown, UserCreateBody>,
-  res: Response
-) => {
-  const error = validateCreateUser(req.body);
-  if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+export const createUser = (req: Request<unknown, unknown, UserCreateBody>, res: Response) => {
+  try {
+    const validation = createUserSchema.validate(req.body, { abortEarly: false });
 
-  const user = userService.createUser(req.body);
-  return res.status(StatusCodes.CREATED).json({ message: "User created", user });
+    if (validation.error) {
+      return res.json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+    }
+
+    const user = userService.createUser(validation.value);
+    return res.status(StatusCodes.CREATED).json({ message: "User created", user });
+  } catch (err) {
+    return res.json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          "Internal Server Error",
+          err instanceof Error ? err.message : "Something went wrong"
+        ),
+      ])
+    );
+  }
 };
 
-export const updateUser = (
-  req: Request<{ id: string }, unknown, UserUpdateBody>,
-  res: Response
-) => {
-  const error = validateUpdateUser(req.body);
-  if (error) return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
+export const updateUser = (req: Request<{ id: string }, unknown, UserUpdateBody>, res: Response) => {
+  try {
+    const validation = updateUserSchema.validate(req.body, { abortEarly: false });
 
-  const user = userService.updateUser(Number(req.params.id), req.body);
-  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
+    if (validation.error) {
+      return res.json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+    }
 
-  return res.json({ message: "User updated", user });
+    const user = userService.updateUser(Number(req.params.id), validation.value);
+    if (!user) {
+      return res.json(
+        createErrorDocument([
+          createError(StatusCodes.NOT_FOUND, "Not Found", "User not found", { pointer: "/data/id" }),
+        ])
+      );
+    }
+
+    return res.json({ message: "User updated", user });
+  } catch (err) {
+    return res.json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          "Internal Server Error",
+          err instanceof Error ? err.message : "Something went wrong"
+        ),
+      ])
+    );
+  }
 };
 
-export const deleteUser = (req: Request, res: Response) => {
-  const user = userService.deleteUser(Number(req.params.id));
-  if (!user) return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
-
-  return res.json({ message: "User soft deleted", user });
+export const deleteUser = (req: Request<{ id: string }>, res: Response) => {
+  try {
+    const user = userService.deleteUser(Number(req.params.id));
+    if (!user) {
+      return res.json(
+        createErrorDocument([
+          createError(StatusCodes.NOT_FOUND, "Not Found", "User not found", { pointer: "/data/id" }),
+        ])
+      );
+    }
+    return res.json({ message: "User soft deleted", user });
+  } catch (err) {
+    return res.json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          "Internal Server Error",
+          err instanceof Error ? err.message : "Something went wrong"
+        ),
+      ])
+    );
+  }
 };

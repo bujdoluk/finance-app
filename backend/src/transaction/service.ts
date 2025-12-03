@@ -5,16 +5,15 @@ import transactionRepository from "./repository";
 
 export const transactionService = {
   createTransaction(body: TransactionCreateBody): Resource {
+    const allTransactions = transactionRepository.findAll();
+    const newId = allTransactions.length ? allTransactions[allTransactions.length - 1].id + 1 : 1;
+
     const newTransaction: Transaction = {
-      amount: body.amount,
-      category: body.category,
+      ...body,
       created_at: new Date().toISOString(),
-      date: body.date,
       deleted_at: false,
-      id: Date.now(),
-      sender: body.sender,
-      sender_picture: body.sender_picture,
-      updated_at: new Date().toISOString()
+      id: newId,
+      updated_at: new Date().toISOString(),
     };
 
     const stored = transactionRepository.create(newTransaction);
@@ -39,7 +38,7 @@ export const transactionService = {
   getTransactionById(id: number): null | Resource {
     const t = transactionRepository.findById(id);
     return t ? mapToTransactionResource(t) : null;
-  }
+  },
 };
 
 export default transactionService;

@@ -1,16 +1,17 @@
+import Joi from "joi";
+
 import { UserCreateBody, UserUpdateBody } from "./index";
 
-export const validateCreateUser = (data: UserCreateBody) => {
-  const { email, first_name, last_name, password } = data;
-  if (!first_name || !last_name || !email || !password) {
-    return "All fields are required";
-  }
-  return null; 
-};
+export const createUserSchema = Joi.object<UserCreateBody>({
+  email: Joi.string().email().required(),
+  first_name: Joi.string().required(),
+  last_name: Joi.string().required(),
+  password: Joi.string().required(),
+});
 
-export const validateUpdateUser = (data: UserUpdateBody) => {
-  if (!data.first_name && !data.last_name && !data.email && !data.password) {
-    return "At least one field must be provided";
-  }
-  return null; 
-};
+export const updateUserSchema = Joi.object<UserUpdateBody>({
+  email: Joi.string().email().optional(),
+  first_name: Joi.string().optional(),
+  last_name: Joi.string().optional(),
+  password: Joi.string().optional(),
+}).min(1); 
