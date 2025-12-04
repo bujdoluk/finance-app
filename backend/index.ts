@@ -7,6 +7,7 @@ import specs from "./src/utils/swagger/init";
 import limiter from "./src/utils/rate-limit";
 import hpp from "hpp";
 import helmet from "helmet";
+import logger from './src/utils/logger/logger';
 
 const app = express();
 app.use(helmet());
@@ -25,7 +26,7 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 const port = Number(process.env.APP_PORT ?? process.env.PORT ?? "9001");
 
 const server = app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  logger.info(`API is starting on port ${port}`);
 });
 
 const shutdown = (signal: string) => {

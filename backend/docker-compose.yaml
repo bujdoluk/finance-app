@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_DB: '${POSTGRES_DB}'
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -20,9 +20,11 @@ services:
     environment:
       PORT: '${APP_PORT}'
     ports:
-      - "3001:3001"
+      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - database
+    volumes:
+      - logs_data:/logs 
 
   nginx:
     image: nginx:latest
@@ -36,5 +38,14 @@ services:
     depends_on:
       - api
 
+  logs:
+    image: alpine
+    container_name: logs
+    command: ["sh", "-c", "tail -F /logs/app.log"]
+    restart: always
+    volumes:
+      - logs_data:/logs
+
 volumes:
   postgres_data:
+  logs_data:
