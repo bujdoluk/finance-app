@@ -19,6 +19,7 @@ services:
     restart: always
     environment:
       PORT: '${APP_PORT}'
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${POSTGRES_PORT}/${POSTGRES_DB}
     ports:
       - "${APP_PORT}:${APP_PORT}"
     depends_on:

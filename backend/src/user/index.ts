@@ -22,26 +22,3 @@ export interface UserUpdateBody {
   last_name?: string;
   password?: string;
 };
-
-export const users: User[] = [
-  {
-    created_at: new Date().toISOString(),
-    deleted_at: false,
-    email: "john@example.com",
-    first_name: "John",
-    id: 1,
-    last_name: "Doe",
-    password: "password123",
-    updated_at: new Date().toISOString()
-  },
-  {
-    created_at: new Date().toISOString(),
-    deleted_at: false,
-    email: "jane@example.com",
-    first_name: "Jane",
-    id: 2,
-    last_name: "Smith",
-    password: "secret",
-    updated_at: new Date().toISOString()
-  }
-];

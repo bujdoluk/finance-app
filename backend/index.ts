@@ -1,4 +1,4 @@
-import express, { Request, Response, Router } from 'express';
+import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import router from "./src/routes/index";
@@ -8,6 +8,10 @@ import limiter from "./src/utils/rate-limit";
 import hpp from "hpp";
 import helmet from "helmet";
 import logger from './src/utils/logger/logger';
+import dotenv from 'dotenv';
+// Load environment variables from .env file (just for node-pg-migrate tool)
+dotenv.config();
+import { pool } from './database/db';
 
 const app = express();
 app.use(helmet());
@@ -23,9 +27,9 @@ app.use(morgan('dev'));
 app.use("/v1", router);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
-const port = Number(process.env.APP_PORT ?? process.env.PORT ?? "9001");
+const port = Number(process.env.APP_PORT ?? 3001);
 
-const server = app.listen(port, () => {
+const server = app.listen(port, "0.0.0.0", () => {
   logger.info(`API is starting on port ${port}`);
 });
 
@@ -39,13 +43,15 @@ const shutdown = (signal: string) => {
 
   timeout.unref();
 
-  server.close(() => {
+  server.close(async(): Promise<void> => {
     console.log("Closed out remaining connections");
 
-    // Additional cleanup tasks (DB, queues, files, etc.)
-    // await prisma.$disconnect();
-    // mongoose.disconnect();
-    // redis.quit();
+    try {
+      await pool.end(); 
+      console.log("Postgres pool has ended");
+    } catch (err: unknown) {
+      console.error("Error closing Postgres pool", err);
+    }
 
     clearTimeout(timeout); 
     process.exit(0);
