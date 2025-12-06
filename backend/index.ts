@@ -11,7 +11,7 @@ import logger from './src/utils/logger/logger';
 import dotenv from 'dotenv';
 // Load environment variables from .env file (just for node-pg-migrate tool)
 dotenv.config();
-import { pool } from './database/db';
+import pool from './database/db';
 
 const app = express();
 app.use(helmet());

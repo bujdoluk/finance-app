@@ -1,20 +1,13 @@
 import { Resource } from "../utils/jsonapi/resource";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { User, UserCreateBody, UserUpdateBody } from "./index";
+import { UserCreateBody, UserUpdateBody } from "./index";
 import mapToUserResource from "./mapper";
 import userRepository from "./repository";
 
 export const userService = {
   async createUser(body: UserCreateBody): Promise<Resource> {
     try {
-      const newUser: Partial<User> = {
-        ...body,
-        created_at: new Date().toISOString(),
-        deleted_at: false,
-        updated_at: new Date().toISOString(),
-      };
-
-      const stored = await userRepository.create(newUser);
+      const stored = await userRepository.create(body);
       return mapToUserResource(stored);
     } catch (err: unknown) {
       logger.error(`createUser error: ${getErrorMessage(err)}`);
@@ -25,13 +18,10 @@ export const userService = {
   async deleteUser(id: number): Promise<null | Resource> {
     try {
       const user = await userRepository.findById(id);
-      if (!user) {
-        logger.warn(`deleteUser: User not found [userId=${String(id)}]`);
-        return null;
-      }
+      if (!user) return null;
 
-      const deletedUser = await userRepository.softDelete(id);
-      return mapToUserResource(deletedUser);
+      const deleted = await userRepository.softDelete(id);
+      return mapToUserResource(deleted);
     } catch (err: unknown) {
       logger.error(`deleteUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
@@ -51,11 +41,7 @@ export const userService = {
   async getUserById(id: number): Promise<null | Resource> {
     try {
       const user = await userRepository.findById(id);
-      if (!user) {
-        logger.warn(`getUserById: User not found [userId=${String(id)}]`);
-        return null;
-      }
-      return mapToUserResource(user);
+      return user ? mapToUserResource(user) : null;
     } catch (err: unknown) {
       logger.error(`getUserById error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
@@ -65,22 +51,14 @@ export const userService = {
   async updateUser(id: number, body: UserUpdateBody): Promise<null | Resource> {
     try {
       const user = await userRepository.findById(id);
-      if (!user) {
-        logger.warn(`updateUser: User not found [userId=${String(id)}]`);
-        return null;
-      }
+      if (!user) return null;
 
-      const updatedUserData: User = {
+      const updated = await userRepository.update(id, {
         ...user,
-        email: body.email ?? user.email,
-        first_name: body.first_name ?? user.first_name,
-        last_name: body.last_name ?? user.last_name,
-        password: body.password ?? user.password,
-        updated_at: new Date().toISOString(),
-      };
+        ...body,
+      });
 
-      const updatedUser = await userRepository.update(updatedUserData);
-      return mapToUserResource(updatedUser);
+      return mapToUserResource(updated);
     } catch (err: unknown) {
       logger.error(`updateUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;

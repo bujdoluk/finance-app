@@ -1,6 +1,6 @@
 export interface User {
   created_at: string;
-  deleted_at: boolean;
+  deleted_at: null | string;
   email: string;
   first_name: string;
   id: number;

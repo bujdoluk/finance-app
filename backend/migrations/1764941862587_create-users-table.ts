@@ -9,9 +9,9 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         last_name: { type: 'text', notNull: true  },
         email: { type: 'text', notNull: true, unique: true },
         password: { type: 'text', notNull: true },
-        created_at: { type: 'timestamp', notNull: true, default: pgm.func('current_timestamp') },
-        updated_at: { type: 'timestamp', notNull: true, default: pgm.func('current_timestamp') },
-        deleted_at: { type: 'boolean', notNull: true, default: false }
+        created_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
+        updated_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
+        deleted_at: { type: 'timestamptz', default: null }
     },  
     {
       ifNotExists: true,
@@ -20,6 +20,21 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     pgm.createIndex('users', 'email'); 
     pgm.createIndex('users', ['first_name', 'last_name']); 
     pgm.createIndex('users', 'created_at'); 
+
+    pgm.sql(`
+        CREATE OR REPLACE FUNCTION set_updated_at()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE TRIGGER users_set_updated_at
+        BEFORE UPDATE ON users
+        FOR EACH ROW
+        EXECUTE FUNCTION set_updated_at();
+    `);
 }
 
 export async function down(pgm: MigrationBuilder): Promise<void> {

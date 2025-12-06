@@ -12,7 +12,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         '$2b$10$EXAMPLE_HASH',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
-        false
+        null
       );
     `);
 }
