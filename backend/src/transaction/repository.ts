@@ -1,52 +1,67 @@
+import { dbPool } from "../../database/db";
+import { tables, Transactions, TransactionsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { Transaction, transactions } from "./index";
 
 export const transactionRepository = {
-  create(transaction: Transaction): Transaction {
+  async create(transaction: TransactionsInput): Promise<Transactions> {
     try {
-      transactions.push(transaction);
-      logger.info(`Transaction created [transactionId=${String(transaction.id)}]`);
-      return transaction;
+      const res = await dbPool.query<Transactions>(
+        `INSERT INTO ${tables.transactions.tableName} 
+          (amount, category, date, sender, sender_picture, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         RETURNING *`,
+        [
+          transaction.amount,
+          transaction.category,
+          transaction.date,
+          transaction.sender,
+          transaction.sender_picture,
+        ]
+      );
+      return res.rows[0];
     } catch (err: unknown) {
-      logger.error(`create transaction failed [transactionId=${String(transaction.id)}]: ${getErrorMessage(err)}`);
+      logger.error(`create failed: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  findAll(): Transaction[] {
+  async findAll(): Promise<Transactions[]> {
     try {
-      return transactions.filter(t => !t.deleted_at);
+      const res = await dbPool.query<Transactions>(
+        `SELECT * FROM ${tables.transactions.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`
+      );
+      return res.rows;
     } catch (err: unknown) {
-      logger.error(`findAll transactions failed: ${getErrorMessage(err)}`);
+      logger.error(`findAll failed: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  findById(id: number): Transaction | undefined {
+  async findById(id: number): Promise<null | Transactions> {
     try {
-      return transactions.find(t => t.id === id && !t.deleted_at);
+      const res = await dbPool.query<Transactions>(
+        `SELECT * FROM ${tables.transactions.tableName} WHERE id = $1 AND deleted_at IS NULL`,
+        [id]
+      );
+      return res.rows[0] ?? null;
     } catch (err: unknown) {
-      logger.error(`findById failed [transactionId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`findById failed [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  softDelete(transaction: Transaction): Transaction {
+  async softDelete(id: number): Promise<Transactions> {
     try {
-      logger.info(`Transaction soft deleted [transactionId=${String(transaction.id)}]`);
-      return transaction;
+      const res = await dbPool.query<Transactions>(
+        `UPDATE ${tables.transactions.tableName} 
+         SET deleted_at = NOW(), updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [id]
+      );
+      return res.rows[0];
     } catch (err: unknown) {
-      logger.error(`softDelete failed [transactionId=${String(transaction.id)}]: ${getErrorMessage(err)}`);
-      throw err;
-    }
-  },
-
-  update(transaction: Transaction): Transaction {
-    try {
-      logger.info(`Transaction updated [transactionId=${String(transaction.id)}]`);
-      return transaction;
-    } catch (err: unknown) {
-      logger.error(`update failed [transactionId=${String(transaction.id)}]: ${getErrorMessage(err)}`);
+      logger.error(`softDelete failed [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

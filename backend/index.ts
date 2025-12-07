@@ -11,7 +11,7 @@ import logger from './src/utils/logger/logger';
 import dotenv from 'dotenv';
 // Load environment variables from .env file (just for node-pg-migrate tool)
 dotenv.config();
-import userRepository from './src/user/repository';
+import { dbPool } from './database/db';
 
 const app = express();
 app.use(helmet());
@@ -47,7 +47,7 @@ const shutdown = (signal: string) => {
     console.log("Closed out remaining connections");
 
     try {
-      await userRepository.pool.end(); 
+      await dbPool.end(); 
       console.log("Postgres pool has ended");
     } catch (err: unknown) {
       console.error("Error closing Postgres pool", err);

@@ -8,7 +8,7 @@ import { mapToUserResource } from "./mapper";
 import userService from "./service";
 import { createUserSchema, updateUserSchema } from "./validation";
 
-export const getAllUsers = async (_req: Request, res: Response) => {
+export const getAllUsers = async (_req: Request, res: Response): Promise<Response> => {
   try {
     const users: Users[] = await userService.getAllUsers();
     return res.json(users.map(mapToUserResource));
@@ -26,10 +26,10 @@ export const getAllUsers = async (_req: Request, res: Response) => {
   }
 };
 
-export const getUserById = async (req: Request<{ id: string }>, res: Response) => {
+export const getUserById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);
-    const user = await userService.getUserById(userId);
+    const user: null | Users = await userService.getUserById(userId);
 
     if (!user) {
       logger.warn(`getUserById: User not found [userId=${String(userId)}]`);
@@ -55,7 +55,7 @@ export const getUserById = async (req: Request<{ id: string }>, res: Response) =
   }
 };
 
-export const createUser = async (req: Request<unknown, unknown, UsersInput>, res: Response) => {
+export const createUser = async (req: Request<unknown, unknown, UsersInput>, res: Response): Promise<Response> => {
   try {
     const validation = createUserSchema.validate(req.body, { abortEarly: false });
 
@@ -65,7 +65,7 @@ export const createUser = async (req: Request<unknown, unknown, UsersInput>, res
       return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const user = await userService.createUser(validation.value);
+    const user: Users = await userService.createUser(validation.value);
     return res.status(StatusCodes.CREATED).json({ message: "User created", user: mapToUserResource(user) });
   } catch (err: unknown) {
     logger.error(`createUser error: ${getErrorMessage(err)}`);
@@ -81,7 +81,7 @@ export const createUser = async (req: Request<unknown, unknown, UsersInput>, res
   }
 };
 
-export const updateUser = async (req: Request<{ id: string }, unknown, UsersInput>, res: Response) => {
+export const updateUser = async (req: Request<{ id: string }, unknown, UsersInput>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);
     const validation = updateUserSchema.validate(req.body, { abortEarly: false });
@@ -92,7 +92,7 @@ export const updateUser = async (req: Request<{ id: string }, unknown, UsersInpu
       return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const user = await userService.updateUser(userId, validation.value);
+    const user: null | Users = await userService.updateUser(userId, validation.value);
     if (!user) {
       logger.warn(`updateUser: User not found [userId=${String(userId)}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
@@ -117,10 +117,10 @@ export const updateUser = async (req: Request<{ id: string }, unknown, UsersInpu
   }
 };
 
-export const deleteUser = async (req: Request<{ id: string }>, res: Response) => {
+export const deleteUser = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);
-    const user = await userService.deleteUser(userId);
+    const user: null | Users = await userService.deleteUser(userId);
 
     if (!user) {
       logger.warn(`deleteUser: User not found [userId=${String(userId)}]`);

@@ -1,22 +1,23 @@
+import { Transactions } from "../../database/dbSchema";
 import { Resource } from "../utils/jsonapi/resource";
-import { Transaction } from "./index";
 
-export const mapToTransactionResource = (t: Transaction): Resource => ({
+/**
+ * Map a Transaction type interface to a JSON:API Resource
+ */
+export const mapToTransactionResource = (transaction: Transactions): Resource => ({
   attributes: {
-    amount: t.amount,
-    category: t.category,
-    created_at: t.created_at,
-    date: t.date,
-    deleted_at: t.deleted_at,
-    sender: t.sender,
-    sender_picture: t.sender_picture,
-    updated_at: t.updated_at
+    amount: transaction.amount,
+    category: transaction.category,
+    created_at: transaction.created_at,
+    date: transaction.date,
+    sender: transaction.sender,
+    sender_picture: transaction.sender_picture,
   },
-  id: t.id.toString(),
+  id: String(transaction.id),
   links: {
-    self: `/v1/transactions/${String(t.id)}`
+    self: `/v1/transactions/${String(transaction.id)}`,
   },
-  type: "transactions"
+  type: "transactions",
 });
 
 export default mapToTransactionResource;

@@ -1,31 +1,20 @@
-import { Pool } from "pg";
 
+
+import { dbPool } from "../../database/db";
 import { tables, Users, UsersInput  } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
 
-export const pool: Pool = new Pool({
-  // Return an error if connection cannot be established in 5 seconds
-  connectionTimeoutMillis: 5000,
-  database: process.env.POSTGRES_DB,
-  host: process.env.POSTGRES_HOST,
-  // Close idle connections after 30 seconds
-  idleTimeoutMillis: 30000,
-  // Number of connections in a pool
-  max: 20,
-  password: process.env.POSTGRES_PASSWORD,
-  port: Number(process.env.POSTGRES_PORT),
-  user: process.env.POSTGRES_USER
-});
 
 export const userRepository = {
   async create(user: UsersInput): Promise<Users> {
     try {
-      const res = await pool.query<Users>(
+      const res = await dbPool.query<Users>(
         `INSERT INTO ${tables.users.tableName} (first_name, last_name, email, password)
         VALUES ($1, $2, $3, $4)
         RETURNING *`,
         [user.first_name, user.last_name, user.email, user.password]
       );
+      
 
       const createdUser = res.rows[0];
       return createdUser;
@@ -38,7 +27,7 @@ export const userRepository = {
 
   async findAll(): Promise<Users[]> {
     try {
-      const res= await pool.query<Users>(
+      const res= await dbPool.query<Users>(
         `SELECT * FROM ${tables.users.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`
       );
       return res.rows;
@@ -50,7 +39,7 @@ export const userRepository = {
 
   async findById(id: number): Promise<null | Users> {
     try {
-      const res = await pool.query<Users>(
+      const res = await dbPool.query<Users>(
         `SELECT * FROM ${tables.users.tableName} WHERE id = $1 AND deleted_at IS NULL`,
         [id]
       );
@@ -63,7 +52,7 @@ export const userRepository = {
 
   async softDelete(id: number): Promise<Users> {
     try {
-      const res = await pool.query<Users>(
+      const res = await dbPool.query<Users>(
         `UPDATE ${tables.users.tableName}
          SET deleted_at = NOW()
          WHERE id = $1
@@ -79,7 +68,7 @@ export const userRepository = {
 
   async update(id: number, body: UsersInput): Promise<Users> {
     try {
-      const res = await pool.query<Users>(
+      const res = await dbPool.query<Users>(
         `UPDATE ${tables.users.tableName}
          SET first_name = $1,
              last_name = $2,
@@ -101,4 +90,4 @@ export const userRepository = {
   },
 };
 
-export default { pool, userRepository };
+export default userRepository;

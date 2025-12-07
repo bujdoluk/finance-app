@@ -1,8 +1,8 @@
+import { TransactionsInput } from "@db/dbSchema";
 import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 
 import { joiToErrors } from "../utils/jsonapi/error";
-import { TransactionCreateBody } from "./index";
 
 const transactionSchema = Joi.object({
   amount: Joi.number().required().positive(),
@@ -14,7 +14,7 @@ const transactionSchema = Joi.object({
 
 export const createTransactionSchema = transactionSchema; 
 
-export const validateCreateTransaction = (body: TransactionCreateBody) => {
+export const validateCreateTransaction = (body: TransactionsInput) => {
   const result = createTransactionSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;

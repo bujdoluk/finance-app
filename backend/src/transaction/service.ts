@@ -1,69 +1,43 @@
-import { Resource } from "../utils/jsonapi/resource";
+import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { Transaction, TransactionCreateBody } from "./index";
-import { mapToTransactionResource } from "./mapper";
 import transactionRepository from "./repository";
 
 export const transactionService = {
-  createTransaction(body: TransactionCreateBody): Resource {
+  async createTransaction(body: TransactionsInput): Promise<Transactions> {
     try {
-      const allTransactions = transactionRepository.findAll();
-      const newId = allTransactions.length ? allTransactions[allTransactions.length - 1].id + 1 : 1;
-
-      const newTransaction: Transaction = {
-        ...body,
-        created_at: new Date().toISOString(),
-        deleted_at: false,
-        id: newId,
-        updated_at: new Date().toISOString(),
-      };
-
-      const stored = transactionRepository.create(newTransaction);
-      return mapToTransactionResource(stored);
+      const created = await transactionRepository.create(body);
+      return created;
     } catch (err: unknown) {
       logger.error(`createTransaction error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  deleteTransaction(id: number): null | Resource {
+  async deleteTransaction(id: number): Promise<null | Transactions> {
     try {
-      const t = transactionRepository.findById(id);
-      if (!t) {
-        logger.warn(`deleteTransaction: Transaction not found [transactionId=${String(id)}]`);
-        return null;
-      }
-
-      t.deleted_at = true;
-      t.updated_at = new Date().toISOString();
-      transactionRepository.softDelete(t);
-
-      return mapToTransactionResource(t);
+      const transaction = await transactionRepository.findById(id);
+      if (!transaction) return null;
+      return await transactionRepository.softDelete(id);
     } catch (err: unknown) {
-      logger.error(`deleteTransaction error [transactionId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`deleteTransaction error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getAllTransactions(): Resource[] {
+  async getAllTransactions(): Promise<Transactions[]> {
     try {
-      return transactionRepository.findAll().map(mapToTransactionResource);
+      return await transactionRepository.findAll();
     } catch (err: unknown) {
       logger.error(`getAllTransactions error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getTransactionById(id: number): null | Resource {
+  async getTransactionById(id: number): Promise<null | Transactions> {
     try {
-      const t = transactionRepository.findById(id);
-      if (!t) {
-        logger.warn(`getTransactionById: Transaction not found [transactionId=${String(id)}]`);
-        return null;
-      }
-      return mapToTransactionResource(t);
+      return await transactionRepository.findById(id);
     } catch (err: unknown) {
-      logger.error(`getTransactionById error [transactionId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`getTransactionById error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

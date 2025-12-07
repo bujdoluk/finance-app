@@ -1,19 +1,20 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import { TransactionCreateBody } from "./index";
+import { mapToTransactionResource } from "./mapper";
 import transactionService from "./service";
 import { validateCreateTransaction } from "./validation";
 
-export const getAllTransactions = (_req: Request, res: Response) => {
+export const getAllTransactions = async (_req: Request, res: Response): Promise<Response> => {
   try {
-    const transactions = transactionService.getAllTransactions();
-    return res.json(transactions);
+    const transactions: Transactions[] = await transactionService.getAllTransactions();
+    return res.json(transactions.map(mapToTransactionResource));
   } catch (err: unknown) {
     logger.error(`getAllTransactions error: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(
           StatusCodes.INTERNAL_SERVER_ERROR,
@@ -25,24 +26,24 @@ export const getAllTransactions = (_req: Request, res: Response) => {
   }
 };
 
-export const getTransactionById = (req: Request<{ id: string }>, res: Response) => {
+export const getTransactionById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const id = Number(req.params.id);
-    const t = transactionService.getTransactionById(id);
+    const transaction: null | Transactions = await transactionService.getTransactionById(id);
 
-    if (!t) {
+    if (!transaction) {
       logger.warn(`getTransactionById: Transaction not found [transactionId=${String(id)}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Transaction not found", { pointer: "/data/id" }),
         ])
       );
     }
 
-    return res.json(t);
+    return res.status(StatusCodes.OK).json(mapToTransactionResource(transaction));
   } catch (err: unknown) {
     logger.error(`getTransactionById error [transactionId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(
           StatusCodes.INTERNAL_SERVER_ERROR,
@@ -54,32 +55,31 @@ export const getTransactionById = (req: Request<{ id: string }>, res: Response) 
   }
 };
 
-export const createTransaction = (
-  req: Request<unknown, unknown, TransactionCreateBody>,
-  res: Response
-) => {
+export const createTransaction = async (req: Request<unknown, unknown, TransactionsInput>, res: Response): Promise<Response> => {
   try {
     const errorDoc = validateCreateTransaction(req.body);
     if (errorDoc) {
-      const messages = errorDoc.errors.map((e) => {
-          if (typeof e === 'string') return e;
-          if ('message' in e && typeof e.message === 'string') return e.message;
-          return '[Unknown validation error]';
-      }).map(formatValidationMessage).join(' ');
+      const messages = errorDoc.errors
+        .map((e) => {
+          if (typeof e === "string") return e;
+          if ("message" in e && typeof e.message === "string") return e.message;
+          return "[Unknown validation error]";
+        })
+        .map(formatValidationMessage)
+        .join(" ");
 
       logger.warn(`createTransaction validation failed. ${messages}`);
-
       return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
     }
 
-    const t = transactionService.createTransaction(req.body);
+    const transaction: Transactions = await transactionService.createTransaction(req.body);
     return res.status(StatusCodes.CREATED).json({
       message: "Transaction created",
-      transaction: t,
+      transaction: mapToTransactionResource(transaction),
     });
   } catch (err: unknown) {
     logger.error(`createTransaction error: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(
           StatusCodes.INTERNAL_SERVER_ERROR,
@@ -91,24 +91,27 @@ export const createTransaction = (
   }
 };
 
-export const deleteTransaction = (req: Request<{ id: string }>, res: Response) => {
+export const deleteTransaction = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const id = Number(req.params.id);
-    const t = transactionService.deleteTransaction(id);
+    const transaction: null | Transactions = await transactionService.deleteTransaction(id);
 
-    if (!t) {
+    if (!transaction) {
       logger.warn(`deleteTransaction: Transaction not found [transactionId=${String(id)}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Transaction not found", { pointer: "/data/id" }),
         ])
       );
     }
 
-    return res.json({ message: "Transaction soft deleted", transaction: t });
+    return res.status(StatusCodes.OK).json({
+      message: "Transaction soft deleted",
+      transaction: mapToTransactionResource(transaction),
+    });
   } catch (err: unknown) {
     logger.error(`deleteTransaction error [transactionId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(
           StatusCodes.INTERNAL_SERVER_ERROR,
