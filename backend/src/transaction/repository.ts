@@ -27,9 +27,7 @@ export const transactionRepository = {
 
   async findAll(): Promise<Transactions[]> {
     try {
-      const res = await dbPool.query<Transactions>(
-        `SELECT * FROM ${tables.transactions.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`
-      );
+      const res = await dbPool.query<Transactions>(`SELECT * FROM ${tables.transactions.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
       return res.rows;
     } catch (err: unknown) {
       logger.error(`findAll failed: ${getErrorMessage(err)}`);
@@ -39,10 +37,7 @@ export const transactionRepository = {
 
   async findById(id: number): Promise<null | Transactions> {
     try {
-      const res = await dbPool.query<Transactions>(
-        `SELECT * FROM ${tables.transactions.tableName} WHERE id = $1 AND deleted_at IS NULL`,
-        [id]
-      );
+      const res = await dbPool.query<Transactions>(`SELECT * FROM ${tables.transactions.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`findById failed [id=${String(id)}]: ${getErrorMessage(err)}`);
@@ -52,13 +47,8 @@ export const transactionRepository = {
 
   async softDelete(id: number): Promise<Transactions> {
     try {
-      const res = await dbPool.query<Transactions>(
-        `UPDATE ${tables.transactions.tableName} 
-         SET deleted_at = NOW(), updated_at = NOW()
-         WHERE id = $1
-         RETURNING *`,
-        [id]
-      );
+      const res = await dbPool.query<Transactions>(`UPDATE ${tables.transactions.tableName} SET deleted_at = NOW(), updated_at = NOW()
+      WHERE id = $1 RETURNING *`, [id]);
       return res.rows[0];
     } catch (err: unknown) {
       logger.error(`softDelete failed [id=${String(id)}]: ${getErrorMessage(err)}`);

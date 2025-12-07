@@ -16,7 +16,6 @@ export const userService = {
     try {
       const user = await userRepository.findById(id);
       if (!user) return null;
-
       return await userRepository.softDelete(id);
     } catch (err: unknown) {
       logger.error(`deleteUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
@@ -46,7 +45,6 @@ export const userService = {
     try {
       const existingUser = await userRepository.findById(id);
       if (!existingUser) return null;
-
       return await userRepository.update(id, { ...existingUser, ...body });
     } catch (err: unknown) {
       logger.error(`updateUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);

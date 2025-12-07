@@ -1,74 +1,59 @@
+import { dbPool } from "../../database/db";
+import { Pots, PotsInput, tables } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { Pot, PotCreateBody, pots, PotUpdateBody } from "./index";
 
 export const potRepository = {
-  create(data: PotCreateBody): Pot {
+  async create(data: PotsInput): Promise<Pots> {
     try {
-      const newPot: Pot = {
-        ...data,
-        created_at: new Date().toISOString(),
-        deleted_at: false,
-        id: pots.length ? pots[pots.length - 1].id + 1 : 1,
-        total_saved: data.total_saved,
-        updated_at: new Date().toISOString(),
-      };
-      pots.push(newPot);
-      return newPot;
+      const res = await dbPool.query<Pots>(`INSERT INTO ${tables.pots.tableName} (name, target, total_saved) VALUES ($1, $2, $3) RETURNING *`,
+      [data.name, data.target, data.total_saved]);
+      return res.rows[0];
     } catch (err: unknown) {
-      logger.error(`create pot failed [data=${JSON.stringify(data)}]: ${getErrorMessage(err)}`);
+      logger.error(`create pot failed [name=${data.name}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getAll(): Pot[] {
+  async findAll(): Promise<Pots[]> {
     try {
-      return pots.filter(p => !p.deleted_at);
+      const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
+      return res.rows;
     } catch (err: unknown) {
-      logger.error(`get all pots failed: ${getErrorMessage(err)}`);
+      logger.error(`findAll pots failed: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getById(id: number): Pot | undefined {
+  async findById(id: number): Promise<null | Pots> {
     try {
-      return pots.find(p => p.id === id && !p.deleted_at);
+      const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
+      return res.rows[0] ?? null;
     } catch (err: unknown) {
-      logger.error(`get pot by id failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`findById pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  softDelete(id: number): Pot | undefined {
+  async softDelete(id: number): Promise<null | Pots> {
     try {
-      const pot = pots.find(p => p.id === id && !p.deleted_at);
-      if (!pot) {
-        logger.warn(`soft delete pot failed: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      pot.deleted_at = true;
-      pot.updated_at = new Date().toISOString();
-      return pot;
+      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]);
+      return res.rows[0] ?? null;
     } catch (err: unknown) {
-      logger.error(`soft delete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`softDelete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  update(id: number, data: PotUpdateBody): Pot | undefined {
+  async update(id: number, data: PotsInput): Promise<null | Pots> {
     try {
-      const pot = pots.find(p => p.id === id && !p.deleted_at);
-      if (!pot) {
-        logger.warn(`update pot failed: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      Object.assign(pot, data);
-      pot.updated_at = new Date().toISOString();
-      return pot;
+      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET name = $1, target = $2, total_saved = $3, updated_at = NOW()
+      WHERE id = $4 AND deleted_at IS NULL RETURNING *`, [data.name, data.target, data.total_saved, id]);
+      return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`update pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
-  }
+  },
 };
 
 export default potRepository;

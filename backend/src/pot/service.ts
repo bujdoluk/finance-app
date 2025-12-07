@@ -1,114 +1,83 @@
-import { Resource } from "../utils/jsonapi/resource";
+import { Pots, PotsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { PotCreateBody, PotDepositWithdrawBody, PotUpdateBody } from "./index";
-import { mapToPotResource } from "./mapper";
-import { potRepository } from "./repository";
+import potRepository  from "./repository";
 
 export const potService = {
-  createPot(data: PotCreateBody): Resource {
+  async createPot(body: PotsInput): Promise<Pots> {
     try {
-      const pot = potRepository.create(data);
-      return mapToPotResource(pot);
+      const pot = await potRepository.create(body);
+      return pot;
     } catch (err: unknown) {
-      logger.error(
-        `create pot failed [total_saved=${String(data.total_saved)}]: ${getErrorMessage(err)}`
-      );
+      logger.error(`createPot error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  deletePot(id: number): Resource | undefined {
+  async deletePot(id: number): Promise<null | Pots> {
     try {
-      const pot = potRepository.softDelete(id);
-      if (!pot) {
-        logger.warn(`deletePot: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      return mapToPotResource(pot);
+      const pot = await potRepository.findById(id);
+      if (!pot) return null;
+      return await potRepository.softDelete(id);
     } catch (err: unknown) {
-      logger.error(`deletePot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`deletePot error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  deposit(id: number, body: PotDepositWithdrawBody): Resource | undefined {
+  async deposit(id: number, body: PostInput): Promise<null | Pots> {
     try {
-      const pot = potRepository.getById(id);
-      if (!pot) {
-        logger.warn(`deposit failed: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      pot.total_saved += body.amount;
-      pot.updated_at = new Date().toISOString();
-      return mapToPotResource(pot);
+      const existing = await potRepository.findById(id);
+      if (!existing) return null;
+      return await potRepository.update(id, { ...existing, total_saved: existing.total_saved + body.amount });
     } catch (err: unknown) {
-      logger.error(
-        `deposit failed [potId=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`
-      );
+      logger.error(`deposit error [id=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getAllPots(): Resource[] {
+  async getAllPots(): Promise<Pots[]> {
     try {
-      return potRepository.getAll().map(mapToPotResource);
+      return await potRepository.findAll();
     } catch (err: unknown) {
-      logger.error(`getAllPots failed: ${getErrorMessage(err)}`);
+      logger.error(`getAllPots error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getPotById(id: number): Resource | undefined {
+  async getPotById(id: number): Promise<null | Pots> {
     try {
-      const pot = potRepository.getById(id);
-      if (!pot) {
-        logger.warn(`getPotById: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      return mapToPotResource(pot);
+      return await potRepository.findById(id);
     } catch (err: unknown) {
-      logger.error(`getPotById failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`getPotById error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  updatePot(id: number, data: PotUpdateBody): Resource | undefined {
+  async updatePot(id: number, body: PotsInput): Promise<null | Pots> {
     try {
-      const pot = potRepository.update(id, data);
-      if (!pot) {
-        logger.warn(`updatePot: pot not found [potId=${String(id)}]`);
-        return undefined;
-      }
-      return mapToPotResource(pot);
+      const existingPot = await potRepository.findById(id);
+      if (!existingPot) return null;
+      return await potRepository.update(id, { ...existingPot, ...body });
     } catch (err: unknown) {
-      logger.error(`updatePot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`updatePot error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  withdraw(id: number, body: PotDepositWithdrawBody): Resource | undefined {
+  async withdraw(id: number, body: { amount: number }): Promise<null | Pots> {
     try {
-      const pot = potRepository.getById(id);
-      if (!pot) {
-        logger.warn(`withdraw failed: pot not found [potId=${String(id)}]`);
-        return undefined;
+      const existing = await potRepository.findById(id);
+      if (!existing) return null;
+      if (body.amount > existing.total_saved) {
+        logger.warn(`withdraw failed: insufficient funds [id=${String(id)}, requested=${String(body.amount)}, available=${String(existing.total_saved)}]`);
+        return null;
       }
-      if (body.amount > pot.total_saved) {
-        logger.warn(
-          `withdraw failed: insufficient funds [potId=${String(id)}, amount=${String(body.amount)}, total_saved=${String(pot.total_saved)}]`
-        );
-        return undefined;
-      }
-      pot.total_saved -= body.amount;
-      pot.updated_at = new Date().toISOString();
-      return mapToPotResource(pot);
+      return await potRepository.update(id, { ...existing, total_saved: existing.total_saved - body.amount });
     } catch (err: unknown) {
-      logger.error(
-        `withdraw failed [potId=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`
-      );
+      logger.error(`withdraw error [id=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
       throw err;
     }
-  },
+  }
 };
 
 export default potService;

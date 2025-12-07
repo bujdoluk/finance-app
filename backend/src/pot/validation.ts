@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 
+import { PotsInput } from "../../database/dbSchema";
 import { joiToErrors } from "../utils/jsonapi/error";
-import { PotCreateBody, PotDepositWithdrawBody, PotUpdateBody } from "./index";
 
 const potSchema = Joi.object({
   amount: Joi.number().positive(),
@@ -23,19 +23,19 @@ export const depositWithdrawSchema = Joi.object({
   amount: Joi.number().positive().required(),
 });
 
-export const validateCreatePot = (body: PotCreateBody) => {
+export const validateCreatePot = (body: PotsInput) => {
   const result = createPotSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
 };
 
-export const validateUpdatePot = (body: PotUpdateBody) => {
+export const validateUpdatePot = (body: PotsInput) => {
   const result = updatePotSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
 };
 
-export const validateDepositWithdraw = (body: PotDepositWithdrawBody) => {
+export const validateDepositWithdraw = (body: PotsInput) => {
   const result = depositWithdrawSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
