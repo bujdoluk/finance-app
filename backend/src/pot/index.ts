@@ -1,7 +1,7 @@
 export interface Pot {
   amount: number;
   created_at: string;
-  deleted_at: boolean;
+  deleted_at: string;
   id: number;
   name: string;
   target: number;
@@ -24,16 +24,4 @@ export interface PotDepositWithdrawBody {
 
 export type PotUpdateBody = Partial<Pick<Pot, "target" | "total_saved">>;
 
-export const pots: Pot[] = [
-  {
-    amount: 200,
-    created_at: new Date().toISOString(),
-    deleted_at: false,
-    id: 1,
-    name: "Vacation",
-    target: 1000,
-    theme: "blue",
-    total_saved: 200,
-    updated_at: new Date().toISOString()
-  }
-];
+export const pots: Pot[] = [];

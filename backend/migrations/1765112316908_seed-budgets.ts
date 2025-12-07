@@ -1,0 +1,19 @@
+import type { MigrationBuilder } from 'node-pg-migrate';
+
+export const shorthands = undefined;
+
+export async function up(pgm: MigrationBuilder): Promise<void> {
+  pgm.sql(`
+    INSERT INTO budgets (name, theme, amount, maximum_spending)
+    VALUES
+      ('Groceries', 'Food', 500, 500),
+      ('Vacation', 'Travel', 1000, 1000);
+  `);
+}
+
+export async function down(pgm: MigrationBuilder): Promise<void> {
+  pgm.sql(`
+    DELETE FROM budgets
+    WHERE name IN ('Groceries', 'Vacation');
+  `);
+}
