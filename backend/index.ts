@@ -11,7 +11,7 @@ import logger from './src/utils/logger/logger';
 import dotenv from 'dotenv';
 // Load environment variables from .env file (just for node-pg-migrate tool)
 dotenv.config();
-import pool from './database/db';
+import userRepository from './src/user/repository';
 
 const app = express();
 app.use(helmet());
@@ -29,7 +29,7 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
 const port = Number(process.env.APP_PORT ?? 3001);
 
-const server = app.listen(port, "0.0.0.0", () => {
+const server = app.listen(port, () => {
   logger.info(`API is starting on port ${port}`);
 });
 
@@ -47,7 +47,7 @@ const shutdown = (signal: string) => {
     console.log("Closed out remaining connections");
 
     try {
-      await pool.end(); 
+      await userRepository.pool.end(); 
       console.log("Postgres pool has ended");
     } catch (err: unknown) {
       console.error("Error closing Postgres pool", err);

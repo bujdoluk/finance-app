@@ -1,64 +1,53 @@
-import { Resource } from "../utils/jsonapi/resource";
+import { Users, UsersInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { UserCreateBody, UserUpdateBody } from "./index";
-import mapToUserResource from "./mapper";
-import userRepository from "./repository";
+import { userRepository } from "./repository";
 
 export const userService = {
-  async createUser(body: UserCreateBody): Promise<Resource> {
+  async createUser(body: UsersInput): Promise<Users> {
     try {
-      const stored = await userRepository.create(body);
-      return mapToUserResource(stored);
+      return await userRepository.create(body);
     } catch (err: unknown) {
       logger.error(`createUser error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async deleteUser(id: number): Promise<null | Resource> {
+  async deleteUser(id: number): Promise<null | Users> {
     try {
       const user = await userRepository.findById(id);
       if (!user) return null;
 
-      const deleted = await userRepository.softDelete(id);
-      return mapToUserResource(deleted);
+      return await userRepository.softDelete(id);
     } catch (err: unknown) {
       logger.error(`deleteUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getAllUsers(): Promise<Resource[]> {
+  async getAllUsers(): Promise<Users[]> {
     try {
-      const users = await userRepository.findAll();
-      return users.map(mapToUserResource);
+      return await userRepository.findAll();
     } catch (err: unknown) {
       logger.error(`getAllUsers error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getUserById(id: number): Promise<null | Resource> {
+  async getUserById(id: number): Promise<null | Users> {
     try {
-      const user = await userRepository.findById(id);
-      return user ? mapToUserResource(user) : null;
+      return await userRepository.findById(id);
     } catch (err: unknown) {
       logger.error(`getUserById error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async updateUser(id: number, body: UserUpdateBody): Promise<null | Resource> {
+  async updateUser(id: number, body: UsersInput): Promise<null | Users> {
     try {
-      const user = await userRepository.findById(id);
-      if (!user) return null;
+      const existingUser = await userRepository.findById(id);
+      if (!existingUser) return null;
 
-      const updated = await userRepository.update(id, {
-        ...user,
-        ...body,
-      });
-
-      return mapToUserResource(updated);
+      return await userRepository.update(id, { ...existingUser, ...body });
     } catch (err: unknown) {
       logger.error(`updateUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;

@@ -6,7 +6,7 @@ This project is based on coding challenge from website https://www.frontendmento
 It is a fullstack app created with tech stack:
    
    - BE: NodeJs, Typescript, Postgres, Docker, Nginx
-   - FE: Nuxt, Vue 3
+   - FE: Nuxt, Vue 3, TailwindCSS
         
 ![Challenge screenshot](./frontend/public/challenge-screenshot.png)
 
@@ -30,15 +30,19 @@ Before you begin, make sure you have met the following requirements:
 
 - `cd backend`
 - `npm i`
-- `..cd`
-- `frontend`
+- `cd ..`
+- `cd frontend`
 - `npm i`
 
-### (Option 1) RUN app via npm script
+### RUN FE app via npm script
 
 - `npm run dev`
 
-### (Option 2) RUN app via docker
+### RUN FE app via Docker
+
+- Available soon
+
+### RUN BE app via docker
 
 - `docker_compose up --build -d`
 
@@ -54,4 +58,19 @@ All docker containers must be up and running before running migrations
 - `docker exec -it api npm run migrate:down`
 - `docker exec -it api npm run migrate:redo`
 
+### GENERATE typescript types from database schema
+All docker containers must be up and running before running migrations
+
+Open container bash
+- `docker exec -it api sh`
+
+Execute those commands inside api container bash
+- `docker compose exec -it api npx pg-to-ts generate -c postgres://<user>:<password>@<service_name_of_db_from_docker>:<db_port>/<db_name> -o ./database/dbSchema.ts`
+- `exit`
+
+Copy dbSchema.ts from container to your local machine
+- `docker cp api:/usr/src/app/database/dbSchema.ts  ./database/dbSchema.ts`
+
 ### RUN tests
+
+- Available soon
