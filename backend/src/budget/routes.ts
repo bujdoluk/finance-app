@@ -1,14 +1,6 @@
 import { Router } from "express";
 
-import {
-  createBudget,
-  deleteBudget,
-  depositToBudget,
-  getBudgetById,
-  getBudgets,
-  updateBudget,
-  withdrawFromBudget
-} from "../budget/controller";
+import { createBudget, deleteBudget, depositToBudget, getBudgetById, getBudgets, updateBudget, withdrawFromBudget } from "../budget/controller";
 
 const router = Router();
 

@@ -21,6 +21,9 @@ Before you begin, make sure you have met the following requirements:
 
 - `git clone git@github.com:bujdoluk/finance-app.git`
 
+DISCLAIMER 
+- Following commands may vary based on your OS. You may have to change them to make them work on your OS. This app is being developed on Windows.
+
 ### Environment variables
 
 - Create .env file in ./backend path and add your configuration
@@ -65,7 +68,7 @@ Open container bash
 - `docker exec -it api sh`
 
 Execute those commands inside api container bash
-- `docker compose exec -it api npx pg-to-ts generate -c postgres://<user>:<password>@<service_name_of_db_from_docker>:<db_port>/<db_name> -o ./database/dbSchema.ts`
+- `docker compose exec -it api npx pg-to-ts generate -c postgres://<db_user>:<db_password>@<db_host>:<db_port>/<db_name> -o ./database/dbSchema.ts`
 - `exit`
 
 Copy dbSchema.ts from container to your local machine
@@ -74,3 +77,26 @@ Copy dbSchema.ts from container to your local machine
 ### RUN tests
 
 - Available soon
+
+### How to update FE and BE apps using nvm
+Open bash as an administrator
+
+To upgrade Node you may first want to see which version of Node.js you are currently using:
+
+- `node --version`
+
+Find out which versions of Node.js you may have installed and which one of those you're currently using:
+
+- `nvm ls`
+
+List all versions of Node.js available for installation:
+
+- `nvm ls available`
+
+Assuming you would pick Node.js v22.0.0 for installation you'd type the following to install that version:
+
+- `nvm install v22.0.0`
+
+Use installed version
+
+- `nvm use v22.0.0`

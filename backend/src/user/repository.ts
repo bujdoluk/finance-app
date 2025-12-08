@@ -41,6 +41,11 @@ export const userRepository = {
     }
   },
 
+  async getByEmail(email: string): Promise<null | Users> {
+    const res = await dbPool.query<Users>(`SELECT * FROM ${tables.users.tableName} WHERE email = $1 AND deleted_at IS NULL`, [email]);
+    return res.rows[0] ?? null;
+  },
+
   async getById(id: number): Promise<null | Users> {
     try {
       const res = await dbPool.query<Users>(`SELECT * FROM ${tables.users.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);

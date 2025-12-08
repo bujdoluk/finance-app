@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import authRouter from "../auth/routes";
 import billRouter from "../bill/routes";
 import budgetRouter from "../budget/routes";
 import potRouter from "../pot/routes";
@@ -13,6 +14,7 @@ const router = Router();
 router.get("/health", getHealth);
 router.get("/perf", getPerformanceInfo);
 
+router.use("/auth", authRouter); 
 router.use("/users", userRouter);           
 router.use("/pots", potRouter);              
 router.use("/budgets", budgetRouter);       

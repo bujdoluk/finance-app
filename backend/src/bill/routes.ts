@@ -1,12 +1,6 @@
 import { Router } from "express";
 
-import {
-  createBill,
-  deleteBill,
-  getBillById,
-  getBills,
-  updateBill
-} from "../bill/controller";
+import { createBill, deleteBill, getBillById, getBills, updateBill } from "../bill/controller";
 
 const router = Router();
 
