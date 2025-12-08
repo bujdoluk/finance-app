@@ -40,3 +40,11 @@ export const validateDepositWithdraw = (body: PotsInput) => {
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
 };
+
+export const validateDepositAmount = (body: PotsInput) => {
+  const result = depositWithdrawSchema.validate(body, { abortEarly: false });
+  if (result.error) {
+    return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
+  }
+  return null;
+};

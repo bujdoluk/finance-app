@@ -1,23 +1,21 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import Joi from "joi";
 
 import { Pots, PotsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument, joiToErrors } from "../utils/jsonapi/error";
-import logger, {
-  formatValidationMessage,
-  getErrorMessage,
-} from "../utils/logger/logger";
+import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
 import { mapToPotResource } from "./mapper";
 import potService from "./service";
-import {
-  createPotSchema,
-  depositWithdrawSchema,
-  updatePotSchema,
-} from "./validation";
+import { createPotSchema, depositWithdrawSchema, updatePotSchema } from "./validation";
+
+const formatValidationErrors = (errors: Joi.ValidationErrorItem[]): string => {
+  return errors.map(e => formatValidationMessage(e.message)).join(" ");
+};
 
 export const getAllPots = async (_req: Request, res: Response): Promise<Response> => {
   try {
-    const pots: Pots[] = await potService.getAllPots();
+    const pots: Pots[] = await potService.get();
     return res.json(pots.map(mapToPotResource));
   } catch (err: unknown) {
     logger.error(`getAllPots error: ${getErrorMessage(err)}`);
@@ -35,16 +33,14 @@ export const getAllPots = async (_req: Request, res: Response): Promise<Response
 
 export const getPotById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
-    const id = Number(req.params.id);
-    const pot = await potService.getPotById(id);
+    const potId = Number(req.params.id);
+    const pot = await potService.getById(potId);
 
     if (!pot) {
-      logger.warn(`getPotById: Pot not found [potId=${String(id)}]`);
+      logger.warn(`getPotById: Pot not found [potId=${String(potId)}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", {
-            pointer: "/data/id",
-          }),
+          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", { pointer: "/data/id" }),
         ])
       );
     }
@@ -64,23 +60,20 @@ export const getPotById = async (req: Request<{ id: string }>, res: Response): P
   }
 };
 
-export const createPot = async (
-  req: Request<unknown, unknown, PotsInput>,
-  res: Response
-): Promise<Response> => {
+export const createPot = async (req: Request<unknown, unknown, PotsInput>, res: Response): Promise<Response> => {
   try {
     const validation = createPotSchema.validate(req.body, { abortEarly: false });
+    const error = validation.error;
+    const value = validation.value as PotsInput;
 
-    if (validation.error) {
-      const messages = validation.error.details.map((d) => formatValidationMessage(d.message)).join(" ");
+    if (error) {
+      const messages = formatValidationErrors(error.details);
       logger.warn(`createPot validation failed. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const pot = await potService.createPot(validation.value);
-    return res
-      .status(StatusCodes.CREATED)
-      .json({ message: "Pot created", pot: mapToPotResource(pot) });
+    const pot = await potService.create(value);
+    return res.status(StatusCodes.CREATED).json({ message: "Pot created", pot: mapToPotResource(pot) });
   } catch (err: unknown) {
     logger.error(`createPot error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
@@ -100,21 +93,21 @@ export const updatePot = async (req: Request<{ id: string }, unknown, PotsInput>
     const potId = Number(req.params.id);
 
     const validation = updatePotSchema.validate(req.body, { abortEarly: false });
-    if (validation.error) {
-      const messages = validation.error.details.map((d) => formatValidationMessage(d.message)).join(" ");
+    const error = validation.error;
+    const value = validation.value as PotsInput;
 
+    if (error) {
+      const messages = formatValidationErrors(error.details);
       logger.warn(`updatePot validation failed [potId=${String(potId)}]. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const pot = await potService.updatePot(potId, validation.value);
+    const pot = await potService.updatePot(potId, value);
     if (!pot) {
       logger.warn(`updatePot: Pot not found [potId=${String(potId)}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", {
-            pointer: "/data/id",
-          }),
+          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", { pointer: "/data/id" }),
         ])
       );
     }
@@ -124,11 +117,7 @@ export const updatePot = async (req: Request<{ id: string }, unknown, PotsInput>
     logger.error(`updatePot error [potId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
-        createError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "Internal Server Error",
-          err instanceof Error ? err.message : "Something went wrong"
-        ),
+        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
     );
   }
@@ -137,15 +126,13 @@ export const updatePot = async (req: Request<{ id: string }, unknown, PotsInput>
 export const deletePot = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const potId = Number(req.params.id);
-    const pot = await potService.deletePot(potId);
+    const pot = await potService.delete(potId);
 
     if (!pot) {
       logger.warn(`deletePot: Pot not found [potId=${String(potId)}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", {
-            pointer: "/data/id",
-          }),
+          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", { pointer: "/data/id" }),
         ])
       );
     }
@@ -165,61 +152,53 @@ export const deletePot = async (req: Request<{ id: string }>, res: Response): Pr
   }
 };
 
-export const depositToPot = async (
-  req: Request<{ id: string }, unknown, PotsInput>,
-  res: Response
-) => {
+export const depositToPot = async (req: Request<{ id: string }, unknown, PotsInput>, res: Response): Promise<Response> => {
   try {
-    const errorDoc = validateDepositWithdraw(req.body);
-    if (errorDoc) {
-      const messages = formatValidationErrors(errorDoc.errors);
+    const validation = depositWithdrawSchema.validate(req.body, { abortEarly: false });
+    const error = validation.error;
+    const value = validation.value as PotsInput;
+
+    if (error) {
+      const messages = formatValidationErrors(error.details);
       logger.warn(`depositToPot validation failed [potId=${req.params.id}]. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
+      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(error.details, StatusCodes.BAD_REQUEST));
     }
 
-    // Now pass typed body directly to service
-    const pot = await potService.deposit(Number(req.params.id), req.body);
+    const pot = await potService.deposit(Number(req.params.id), value);
     if (!pot) {
       logger.warn(`depositToPot: Pot not found [potId=${req.params.id}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
-        createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", { pointer: "/data/id" }),
-        ])
+        createErrorDocument([createError(StatusCodes.NOT_FOUND, "Not Found", "Pot not found", { pointer: "/data/id" })])
       );
     }
 
-    return res.json({ message: "Deposit successful", pot });
+    return res.json({ message: "Deposit successful", pot: mapToPotResource(pot) });
   } catch (err: unknown) {
     logger.error(`depositToPot error [potId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong")])
     );
   }
 };
-export const withdrawFromPot = async (req: Request<{ id: string }, unknown, { amount: number }>, res: Response): Promise<Response> => {
+
+export const withdrawFromPot = async (req: Request<{ id: string }, unknown, PotsInput>, res: Response): Promise<Response> => {
   try {
     const potId = Number(req.params.id);
 
     const validation = depositWithdrawSchema.validate(req.body, { abortEarly: false });
-    if (validation.error) {
-      const messages = validation.error.details.map((d) => formatValidationMessage(d.message)).join(" ");
+    const error = validation.error;
+    const value = validation.value as PotsInput;
+
+    if (error) {
+      const messages = formatValidationErrors(error.details);
       logger.warn(`withdrawFromPot validation failed [potId=${String(potId)}]. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const pot = await potService.withdraw(potId, validation.value);
+    const pot = await potService.withdraw(potId, value);
     if (!pot) {
       return res.status(StatusCodes.BAD_REQUEST).json(
-        createErrorDocument([
-          createError(
-            StatusCodes.BAD_REQUEST,
-            "Bad Request",
-            "Insufficient funds or pot not found",
-            { pointer: "/data/attributes/amount" }
-          ),
-        ])
+        createErrorDocument([createError(StatusCodes.BAD_REQUEST, "Bad Request", "Insufficient funds or pot not found", { pointer: "/data/attributes/amount" })])
       );
     }
 
@@ -227,13 +206,7 @@ export const withdrawFromPot = async (req: Request<{ id: string }, unknown, { am
   } catch (err: unknown) {
     logger.error(`withdrawFromPot error [potId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "Internal Server Error",
-          err instanceof Error ? err.message : "Something went wrong"
-        ),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong")])
     );
   }
 };

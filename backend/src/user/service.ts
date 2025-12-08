@@ -3,7 +3,7 @@ import logger, { getErrorMessage } from "../utils/logger/logger";
 import { userRepository } from "./repository";
 
 export const userService = {
-  async createUser(body: UsersInput): Promise<Users> {
+  async create(body: UsersInput): Promise<Users> {
     try {
       return await userRepository.create(body);
     } catch (err: unknown) {
@@ -12,29 +12,29 @@ export const userService = {
     }
   },
 
-  async deleteUser(id: number): Promise<null | Users> {
+  async delete(id: number): Promise<null | Users> {
     try {
-      const user = await userRepository.findById(id);
+      const user = await userRepository.getById(id);
       if (!user) return null;
-      return await userRepository.softDelete(id);
+      return await userRepository.delete(id);
     } catch (err: unknown) {
       logger.error(`deleteUser error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getAllUsers(): Promise<Users[]> {
+  async get(): Promise<Users[]> {
     try {
-      return await userRepository.findAll();
+      return await userRepository.get();
     } catch (err: unknown) {
       logger.error(`getAllUsers error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getUserById(id: number): Promise<null | Users> {
+  async getById(id: number): Promise<null | Users> {
     try {
-      return await userRepository.findById(id);
+      return await userRepository.getById(id);
     } catch (err: unknown) {
       logger.error(`getUserById error [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
@@ -43,7 +43,7 @@ export const userService = {
 
   async updateUser(id: number, body: UsersInput): Promise<null | Users> {
     try {
-      const existingUser = await userRepository.findById(id);
+      const existingUser = await userRepository.getById(id);
       if (!existingUser) return null;
       return await userRepository.update(id, { ...existingUser, ...body });
     } catch (err: unknown) {

@@ -1,21 +1,20 @@
+import { Bills } from "../../database/dbSchema";
 import { Resource } from "../utils/jsonapi/resource";
-import { Bill } from "./index";
 
-export const mapToBillResource = (b: Bill): Resource => ({
+/**
+ * Map a Bills type interface to JSON:API Resource
+ */
+export const mapToBillResource = (bill: Bills): Resource => ({
   attributes: {
-    amount: b.amount,
-    created_at: b.created_at,
-    deleted_at: b.deleted_at,
-    frequency: b.frequency,
-    name: b.name,
-    next_run: b.next_run,
-    updated_at: b.updated_at
+    amount: bill.amount,
+    created_at: bill.created_at,
+    frequency: bill.frequency,
+    name: bill.name,
+    next_run: bill.next_run,
   },
-  id: b.id.toString(),
+  id: String(bill.id),
   links: {
-    self: `/v1/bills/${String(b.id)}`
+    self: `/v1/bills/${String(bill.id)}`,
   },
-  type: "bills"
+  type: "bills",
 });
-
-export default mapToBillResource;

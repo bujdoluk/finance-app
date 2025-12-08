@@ -1,21 +1,22 @@
+import { Budgets } from "../../database/dbSchema";
 import { Resource } from "../utils/jsonapi/resource";
-import { Budget } from "./index";
 
-export const mapToBudgetResource = (b: Budget): Resource => ({
+/**
+ * Map a Budget type interface into a JSON:API Resource
+ */
+export const mapToBudgetResource = (budget: Budgets): Resource => ({
   attributes: {
-    amount: b.amount,
-    created_at: b.created_at,
-    deleted_at: b.deleted_at,
-    maximumSpending: b.maximumSpending,
-    name: b.name,
-    theme: b.theme,
-    updated_at: b.updated_at
+    amount: budget.amount,
+    created_at: budget.created_at,
+    maximum_spending: budget.maximum_spending,
+    name: budget.name,
+    theme: budget.theme,
   },
-  id: b.id.toString(),
+  id: String(budget.id),
   links: {
-    self: `/v1/budgets/${String(b.id)}`
+    self: `/v1/budgets/${String(budget.id)}`,
   },
-  type: "budgets"
+  type: "budgets",
 });
 
 export default mapToBudgetResource;

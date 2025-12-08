@@ -21,7 +21,17 @@ export const userRepository = {
     }
   },
 
-  async findAll(): Promise<Users[]> {
+  async delete(id: number): Promise<Users> {
+    try {
+      const res = await dbPool.query<Users>(`UPDATE ${tables.users.tableName} SET deleted_at = NOW() WHERE id = $1 RETURNING *`, [id]);
+      return res.rows[0];
+    } catch (err: unknown) {
+      logger.error(`delete failed [userId=${String(id)}]: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async get(): Promise<Users[]> {
     try {
       const res = await dbPool.query<Users>(`SELECT * FROM ${tables.users.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
       return res.rows;
@@ -31,22 +41,12 @@ export const userRepository = {
     }
   },
 
-  async findById(id: number): Promise<null | Users> {
+  async getById(id: number): Promise<null | Users> {
     try {
       const res = await dbPool.query<Users>(`SELECT * FROM ${tables.users.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`findById failed [userId=${String(id)}]: ${getErrorMessage(err)}`);
-      throw err;
-    }
-  },
-
-  async softDelete(id: number): Promise<Users> {
-    try {
-      const res = await dbPool.query<Users>(`UPDATE ${tables.users.tableName} SET deleted_at = NOW() WHERE id = $1 RETURNING *`, [id]);
-      return res.rows[0];
-    } catch (err: unknown) {
-      logger.error(`softDelete failed [userId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

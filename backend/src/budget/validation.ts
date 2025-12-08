@@ -1,8 +1,8 @@
+import { BudgetsInput } from "@db/dbSchema";
 import { StatusCodes } from "http-status-codes";
-import Joi from "joi";
+import Joi from "joi"; 
 
-import { joiToErrors } from "../utils/jsonapi/error"; 
-import { BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
+import { joiToErrors } from "../utils/jsonapi/error";
 
 const budgetSchema = Joi.object({
   amount: Joi.number().positive(),
@@ -22,19 +22,19 @@ export const depositWithdrawSchema = Joi.object({
   amount: Joi.number().positive().required(),
 });
 
-export const validateCreateBudget = (body: BudgetCreateBody) => {
+export const validateCreateBudget = (body: BudgetsInput) => {
   const result = createBudgetSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
 };
 
-export const validateUpdateBudget = (body: BudgetUpdateBody) => {
+export const validateUpdateBudget = (body: BudgetsInput) => {
   const result = updateBudgetSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;
 };
 
-export const validateDepositWithdraw = (body: BudgetAmountBody) => {
+export const validateDepositWithdraw = (body: BudgetsInput) => {
   const result = depositWithdrawSchema.validate(body, { abortEarly: false });
   if (result.error) return joiToErrors(result.error.details, StatusCodes.BAD_REQUEST);
   return null;

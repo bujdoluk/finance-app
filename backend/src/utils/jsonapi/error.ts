@@ -1,3 +1,4 @@
+// For more information visit https://jsonapi.org/
 import { Links } from "./links";
 import { Meta } from "./meta";
 

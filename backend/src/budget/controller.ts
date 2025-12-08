@@ -1,9 +1,10 @@
+import { BudgetsInput } from "@db/dbSchema";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import { BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
+import mapToBudgetResource from "./mapper";
 import budgetService from "./service";
 import { validateCreateBudget, validateDepositWithdraw, validateUpdateBudget } from "./validation";
 
@@ -17,13 +18,13 @@ const formatValidationErrors = (errors: unknown[]): string => {
     .join(" ");
 };
 
-export const getAllBudgets = (_req: Request, res: Response) => {
+export const getBudgets = async (_req: Request, res: Response): Promise<Response> => {
   try {
-    const budgets = budgetService.getAllBudgets();
-    return res.json(budgets);
+    const budgets = await budgetService.get();
+    return res.json(budgets.map(mapToBudgetResource));
   } catch (err: unknown) {
     logger.error(`getAllBudgets error: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -31,21 +32,21 @@ export const getAllBudgets = (_req: Request, res: Response) => {
   }
 };
 
-export const getBudgetById = (req: Request<{ id: string }>, res: Response) => {
+export const getBudgetById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
-    const budget = budgetService.getBudgetById(Number(req.params.id));
+    const budget = await budgetService.getById(Number(req.params.id));
     if (!budget) {
       logger.warn(`getBudgetById: Budget not found [budgetId=${req.params.id}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Budget not found", { pointer: "/data/id" }),
         ])
       );
     }
-    return res.json(budget);
+    return res.json(mapToBudgetResource(budget));
   } catch (err: unknown) {
     logger.error(`getBudgetById error [budgetId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -53,7 +54,7 @@ export const getBudgetById = (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-export const createBudget = (req: Request<object, object, BudgetCreateBody>, res: Response) => {
+export const createBudget = async (req: Request<object, object, BudgetsInput>, res: Response): Promise<Response> => {
   try {
     const errorDoc = validateCreateBudget(req.body);
     if (errorDoc) {
@@ -62,11 +63,11 @@ export const createBudget = (req: Request<object, object, BudgetCreateBody>, res
       return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
     }
 
-    const budget = budgetService.createBudget(req.body);
-    return res.status(StatusCodes.CREATED).json({ budget, message: "Budget created" });
+    const budget = await budgetService.create(req.body);
+    return res.status(StatusCodes.CREATED).json({ budget: mapToBudgetResource(budget), message: "Budget created" });
   } catch (err: unknown) {
     logger.error(`createBudget error: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -74,7 +75,7 @@ export const createBudget = (req: Request<object, object, BudgetCreateBody>, res
   }
 };
 
-export const updateBudget = (req: Request<{ id: string }, object, BudgetUpdateBody>, res: Response) => {
+export const updateBudget = async (req: Request<{ id: string }, object, BudgetsInput>, res: Response): Promise<Response> => {
   try {
     const errorDoc = validateUpdateBudget(req.body);
     if (errorDoc) {
@@ -83,20 +84,20 @@ export const updateBudget = (req: Request<{ id: string }, object, BudgetUpdateBo
       return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
     }
 
-    const budget = budgetService.updateBudget(Number(req.params.id), req.body);
+    const budget = await budgetService.update(Number(req.params.id), req.body);
     if (!budget) {
       logger.warn(`updateBudget: Budget not found [budgetId=${req.params.id}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Budget not found", { pointer: "/data/id" }),
         ])
       );
     }
 
-    return res.json({ budget, message: "Budget updated" });
+    return res.json({ budget: mapToBudgetResource(budget), message: "Budget updated" });
   } catch (err: unknown) {
     logger.error(`updateBudget error [budgetId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -104,21 +105,21 @@ export const updateBudget = (req: Request<{ id: string }, object, BudgetUpdateBo
   }
 };
 
-export const deleteBudget = (req: Request<{ id: string }>, res: Response) => {
+export const deleteBudget = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
-    const budget = budgetService.deleteBudget(Number(req.params.id));
+    const budget = await budgetService.delete(Number(req.params.id));
     if (!budget) {
       logger.warn(`deleteBudget: Budget not found [budgetId=${req.params.id}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Budget not found", { pointer: "/data/id" }),
         ])
       );
     }
-    return res.json({ budget, message: "Budget soft deleted" });
+    return res.json({ budget: mapToBudgetResource(budget), message: "Budget soft deleted" });
   } catch (err: unknown) {
     logger.error(`deleteBudget error [budgetId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -126,7 +127,7 @@ export const deleteBudget = (req: Request<{ id: string }>, res: Response) => {
   }
 };
 
-export const depositToBudget = (req: Request<{ id: string }, object, BudgetAmountBody>, res: Response) => {
+export const depositToBudget = async (req: Request<{ id: string }, object, BudgetsInput>, res: Response): Promise<Response> => {
   try {
     const errorDoc = validateDepositWithdraw(req.body);
     if (errorDoc) {
@@ -135,20 +136,20 @@ export const depositToBudget = (req: Request<{ id: string }, object, BudgetAmoun
       return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
     }
 
-    const budget = budgetService.depositToBudget(Number(req.params.id), req.body);
+    const budget = await budgetService.deposit(Number(req.params.id), req.body.amount);
     if (!budget) {
       logger.warn(`depositToBudget: Budget not found [budgetId=${req.params.id}]`);
-      return res.json(
+      return res.status(StatusCodes.NOT_FOUND).json(
         createErrorDocument([
           createError(StatusCodes.NOT_FOUND, "Not Found", "Budget not found", { pointer: "/data/id" }),
         ])
       );
     }
 
-    return res.json({ budget, message: `Deposited $${String(req.body.amount)} to budget` });
+    return res.json({ budget: mapToBudgetResource(budget), message: `Deposited $${String(req.body.amount)} to budget` });
   } catch (err: unknown) {
     logger.error(`depositToBudget error [budgetId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])
@@ -156,7 +157,7 @@ export const depositToBudget = (req: Request<{ id: string }, object, BudgetAmoun
   }
 };
 
-export const withdrawFromBudget = (req: Request<{ id: string }, object, BudgetAmountBody>, res: Response) => {
+export const withdrawFromBudget = async (req: Request<{ id: string }, object, BudgetsInput>, res: Response): Promise<Response> => {
   try {
     const errorDoc = validateDepositWithdraw(req.body);
     if (errorDoc) {
@@ -165,20 +166,20 @@ export const withdrawFromBudget = (req: Request<{ id: string }, object, BudgetAm
       return res.status(StatusCodes.BAD_REQUEST).json(errorDoc);
     }
 
-    const budget = budgetService.withdrawFromBudget(Number(req.params.id), req.body);
+    const budget = await budgetService.withdraw(Number(req.params.id), req.body.amount);
     if (!budget) {
       logger.warn(`withdrawFromBudget: Insufficient funds or Budget not found [budgetId=${req.params.id}]`);
-      return res.json(
+      return res.status(StatusCodes.BAD_REQUEST).json(
         createErrorDocument([
           createError(StatusCodes.BAD_REQUEST, "Bad Request", "Insufficient funds or budget not found", { pointer: "/data/attributes/amount" }),
         ])
       );
     }
 
-    return res.json({ budget, message: `Withdrew $${String(req.body.amount)} from budget` });
+    return res.json({ budget: mapToBudgetResource(budget), message: `Withdrew $${String(req.body.amount)} from budget` });
   } catch (err: unknown) {
     logger.error(`withdrawFromBudget error [budgetId=${req.params.id}]: ${getErrorMessage(err)}`);
-    return res.json(
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([
         createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
       ])

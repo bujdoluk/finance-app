@@ -1,99 +1,75 @@
-import { Resource } from "../utils/jsonapi/resource";
+import { Budgets, BudgetsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { Budget, BudgetAmountBody, BudgetCreateBody, BudgetUpdateBody } from "./index";
-import { mapToBudgetResource } from "./mapper";
 import budgetRepository from "./repository";
 
-const budgetService = {
-  createBudget(body: BudgetCreateBody): Resource {
+export const budgetService = {
+  async create(body: BudgetsInput): Promise<Budgets> {
     try {
-      const allBudgets = budgetRepository.findAll();
-      const newId = allBudgets.length ? allBudgets[allBudgets.length - 1].id + 1 : 1;
-
-      const newBudget: Budget = {
-        ...body,
-        created_at: new Date().toISOString(),
-        deleted_at: false,
-        id: newId,
-        updated_at: new Date().toISOString(),
-      };
-
-      const createdBudget = budgetRepository.create(newBudget);
-      return mapToBudgetResource(createdBudget);
+      return await budgetRepository.create(body);
     } catch (err: unknown) {
-      logger.error(`createBudget failed: ${getErrorMessage(err)}`);
+      logger.error(`createBudget failed [name=${body.name}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  deleteBudget(id: number): Resource | undefined {
+  async delete(id: number): Promise<Budgets | null> {
     try {
-      const budget = budgetRepository.findById(id);
-      if (!budget) return undefined;
-
-      const deleted = budgetRepository.softDelete(budget);
-      return mapToBudgetResource(deleted);
+      const existingBudget = await budgetRepository.getById(id);
+      if (!existingBudget) return null;
+      return await budgetRepository.delete(id);
     } catch (err: unknown) {
       logger.error(`deleteBudget failed [budgetId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  depositToBudget(id: number, body: BudgetAmountBody): Resource | undefined {
+  async deposit(id: number, amount: number): Promise<Budgets | null> {
     try {
-      const budget = budgetRepository.findById(id);
-      if (!budget) return undefined;
-
-      const updated = budgetRepository.deposit(budget, body);
-      return mapToBudgetResource(updated);
+      const existingBudget = await budgetRepository.getById(id);
+      if (!existingBudget) return null;
+      return await budgetRepository.deposit(id, amount);
     } catch (err: unknown) {
-      logger.error(`depositToBudget failed [budgetId=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
+      logger.error(`depositToBudget failed [budgetId=${String(id)}, amount=${String(amount)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getAllBudgets(): Resource[] {
+  async get(): Promise<Budgets[]> {
     try {
-      return budgetRepository.findAll().map(mapToBudgetResource);
+      return await budgetRepository.get();
     } catch (err: unknown) {
       logger.error(`getAllBudgets failed: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  getBudgetById(id: number): Resource | undefined {
+  async getById(id: number): Promise<Budgets | null> {
     try {
-      const budget = budgetRepository.findById(id);
-      return budget ? mapToBudgetResource(budget) : undefined;
+      return await budgetRepository.getById(id);
     } catch (err: unknown) {
       logger.error(`getBudgetById failed [budgetId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  updateBudget(id: number, body: BudgetUpdateBody): Resource | undefined {
+  async update(id: number, body: BudgetsInput): Promise<Budgets | null> {
     try {
-      const budget = budgetRepository.findById(id);
-      if (!budget) return undefined;
-
-      Object.assign(budget, body);
-      const updated = budgetRepository.update(budget);
-      return mapToBudgetResource(updated);
+      const existingBudget = await budgetRepository.getById(id);
+      if (!existingBudget) return null;
+      return await budgetRepository.update(id, body);
     } catch (err: unknown) {
       logger.error(`updateBudget failed [budgetId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  withdrawFromBudget(id: number, body: BudgetAmountBody): Resource | undefined {
+  async withdraw(id: number, amount: number): Promise<Budgets | null> {
     try {
-      const budget = budgetRepository.findById(id);
-      if (!budget) return undefined;
-
-      const updated = budgetRepository.withdraw(budget, body);
-      return updated ? mapToBudgetResource(updated) : undefined;
+      const existingBudget = await budgetRepository.getById(id);
+      if (!existingBudget) return null;
+      return await budgetRepository.withdraw(id, amount);
     } catch (err: unknown) {
-      logger.error(`withdrawFromBudget failed [budgetId=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
+      logger.error(`withdrawFromBudget failed [budgetId=${String(id)}, amount=${String(amount)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

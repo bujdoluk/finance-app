@@ -1,46 +1,63 @@
+import { FilterParams, Filters, parseFilter } from "@/utils/parseFilters";
+
 import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
 import transactionRepository from "./repository";
 
 export const transactionService = {
-  async createTransaction(body: TransactionsInput): Promise<Transactions> {
+  async create(body: TransactionsInput): Promise<Transactions> {
     try {
-      const created = await transactionRepository.create(body);
-      return created;
+      return await transactionRepository.create(body);
     } catch (err: unknown) {
       logger.error(`createTransaction error: ${getErrorMessage(err)}`);
-      throw err;
+      throw err; 
     }
   },
 
-  async deleteTransaction(id: number): Promise<null | Transactions> {
+  async delete(id: number): Promise<null | Transactions> {
     try {
-      const transaction = await transactionRepository.findById(id);
+      const transaction = await transactionRepository.getById(id);
       if (!transaction) return null;
-      return await transactionRepository.softDelete(id);
+
+      return await transactionRepository.delete(id);
     } catch (err: unknown) {
       logger.error(`deleteTransaction error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getAllTransactions(): Promise<Transactions[]> {
+  async filterAndSortTransactions(params: FilterParams): Promise<Transactions[]> {
     try {
-      return await transactionRepository.findAll();
+      let parsedFilter: Filters | null = null;
+
+      if (params.filter) {
+        parsedFilter = parseFilter(params.filter);
+      }
+
+      return await transactionRepository.findFilteredOrSortedTransactions(parsedFilter, params.sort);
     } catch (err: unknown) {
-      logger.error(`getAllTransactions error: ${getErrorMessage(err)}`);
+      logger.error(`filterAndSortTransactions error: ${getErrorMessage(err)}`);
       throw err;
     }
   },
 
-  async getTransactionById(id: number): Promise<null | Transactions> {
+  async get(): Promise<Transactions[]> {
     try {
-      return await transactionRepository.findById(id);
+      return await transactionRepository.get();
+    } catch (err: unknown) {
+      logger.error(`getTransactions error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async getById(id: number): Promise<null | Transactions> {
+    try {
+      return await transactionRepository.getById(id);
     } catch (err: unknown) {
       logger.error(`getTransactionById error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
-  },
+  }
 };
 
 export default transactionService;

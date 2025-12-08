@@ -14,7 +14,17 @@ export const potRepository = {
     }
   },
 
-  async findAll(): Promise<Pots[]> {
+  async delete(id: number): Promise<null | Pots> {
+    try {
+      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]);
+      return res.rows[0] ?? null;
+    } catch (err: unknown) {
+      logger.error(`delete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async get(): Promise<Pots[]> {
     try {
       const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
       return res.rows;
@@ -24,22 +34,12 @@ export const potRepository = {
     }
   },
 
-  async findById(id: number): Promise<null | Pots> {
+  async getById(id: number): Promise<null | Pots> {
     try {
       const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`findById pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
-      throw err;
-    }
-  },
-
-  async softDelete(id: number): Promise<null | Pots> {
-    try {
-      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]);
-      return res.rows[0] ?? null;
-    } catch (err: unknown) {
-      logger.error(`softDelete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

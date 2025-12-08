@@ -1,15 +1,10 @@
 import { Router } from "express";
 
-import {
-  createTransaction,
-  deleteTransaction,
-  getAllTransactions,
-  getTransactionById,
-} from "./controller";
+import { createTransaction, deleteTransaction, getTransactionById, getTransactions } from "./controller";
 
 const router = Router();
 
-router.get("/", getAllTransactions);
+router.get("/", getTransactions);
 router.get("/:id", getTransactionById);
 router.post("/", createTransaction);
 router.delete("/:id", deleteTransaction);

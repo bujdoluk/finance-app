@@ -3,14 +3,14 @@ import { Router } from "express";
 import {
   createBill,
   deleteBill,
-  getAllBills,
   getBillById,
+  getBills,
   updateBill
 } from "../bill/controller";
 
 const router = Router();
 
-router.get("/", getAllBills);
+router.get("/", getBills);
 router.get("/:id", getBillById);
 router.post("/", createBill);
 router.patch("/:id", updateBill);

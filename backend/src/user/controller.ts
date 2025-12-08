@@ -10,7 +10,7 @@ import { createUserSchema, updateUserSchema } from "./validation";
 
 export const getAllUsers = async (_req: Request, res: Response): Promise<Response> => {
   try {
-    const users: Users[] = await userService.getAllUsers();
+    const users: Users[] = await userService.get();
     return res.json(users.map(mapToUserResource));
   } catch (err: unknown) {
     logger.error(`getAllUsers error: ${getErrorMessage(err)}`);
@@ -29,7 +29,7 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<Respons
 export const getUserById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);
-    const user: null | Users = await userService.getUserById(userId);
+    const user: null | Users = await userService.getById(userId);
 
     if (!user) {
       logger.warn(`getUserById: User not found [userId=${String(userId)}]`);
@@ -65,7 +65,7 @@ export const createUser = async (req: Request<unknown, unknown, UsersInput>, res
       return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
     }
 
-    const user: Users = await userService.createUser(validation.value);
+    const user: Users = await userService.create(validation.value);
     return res.status(StatusCodes.CREATED).json({ message: "User created", user: mapToUserResource(user) });
   } catch (err: unknown) {
     logger.error(`createUser error: ${getErrorMessage(err)}`);
@@ -120,7 +120,7 @@ export const updateUser = async (req: Request<{ id: string }, unknown, UsersInpu
 export const deleteUser = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);
-    const user: null | Users = await userService.deleteUser(userId);
+    const user: null | Users = await userService.delete(userId);
 
     if (!user) {
       logger.warn(`deleteUser: User not found [userId=${String(userId)}]`);

@@ -4,15 +4,15 @@ import {
   createBudget,
   deleteBudget,
   depositToBudget,
-  getAllBudgets,
   getBudgetById,
+  getBudgets,
   updateBudget,
   withdrawFromBudget
 } from "../budget/controller";
 
 const router = Router();
 
-router.get("/", getAllBudgets);
+router.get("/", getBudgets);
 router.get("/:id", getBudgetById);
 router.post("/", createBudget);
 router.patch("/:id", updateBudget);

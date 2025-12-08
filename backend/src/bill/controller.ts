@@ -1,137 +1,111 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import {
-  createError,
-  createErrorDocument,
-  joiToErrors,
-} from "../utils/jsonapi/error";
+import { BillsInput } from "../../database/dbSchema";
+import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { Bill } from "./index";
-import billService, { BillCreateData } from "./service";
+import { mapToBillResource } from "./mapper";
+import billService from "./service";
 import { createBillSchema, updateBillSchema } from "./validation";
 
-export const getAllBills = (_req: Request, res: Response) => {
+export const getBills = async (_req: Request, res: Response): Promise<Response> => {
   try {
-    const bills = billService.getAllBills();
-    return res.json(bills);
+    const bills = await billService.get();
+    return res.json(bills.map(mapToBillResource));
   } catch (err: unknown) {
-    logger.error(`getAllBills error: ${getErrorMessage(err)}`);
+    logger.error(`getBills error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "Internal Server Error",
-          err instanceof Error ? err.message : "Something went wrong"
-        ),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };
 
-export const getBillById = (req: Request<{ id: string }>, res: Response) => {
+export const getBillById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const id = Number(req.params.id);
-    const bill = billService.getBillById(id);
-
+    const bill = await billService.getById(id);
     if (!bill) {
-      logger.warn(`getBillById: Bill not found [billId=${String(id)}]`);
       return res.status(StatusCodes.NOT_FOUND).json(
-        createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found", { pointer: "/data/id" }),
-        ])
+        createErrorDocument([createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found")])
       );
     }
-
-    return res.json(bill);
+    return res.json(mapToBillResource(bill));
   } catch (err: unknown) {
     logger.error(`getBillById error [billId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };
 
-export const createBill = (req: Request<object, object, Partial<Bill>>, res: Response) => {
+export const createBill = async (req: Request<unknown, unknown, BillsInput>, res: Response): Promise<Response> => {
   try {
-    const validation = createBillSchema.validate(req.body, { abortEarly: false });
+    const { error } = createBillSchema.validate(req.body, { abortEarly: false });
 
-    if (validation.error) {
-      const messages = validation.error.details.map(d => d.message).join(" ");
+    if (error) {
+      const messages = error.details.map(d => d.message).join(" ");
       logger.warn(`createBill validation failed. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
+      return res.status(StatusCodes.BAD_REQUEST).json(
+        createErrorDocument([createError(StatusCodes.BAD_REQUEST, "Validation Error", messages)])
+      );
     }
 
-    const data = validation.value as BillCreateData;
-    const bill = billService.createBill(data);
+    const value = req.body;
 
-    return res.status(StatusCodes.CREATED).json({ bill, message: "Bill created" });
+    const bill = await billService.create(value);
+    return res.status(StatusCodes.CREATED).json({ bill: mapToBillResource(bill), message: "Bill created" });
   } catch (err: unknown) {
     logger.error(`createBill error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };
 
-export const updateBill = (req: Request<{ id: string }, object, Partial<Bill>>, res: Response) => {
+export const updateBill = async (req: Request<{ id: string }, unknown, BillsInput>, res: Response): Promise<Response> => {
   try {
-    const validation = updateBillSchema.validate(req.body, { abortEarly: false });
+    const id = Number(req.params.id);
 
-    if (validation.error) {
-      const messages = validation.error.details.map(d => d.message).join(" ");
-      logger.warn(`updateBill validation failed [billId=${req.params.id}]. ${messages}`);
-      return res.status(StatusCodes.BAD_REQUEST).json(joiToErrors(validation.error.details, StatusCodes.BAD_REQUEST));
-    }
-
-    const data = validation.value as Partial<Bill>;
-    const bill = billService.updateBill(Number(req.params.id), data);
-
-    if (!bill) {
-      logger.warn(`updateBill: Bill not found [billId=${req.params.id}]`);
-      return res.status(StatusCodes.NOT_FOUND).json(
-        createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found", { pointer: "/data/id" }),
-        ])
+    const { error } = updateBillSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      const messages = error.details.map(d => d.message).join(" ");
+      logger.warn(`updateBill validation failed [billId=${String(id)}]. ${messages}`);
+      return res.status(StatusCodes.BAD_REQUEST).json(
+        createErrorDocument([createError(StatusCodes.BAD_REQUEST, "Validation Error", messages)])
       );
     }
 
-    return res.json({ bill, message: "Bill updated" });
+    const value = req.body;
+
+    const bill = await billService.update(id, value);
+    if (!bill) {
+      return res.status(StatusCodes.NOT_FOUND).json(
+        createErrorDocument([createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found")])
+      );
+    }
+
+    return res.json({ bill: mapToBillResource(bill), message: "Bill updated" });
   } catch (err: unknown) {
     logger.error(`updateBill error [billId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };
 
-export const deleteBill = (req: Request<{ id: string }>, res: Response) => {
+export const deleteBill = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const id = Number(req.params.id);
-    const bill = billService.deleteBill(id);
-
+    const bill = await billService.delete(id);
     if (!bill) {
-      logger.warn(`deleteBill: Bill not found [billId=${String(id)}]`);
-      return res.status(StatusCodes.NOT_FOUND).json(
-        createErrorDocument([
-          createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found", { pointer: "/data/id" }),
-        ])
-      );
+      return res.status(StatusCodes.NOT_FOUND).json(createErrorDocument([createError(StatusCodes.NOT_FOUND, "Not Found", "Bill not found")]));
     }
 
-    return res.json({ bill, message: "Bill soft deleted" });
+    return res.json({ bill: mapToBillResource(bill), message: "Bill soft deleted" });
   } catch (err: unknown) {
     logger.error(`deleteBill error [billId=${req.params.id}]: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
-      createErrorDocument([
-        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", err instanceof Error ? err.message : "Something went wrong"),
-      ])
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };
