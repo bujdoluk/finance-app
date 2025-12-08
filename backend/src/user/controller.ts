@@ -26,6 +26,30 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<Respons
   }
 };
 
+export const getUserByEmail = async (req: Request<{ email: string }>, res: Response): Promise<Response> => {
+  try {
+    const email = req.params.email;
+    const user = await userService.getByEmail(email);
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json(
+        createErrorDocument([
+          createError(StatusCodes.NOT_FOUND, "Not Found", "User not found")
+        ])
+      );
+    }
+
+    return res.status(StatusCodes.OK).json({ user });
+  } catch (err: unknown) {
+    logger.error(`getUserByEmail error [email=${req.params.email}]: ${getErrorMessage(err)}`);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
+      createErrorDocument([
+        createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))
+      ])
+    );
+  }
+};
+
 export const getUserById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
   try {
     const userId = Number(req.params.id);

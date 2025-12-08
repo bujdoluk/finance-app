@@ -32,6 +32,15 @@ export const userService = {
     }
   },
 
+  async getByEmail(email: string): Promise<null | Users> {
+    try {
+      return await userRepository.getByEmail(email);
+    } catch (err: unknown) {
+      logger.error(`getUserByEmail error [email=${email}]: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
   async getById(id: number): Promise<null | Users> {
     try {
       return await userRepository.getById(id);
@@ -41,7 +50,7 @@ export const userService = {
     }
   },
 
-  async updateUser(id: number, body: UsersInput): Promise<null | Users> {
+   async updateUser(id: number, body: UsersInput): Promise<null | Users> {
     try {
       const existingUser = await userRepository.getById(id);
       if (!existingUser) return null;

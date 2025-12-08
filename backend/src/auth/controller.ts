@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
+import { UsersInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { getErrorMessage } from "../utils/logger/logger";
 import authService from "./service";
 
-export const signUp = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const signUp = async (req: Request<unknown, unknown, UsersInput>, res: Response): Promise<Response> => {
   try {
     const user = await authService.signUp(req.body);
     return res.status(StatusCodes.CREATED).json({ message: "User created", user });
@@ -26,12 +24,19 @@ export const signUp = async (
   }
 };
 
-export const login = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const login = async (req: Request<unknown, unknown, { email: string; password: string }>, res: Response): Promise<Response> => {
   try {
-    const token = await authService.login(req.body.email, req.body.password);
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(StatusCodes.BAD_REQUEST).json(
+        createErrorDocument([
+          createError(StatusCodes.BAD_REQUEST, "Bad Request", "Email and password are required"),
+        ])
+      );
+    }
+
+    const token = await authService.login(email, password);
     return res.json({ message: "Login successful", token });
   } catch (err: unknown) {
     logger.warn(`Login failed: ${getErrorMessage(err)}`);
