@@ -7,8 +7,8 @@ export const budgetRepository = {
     try {
       const res = await dbPool.query<Budgets>(
         `INSERT INTO ${tables.budgets.tableName} 
-          (name, theme, amount, maximum_spending, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, NOW(), NOW())
+          (name, theme, amount, maximum_spending)
+         VALUES ($1, $2, $3, $4)
          RETURNING *`,
         [budget.name, budget.theme, budget.amount, budget.maximum_spending]
       );

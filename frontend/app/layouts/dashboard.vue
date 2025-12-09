@@ -18,7 +18,7 @@
 		<div class="w-full flex flex-col">
 			<UDashboardNavbar>
 				<template #left>
-					Good morning, User
+					{{ t('layouts.dashboard.greetingUsers') }}
 				</template>
 
 				<template #right>
@@ -45,8 +45,10 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
 import * as locales from '@nuxt/ui/locale';
+import type { User } from '../../utils/types/api';
 
 const locale = ref('en');
+const { t } = useI18n();
 
 const items = ref<NavigationMenuItem[][]>([
 	[
@@ -77,4 +79,22 @@ const items = ref<NavigationMenuItem[][]>([
 		},
 	],
 ]);
+
+const user = ref<User | null>(null);
+
+const fetchUser = async (id: string): Promise<void> => {
+	try {
+		const data = await $fetch(`http://localhost:3001/users/${id}`);
+		if (data) {
+			user.value = data;
+		}
+	}
+	catch (err: unknown) {
+		console.log(err);
+	}
+};
+
+onMounted(async (): Promise<void> => {
+	await fetchUser();
+});
 </script>

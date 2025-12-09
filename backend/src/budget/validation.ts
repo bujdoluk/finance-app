@@ -6,13 +6,13 @@ import { joiToErrors } from "../utils/jsonapi/error";
 
 const budgetSchema = Joi.object({
   amount: Joi.number().positive(),
-  maximumSpending: Joi.number().positive(),
+  maximum_spending: Joi.number().positive(),
   name: Joi.string().max(100),
   theme: Joi.string().max(50),
 });
 
 export const createBudgetSchema = budgetSchema.fork(
-  ["name", "theme", "amount", "maximumSpending"],
+  ["name", "theme", "amount", "maximum_spending"],
   (field) => field.required()
 );
 

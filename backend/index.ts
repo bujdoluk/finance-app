@@ -16,8 +16,9 @@ import { dbPool } from './database/db';
 const app = express();
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL, 
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true
 }));
 app.use(limiter);
 app.use(hpp());

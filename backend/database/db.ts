@@ -1,4 +1,3 @@
-
 import { Pool } from "pg";
 
 export const dbPool: Pool = new Pool({

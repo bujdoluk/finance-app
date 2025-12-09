@@ -4,6 +4,15 @@
             "limit": "{spend} of {maximum} limit",
             "spendingSummary": "Spending Summary"
         },
+        "budgetCard": {
+            "maximum": "Maximum of ${maximum}",
+            "spent": "Spent",
+            "remaining": "Remaining",
+            "latestSpending": "Latest Spending",
+            "seeAll": "See All",
+            "edit": "Edit Budget",
+            "delete": "Delete Budget"
+        },
         "budgetModal": {
             "add": {
                 "buttons": {
@@ -149,11 +158,10 @@
         },
         "budgets": {
             "title": "Budgets",
-            "maximumOf": "Maximum of ${maximum}",
-            "spent": "Spent",
-            "free": "Free",
-            "latestSpending": "Latest Spending",
-            "seeAll": "See All"
+            "free": "Free"
         }
+    },
+    "dashboard": {
+        "greetingUser": "Good {timeOfDay}, {user}"
     }
 }
