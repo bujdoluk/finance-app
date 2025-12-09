@@ -56,13 +56,8 @@
 import { reactive } from 'vue';
 import { z } from 'zod';
 import { useI18n } from 'vue-i18n';
-import { useToast } from '@nuxt/ui';
-import Cookies from 'js-cookie';
-import { useRouter } from 'vue-router';
 
 const { t } = useI18n();
-const router = useRouter();
-const toast = useToast();
 
 // Form validation schema
 const schema = z.object({
@@ -75,39 +70,4 @@ const formState = reactive<{ email?: string; password?: string }>({
 	email: undefined,
 	password: undefined,
 });
-
-// Login submit handler
-async function onSubmit() {
-	try {
-		const response = await $fetch('http://localhost:3000/users/login', {
-			method: 'POST',
-			body: {
-				email: formState.email,
-				password: formState.password,
-			},
-		});
-
-		// @ts-ignore
-		const token: string = response.token;
-
-		// Save JWT in cookie (expires in 1 hour)
-		Cookies.set('jwt', token, { expires: 1 / 24 });
-
-		toast.add({
-			title: 'Success',
-			description: 'Logged in successfully!',
-			color: 'success',
-		});
-
-		// Redirect after login
-		router.push('/');
-	}
-	catch (err: any) {
-		toast.add({
-			title: 'Error',
-			description: err?.data?.errors?.[0]?.detail || 'Invalid credentials',
-			color: 'danger',
-		});
-	}
-}
 </script>

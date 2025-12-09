@@ -1,11 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
 	modules: [
 		'@nuxt/eslint',
 		'@nuxtjs/i18n',
 		'@nuxt/ui',
 		'@nuxt/image',
-		'@nuxtjs/tailwindcss',
+		'@pinia/nuxt',
 	],
 	ssr: false,
 	devtools: { enabled: true },
@@ -16,12 +17,6 @@ export default defineNuxtConfig({
 		},
 	},
 	compatibilityDate: '2025-07-15',
-	postcss: {
-		plugins: {
-			tailwindcss: {},
-			autoprefixer: {},
-		},
-	},
 	eslint: {
 		config: {
 			stylistic: {
