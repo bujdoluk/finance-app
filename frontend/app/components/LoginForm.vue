@@ -25,14 +25,12 @@
 						<UButton
 							v-for="provider in providers"
 							:key="provider.label"
-							variant="outline"
+							variant="solid"
+							icon="i-simple-icons-google"
 							class="w-full justify-center cursor-pointer bg-gray-900 text-white hover:bg-gray-500"
 							@click="provider.onClick"
 						>
-							<i
-								:class="provider.icon"
-								class="mr-2"
-							/>{{ provider.label }}
+							{{ provider.label }}
 						</UButton>
 					</div>
 				</template>
@@ -99,8 +97,7 @@ const fields: AuthFormField[] = [
 ];
 
 const providers = [
-	{ label: 'Google', icon: 'i-simple-icons-google', onClick: () => alert('Login with Google') },
-	{ label: 'GitHub', icon: 'i-simple-icons-github', onClick: () => alert('Login with GitHub') },
+	{ label: 'Google', onClick: () => alert('Login with Google') },
 ];
 
 const schema = z.object({

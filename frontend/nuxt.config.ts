@@ -7,6 +7,7 @@ export default defineNuxtConfig({
 		'@nuxt/ui',
 		'@nuxt/image',
 		'@pinia/nuxt',
+		'@nuxt/icon',
 	],
 	ssr: false,
 	devtools: { enabled: true },
