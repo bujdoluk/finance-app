@@ -161,7 +161,19 @@
             "free": "Free"
         }
     },
-    "dashboard": {
-        "greetingUser": "Good {timeOfDay}, {user}"
+    "layouts": {
+        "dashboard": {
+            "greeting": "Good {timeOfDay}, {user}",
+            "morning": "morning",
+            "afternoon": "afternoon",
+            "evening": "evening",
+            "navigation": {
+                "overview": "Overview",
+                "transactions": "Transactions",
+                "budgets": "Budgets",
+                "pots": "Pots",
+                "reccuringBills": "Reccuring Bills"
+            }
+        }
     }
 }

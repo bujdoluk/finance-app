@@ -28,7 +28,7 @@ export const login = async (req: Request<unknown, unknown, { email: string; pass
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!email?.trim() || !password?.trim()) {
       return res.status(StatusCodes.BAD_REQUEST).json(
         createErrorDocument([
           createError(StatusCodes.BAD_REQUEST, "Bad Request", "Email and password are required"),
@@ -36,8 +36,9 @@ export const login = async (req: Request<unknown, unknown, { email: string; pass
       );
     }
 
-    const token = await authService.login(email, password);
-    return res.json({ message: "Login successful", token });
+    const { token, user } = await authService.login(email, password);
+
+    return res.json({ message: "Login successful", token, user});
   } catch (err: unknown) {
     logger.warn(`Login failed: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.UNAUTHORIZED).json(

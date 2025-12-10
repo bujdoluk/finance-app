@@ -1,4 +1,5 @@
 <template>
+	<OverlayModal ref="overlay" />
 	<UCard class="w-full max-w-[400px] p-6">
 		<UForm
 			:schema="schema"
@@ -56,18 +57,43 @@
 import { reactive } from 'vue';
 import { z } from 'zod';
 import { useI18n } from 'vue-i18n';
+import { useUserStore } from '~/stores/userStore';
+import type { AuthUser } from '~~/utils/types/api';
+import type OverlayModal from '~/components/OverlayModal.vue';
 
 const { t } = useI18n();
+const router = useRouter();
+const appConfig = useAppConfig();
+const userStore = useUserStore();
+const overlay = ref<typeof OverlayModal>();
 
-// Form validation schema
 const schema = z.object({
 	email: z.string().email(),
 	password: z.string().min(8),
 });
 
-// Form reactive state
-const formState = reactive<{ email?: string; password?: string }>({
-	email: undefined,
-	password: undefined,
+const formState = reactive({
+	email: '',
+	password: '',
 });
+
+const onSubmit = async (): Promise<void> => {
+	overlay.value?.open();
+
+	try {
+		const res = await $fetch<AuthUser>(`${appConfig.api}/auth/login`, {
+			method: 'POST',
+			body: formState,
+		});
+
+		userStore.setUser(res);
+		await router.push('/overview');
+	}
+	catch (err: unknown) {
+		console.error('Login failed:', err);
+	}
+	finally {
+		overlay.value?.close();
+	}
+};
 </script>
