@@ -1,130 +1,104 @@
 <template>
-	<div class="relative">
+	<div class="flex flex-col items-center justify-center gap-4 p-4">
 		<OverlayModal ref="overlay" />
-		<UCard class="w-full max-w-[400px] p-6">
-			<UForm
+
+		<UPageCard class="w-full w-500 max-w-md">
+			<UAuthForm
 				:schema="schema"
-				:state="formState"
-				class="space-y-4"
+				:fields="fields"
+				:title="t('components.signUpForm.createAccount')"
+				icon="i-lucide-user-plus"
+				:submit="{
+					label: t('components.signUpForm.submit'),
+					color: 'gray-900',
+					variant: 'solid',
+					class: 'cursor-pointer',
+				}"
 				@submit="onSubmit"
 			>
-				<h3 class="text-lg font-semibold">
-					{{ t('pages.signUp.title') }}
-				</h3>
-
-				<UFormField
-					:label="t('pages.signUp.name')"
-					name="name"
-				>
-					<UInput
-						v-model="formState.name"
-						class="w-full"
-						placeholder="John Doe"
+				<template #password-hint>
+					<UButton
+						color="neutral"
+						variant="link"
+						size="sm"
+						class="cursor-pointer"
+						:aria-label="show ? 'Hide password' : 'Show password'"
+						:aria-pressed="show"
+						@click="show = !show"
 					/>
-				</UFormField>
+				</template>
 
-				<UFormField
-					:label="t('pages.signUp.email')"
-					name="email"
-				>
-					<UInput
-						v-model="formState.email"
-						class="w-full"
-						placeholder="john.doe@gmail.com"
+				<template #validation>
+					<UAlert
+						v-if="error"
+						color="error"
+						icon="i-lucide-info"
+						:title="error"
 					/>
-				</UFormField>
+				</template>
 
-				<UFormField
-					:label="t('pages.signUp.password')"
-					name="password"
-				>
-					<UInput
-						v-model="formState.password"
-						placeholder="Password"
-						class="w-full"
-						:type="show ? 'text' : 'password'"
-						:ui="{ trailing: 'pe-1' }"
-					>
-						<template #trailing>
-							<UButton
-								color="neutral"
-								variant="link"
-								size="sm"
-								class="cursor-pointer"
-								:icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-								:aria-label="show ? 'Hide password' : 'Show password'"
-								:aria-pressed="show"
-								aria-controls="password"
-								@click="show = !show"
-							/>
-						</template>
-					</UInput>
-				</UFormField>
-
-				<UButton
-					type="submit"
-					class="bg-black w-full justify-center hover:bg-gray-800 active:bg-gray-800 cursor-pointer"
-				>
-					{{ t('pages.signUp.submit') }}
-				</UButton>
-
-				<p class="text-sm mt-2">
-					{{ t('pages.signUp.question') }}
+				<template #footer>
+					{{ t('components.signUpForm.question') }}
 					<NuxtLink
 						to="/login"
-						class="underline"
+						class="text--color-gray-900 font-medium underline"
 					>
-						{{ t('pages.signUp.link') }}
+						{{ t('components.signUpForm.link') }}
 					</NuxtLink>
-				</p>
-			</UForm>
-		</UCard>
+				</template>
+			</UAuthForm>
+		</UPageCard>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { z } from 'zod';
+import * as z from 'zod';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import type OverlayModal from './OverlayModal.vue';
+import type OverlayModal from '~/components/OverlayModal.vue';
+import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui';
 
 const { t } = useI18n();
 const router = useRouter();
 const appConfig = useAppConfig();
-const show = ref<boolean>(false);
 const overlay = ref<typeof OverlayModal>();
+const show = ref(false);
+const error = ref<string | null>(null);
+
+const fields: AuthFormField[] = [
+	{ name: 'name', color: 'gray-900', type: 'text', label: t('components.signUpForm.name'), placeholder: 'John Doe', required: true },
+	{ name: 'email', color: 'gray-900', type: 'email', label: t('components.signUpForm.email'), placeholder: 'john.doe@gmail.com', required: true },
+	{ name: 'password', color: 'gray-900', type: 'password', label: t('components.signUpForm.password'), placeholder: 'Password', required: true },
+];
 
 const schema = z.object({
-	name: z.string().min(2),
-	email: z.string().email(),
-	password: z.string().min(8),
+	name: z.string().min(2, 'Name must be at least 2 characters'),
+	email: z.string().email('Invalid email'),
+	password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-const formState = reactive({
-	name: '',
-	email: '',
-	password: '',
-});
+type Schema = z.output<typeof schema>;
 
-const onSubmit = async (): Promise<void> => {
+const onSubmit = async (payload: FormSubmitEvent<Schema>): Promise<void> => {
+	overlay.value?.open();
+	error.value = null;
+
 	try {
-		overlay.value?.open();
-
-		await $fetch(`${appConfig.api}/aut/sign-up`, {
+		await $fetch(`${appConfig.api}/auth/sign-up`, {
 			method: 'POST',
 			body: {
-				first_name: formState.name.split(' ')[0] || '',
-				last_name: formState.name.split(' ')[1] || '',
-				email: formState.email,
-				password: formState.password,
+				first_name: payload.data.name.split(' ')[0] || '',
+				last_name: payload.data.name.split(' ')[1] || '',
+				email: payload.data.email,
+				password: payload.data.password,
 			},
 		});
 
 		await router.push('/login');
 	}
 	catch (err: unknown) {
-		console.error('Signup failed:', err);
+		console.error('signUpForm failed:', err);
+		error.value = t('components.signUpForm.error') || 'signUpForm failed';
 	}
 	finally {
 		overlay.value?.close();

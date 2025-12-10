@@ -1,89 +1,126 @@
 <template>
-	<OverlayModal ref="overlay" />
-	<UCard class="w-full max-w-[400px] p-6">
-		<UForm
-			:schema="schema"
-			:state="formState"
-			class="space-y-4 w-full max-w-sm"
-			@submit="onSubmit"
-		>
-			<h3 class="text-lg font-semibold">
-				{{ t('pages.login.title') }}
-			</h3>
+	<div class="flex flex-col items-center justify-center gap-4 p-4">
+		<OverlayModal ref="overlay" />
 
-			<UFormField
-				:label="t('pages.login.email')"
-				name="email"
+		<UPageCard class="w-full w-500 max-w-md">
+			<UAuthForm
+				:schema="schema"
+				:fields="fields"
+				:title="t('components.loginForm.title')"
+				:providers="providers"
+				icon="i-lucide-lock"
+				:submit="{
+					label: t('components.loginForm.title'),
+					color: 'gray-900',
+					variant: 'solid',
+					class: 'cursor-pointer',
+				}"
+				:separator="{
+					icon: 'i-lucide-user',
+				}"
+				@submit="onSubmit"
 			>
-				<UInput
-					v-model="formState.email"
-					type="email"
-					class="w-full"
-				/>
-			</UFormField>
+				<template #providers>
+					<div class="flex flex-col gap-2">
+						<UButton
+							v-for="provider in providers"
+							:key="provider.label"
+							variant="outline"
+							class="w-full justify-center cursor-pointer bg-gray-900 text-white hover:bg-gray-500"
+							@click="provider.onClick"
+						>
+							<i
+								:class="provider.icon"
+								class="mr-2"
+							/>{{ provider.label }}
+						</UButton>
+					</div>
+				</template>
 
-			<UFormField
-				:label="t('pages.login.password')"
-				name="password"
-			>
-				<UInput
-					v-model="formState.password"
-					type="password"
-					class="w-full"
-				/>
-			</UFormField>
+				<template #description>
+					{{ t('components.loginForm.question') }}
+					<NuxtLink
+						to="/sign-up"
+						class="text--color-gray-900 font-medium underline"
+					>
+						{{ t('components.loginForm.link') }}
+					</NuxtLink>
+				</template>
 
-			<UButton
-				type="submit"
-				class="bg-black w-full justify-center hover:bg-gray-800 active:bg-gray-800 cursor-pointer"
-			>
-				{{ t('pages.login.submit') }}
-			</UButton>
+				<template #password-hint>
+					<ULink
+						to="#"
+						class="text--color-gray-900 font-medium"
+						tabindex="-1"
+					>
+						{{ t('components.loginForm.forgotPassword') }}
+					</ULink>
+				</template>
 
-			<p class="text-sm mt-2">
-				{{ t('pages.login.question') }}
-				<NuxtLink
-					to="/sign-up"
-					class="underline"
-				>
-					{{ t('pages.login.link') }}
-				</NuxtLink>
-			</p>
-		</UForm>
-	</UCard>
+				<template #validation>
+					<UAlert
+						v-if="error"
+						color="error"
+						icon="i-lucide-info"
+						:title="error"
+					/>
+				</template>
+
+				<template #footer>
+					{{ t('components.loginForm.message') }}
+					<ULink
+						to="#"
+						class="text--color-gray-900 font-medium underline"
+					>{{ t('components.loginForm.termsOfService') }}</ULink>.
+				</template>
+			</UAuthForm>
+		</UPageCard>
+	</div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
-import { z } from 'zod';
+import * as z from 'zod';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '~/stores/userStore';
 import type { AuthUser } from '~~/utils/types/api';
 import type OverlayModal from '~/components/OverlayModal.vue';
+import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui';
 
 const { t } = useI18n();
 const router = useRouter();
 const appConfig = useAppConfig();
 const userStore = useUserStore();
 const overlay = ref<typeof OverlayModal>();
+const error = ref<string | null>(null);
+
+const fields: AuthFormField[] = [
+	{ name: 'email', color: 'gray-900', type: 'email', label: t('components.loginForm.email'), placeholder: 'Enter your email', required: true },
+	{ name: 'password', color: 'gray-900', type: 'password', label: t('components.loginForm.password'), placeholder: 'Enter your password', required: true },
+];
+
+const providers = [
+	{ label: 'Google', icon: 'i-simple-icons-google', onClick: () => alert('Login with Google') },
+	{ label: 'GitHub', icon: 'i-simple-icons-github', onClick: () => alert('Login with GitHub') },
+];
 
 const schema = z.object({
 	email: z.string().email(),
 	password: z.string().min(8),
 });
 
-const formState = reactive({
-	email: '',
-	password: '',
-});
+type Schema = z.output<typeof schema>;
 
-const onSubmit = async (): Promise<void> => {
+const onSubmit = async (payload: FormSubmitEvent<Schema>): Promise<void> => {
 	overlay.value?.open();
+	error.value = null;
 
 	try {
 		const res = await $fetch<AuthUser>(`${appConfig.api}/auth/login`, {
 			method: 'POST',
-			body: formState,
+			body: {
+				email: payload.data.email,
+				password: payload.data.password,
+			},
 		});
 
 		userStore.setUser(res);
@@ -91,6 +128,7 @@ const onSubmit = async (): Promise<void> => {
 	}
 	catch (err: unknown) {
 		console.error('Login failed:', err);
+		error.value = t('components.loginForm.error');
 	}
 	finally {
 		overlay.value?.close();

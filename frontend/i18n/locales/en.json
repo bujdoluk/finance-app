@@ -13,6 +13,30 @@
             "edit": "Edit Budget",
             "delete": "Delete Budget"
         },
+        "loginForm": {
+            "title": "Login",
+            "submit": "Login",
+            "question": "Need to create an account?",
+            "link": "Sign up",
+            "email": "Email",
+            "password": "Password",
+            "image": "Guy chasing money",
+            "forgotPassword": "Forgot password?",
+            "termsOfService": "Terms of Service",
+            "message": "By signing in, you agree to our",
+            "error": "Error"
+        },
+        "signUpForm": {
+            "name": "Name",
+            "title": "Sign Up",
+            "submit": "Create account",
+            "createAccount": "Create your account",
+            "question": "Already have an account?",
+            "link": "Login",
+            "email": "Email",
+            "password": "Password",
+            "image": "Guy chasing money"
+        },
         "budgetModal": {
             "add": {
                 "buttons": {
@@ -123,25 +147,6 @@
         }
     },
     "pages": {
-        "login": {
-            "title": "Login",
-            "submit": "Login",
-            "question": "Need to create an account?",
-            "link": "Sign up",
-            "email": "Email",
-            "password": "Password",
-            "image": "Guy chasing money"
-        },
-        "signUp": {
-            "name": "Name",
-            "title": "Sign Up",
-            "submit": "Create account",
-            "question": "Already have an account?",
-            "link": "Login",
-            "email": "Email",
-            "password": "Password",
-            "image": "Guy chasing money"
-        },
         "pots": {
             "title": "Pots",
             "buttons": {
