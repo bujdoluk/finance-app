@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
 			user.value = data.user;
 		}
 		catch (err: unknown) {
-			console.error('Failed to load user:', err?.statusMessage || err);
+			console.error('Failed to load user:', err);
 			logout();
 		}
 	};

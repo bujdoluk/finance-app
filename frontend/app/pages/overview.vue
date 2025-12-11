@@ -1,6 +1,6 @@
 <template>
 	<div class="bg-stone-100 w-full">
-		<div class="text-3xl pb-8 font-medium">
+		<div class="text-3xl p-8 font-medium">
 			{{ t('pages.overview.title') }}
 		</div>
 		<div class="grid grid-cols-3 px-8 gap-8">
@@ -33,86 +33,19 @@
 		</div>
 		<div class="grid grid-cols-2">
 			<div>
-				<div>Pots</div>
-				<div>Budgets</div>
-				<div>Transactions</div>
-				<div>
-					<div>
-						<div>Reccuring bills</div>
-						<div>see details</div>
-					</div>
-					<div>
-						<div>Paid Bills</div>
-						<div>190</div>
-					</div>
-					<div>
-						<div>Paid Bills</div>
-						<div>190</div>
-					</div>
-					<div>
-						<div>Paid Bills</div>
-						<div>190</div>
-					</div>
+				<div class="pl-8 pr-4 py-8">
+					<PotsOverview :pots="pots" />
+				</div>
+				<div class="pl-8 pr-4 pb-8">
+					<TransactionsOverview :transactions="transactions" />
 				</div>
 			</div>
-
-			<div class="width">
-				<div class="flex justify-between">
-					<div>Budgets</div>
-					<div>See Details</div>
+			<div>
+				<div class="py-8 pr-8 pl-4">
+					<BudgetsOverview :budgets="budgets" />
 				</div>
-
-				<div class="flex justify-between">
-					<ClientOnly>
-						<BudgetChart />
-					</ClientOnly>
-
-					<div class="flex flex-col">
-						<div class="flex p-2">
-							<div>
-								<USeparator
-									orientation="vertical"
-									class="h-12"
-									size="lg"
-									color="primary"
-								/>
-							</div>
-							<div>
-								<div>Entertainment</div>
-								<div>$50.00</div>
-							</div>
-						</div>
-
-						<div class="flex p-2">
-							<div>
-								<USeparator
-									orientation="vertical"
-									class="h-12"
-									size="lg"
-									color="primary"
-								/>
-							</div>
-							<div>
-								<div>Entertainment</div>
-								<div>$50.00</div>
-							</div>
-						</div>
-
-						<div class="flex p-2">
-							<div>
-								<USeparator
-									orientation="vertical"
-									class="h-12"
-									size="lg"
-									color="primary"
-								/>
-							</div>
-							<div>
-								<div>Entertainment</div>
-								<div>$50.00</div>
-							</div>
-						</div>
-					</div>
+				<div class="pb-8 pr-8 pl-4">
+					<BillsOverview :bills="bills" />
 				</div>
 			</div>
 		</div>
@@ -120,9 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import BudgetChart from '~/components/BudgetChart.client.vue';
 import { useI18n } from 'vue-i18n';
 import type { Bill, Budget, Pot, Transaction } from '../../utils/types/api';
+import TransactionsOverview from '~/components/TransactionsOverview.vue';
 
 definePageMeta({
 	layout: 'dashboard',
@@ -130,14 +63,14 @@ definePageMeta({
 
 const { t } = useI18n();
 const appConfig = useAppConfig();
-const bills = ref<Array<Bill>>([]);
-const pots = ref<Array<Pot>>([]);
-const budgets = ref<Array<Budget>>([]);
-const transactions = ref<Array<Transaction>>([]);
+const bills = ref<Bill[]>([]);
+const pots = ref<Pot[]>([]);
+const budgets = ref<Budget[]>([]);
+const transactions = ref<Transaction[]>([]);
 
 const fetchBills = async (): Promise<void> => {
 	try {
-		const data = await $fetch<Array<Bill>>(`${appConfig.api}/bills`);
+		const data = await $fetch<Bill[]>(`${appConfig.api}/bills`);
 		bills.value = data;
 	}
 	catch (err: unknown) {
@@ -147,7 +80,7 @@ const fetchBills = async (): Promise<void> => {
 
 const fetchBudgets = async (): Promise<void> => {
 	try {
-		const data = await $fetch<Array<Budget>>(`${appConfig.api}/budgets`);
+		const data = await $fetch<Budget[]>(`${appConfig.api}/budgets`);
 		budgets.value = data;
 	}
 	catch (err: unknown) {
@@ -157,7 +90,7 @@ const fetchBudgets = async (): Promise<void> => {
 
 const fetchPots = async (): Promise<void> => {
 	try {
-		const data = await $fetch<Array<Pot>>(`${appConfig.api}/pots`);
+		const data = await $fetch<Pot[]>(`${appConfig.api}/pots`);
 		pots.value = data;
 	}
 	catch (err: unknown) {
@@ -167,8 +100,9 @@ const fetchPots = async (): Promise<void> => {
 
 const fetchTransactions = async (): Promise<void> => {
 	try {
-		const data = await $fetch<Array<Transaction>>(`${appConfig.api}/transactions`);
+		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
 		transactions.value = data;
+		console.log('TRANSACTIONS', transactions.value);
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
@@ -176,7 +110,7 @@ const fetchTransactions = async (): Promise<void> => {
 };
 
 onMounted(async (): Promise<void> => {
-	await Promise.all([fetchBills, fetchBudgets, fetchPots, fetchTransactions]);
+	await Promise.all([fetchBills(), fetchBudgets(), fetchPots(), fetchTransactions()]);
 });
 </script>
 

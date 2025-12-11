@@ -84,11 +84,8 @@ const items = ref<NavigationMenuItem[][]>([
 
 const onLogout = async (): Promise<void> => {
 	overlay.value?.open();
-
 	userStore.logout();
-
 	await router.push('/login');
-
 	overlay.value?.close();
 };
 </script>

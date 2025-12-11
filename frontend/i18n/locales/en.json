@@ -4,6 +4,21 @@
             "limit": "{spend} of {maximum} limit",
             "spendingSummary": "Spending Summary"
         },
+        "transactionsOverview": {
+            "title": "Transactions"
+        },
+        "potsOverview": {
+            "title":  "Pots",
+            "seeDetails": "See details"
+        },
+        "budgetsOverview": {
+            "title":  "Budgets",
+            "seeDetails": "See details"
+        },
+        "billsOverview": {
+            "title":  "Reccuring bills",
+            "seeDetails": "See details"
+        },
         "budgetCard": {
             "maximum": "Maximum of ${maximum}",
             "spent": "Spent",
@@ -169,7 +184,7 @@
             "balance": "Current Balance",
             "income": "Income",
             "expenses": "Expenses",
-            "title": "title"
+            "title": "Overview"
         }
     },
     "layouts": {

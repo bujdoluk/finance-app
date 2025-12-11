@@ -87,7 +87,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui';
 import dayjs from 'dayjs';
 import { ref } from 'vue';
-import type Budget from '../../utils/types';
+import type { Budget } from '../../utils/types/api';
 
 const props = defineProps<{
 	budget: Budget;
@@ -106,14 +106,14 @@ const value = ref(props.value ?? 50);
 const buttons = computed<DropdownMenuItem[]>(() => [
 	{
 		label: t('components.budgetCard.delete'),
-		onSelect() {
+		onSelect(): void {
 			emit('delete', props.budget.id);
 		},
 	},
 	{
 		label: t('components.budgetCard.edit'),
-		onSelect() {
-			emit('delete', props.budget.id);
+		onSelect(): void {
+			emit('edit', props.budget.id);
 		},
 	},
 ]);
