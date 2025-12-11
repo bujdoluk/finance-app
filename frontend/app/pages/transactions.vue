@@ -1,15 +1,15 @@
 <template>
-	<div>
-		<div class="px-4 py-3 text-xl font-semibold">
+	<div class="p-8">
+		<div class="p-8 py-3 text-2xl">
 			Transactions
 		</div>
 
-		<div class="flex flex-col bg-white rounded mx-4">
+		<div class="h-full flex flex-col bg-white rounded mx-4">
 			<div class="flex p-4 w-full items-center">
 				<UInput
-					:model-value="table?.tableApi?.getColumn('userName')?.getFilterValue() as string"
+					:model-value="table?.tableApi?.getColumn('sender')?.getFilterValue() as string"
 					placeholder="Filter usernames..."
-					@update:model-value="table?.tableApi?.getColumn('userName')?.setFilterValue($event)"
+					@update:model-value="table?.tableApi?.getColumn('sender')?.setFilterValue($event)"
 				/>
 
 				<div class="ml-auto pr-2">
@@ -36,28 +36,24 @@
 					v-model:pagination="pagination"
 					v-model:column-filters="columnFilters"
 					class="flex-1"
-					:data="data"
+					:data="transactions"
 					:columns="columns"
-					:pagination-options="{
-						getPaginationRowModel: getPaginationRowModel(),
-					}"
-					:filter-options="{
-						getFilteredRowModel: getFilteredRowModel(),
-					}"
+					:pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
+					:filter-options="{ getFilteredRowModel: getFilteredRowModel() }"
 					:ui="{
 						td: 'p-2 pl-4',
 					}"
 				>
-					<template #userName-cell="{ row }">
+					<template #sender-cell="{ row }">
 						<div class="flex items-center gap-3">
 							<UAvatar
 								src="https://github.com/benjamincanac.png"
 								size="md"
-								:alt="`${row.original.userName} avatar`"
+								:alt="`${row.original.sender_picture} avatar`"
 							/>
 							<div>
 								<p class="font-medium text-highlighted">
-									{{ row.original.userName }}
+									{{ row.original.sender }}
 								</p>
 							</div>
 						</div>
@@ -96,6 +92,10 @@ import { getPaginationRowModel, getFilteredRowModel } from '@tanstack/vue-table'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import type { TransactionColumnDefinition } from '../../utils/types/tableColumnDefinitions';
+import type { Transaction } from '../../utils/types/api';
+import appConfig from '#build/app.config';
+import dayjs from 'dayjs';
 
 definePageMeta({
 	layout: 'dashboard',
@@ -129,7 +129,7 @@ const categories = ref([
 	t('components.tables.reccuringBills.filters.atoz'),
 ]);
 
-function getDropdownActions(transaction: Transaction): DropdownMenuItem[][] {
+function getDropdownActions(transaction: TransactionColumnDefinition): DropdownMenuItem[][] {
 	return [
 		[
 			{
@@ -156,17 +156,17 @@ function getDropdownActions(transaction: Transaction): DropdownMenuItem[][] {
 	];
 }
 
-const columns: TableColumn<Transaction>[] = [
+const columns: TableColumn<TransactionColumnDefinition>[] = [
 	{
 		accessorKey: 'id',
 		header: `${t('components.tables.transaction.columns.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
-		accessorKey: 'userName',
-		header: `${t('components.tables.transaction.columns.userName')}`,
+		accessorKey: 'sender',
+		header: `${t('components.tables.transaction.columns.sender')}`,
 		cell: ({ row }) => {
-			return row.getValue('userName');
+			return row.getValue('sender');
 		},
 	},
 	{
@@ -180,13 +180,7 @@ const columns: TableColumn<Transaction>[] = [
 		accessorKey: 'date',
 		header: `${t('components.tables.transaction.columns.date')}`,
 		cell: ({ row }) => {
-			return new Date(row.getValue('date')).toLocaleString('en-US', {
-				day: 'numeric',
-				month: 'short',
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false,
-			});
+			return dayjs(row.getValue('date')).format('MMM DD, YYYY');
 		},
 	},
 	{
@@ -212,72 +206,32 @@ const columns: TableColumn<Transaction>[] = [
 
 const columnFilters = ref([
 	{
-		id: 'userName',
+		id: 'sender',
 		value: '',
 	},
 ]);
 
-type Transaction = {
-	id: number;
-	userName: string;
-	date: string;
-	category: string;
-	amount: number;
-	createdAt: string;
-	updatedAt: string;
-	deletedAt: string;
+const transactions = ref<TransactionColumnDefinition[]>([]);
+
+const fetchTransactions = async (): Promise<void> => {
+	try {
+		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
+
+		transactions.value = data.map(transaction => ({
+			id: transaction.id,
+			amount: transaction.attributes.amount,
+			category: transaction.attributes.category,
+			sender: transaction.attributes.sender,
+			sender_picture: transaction.attributes.sender_picture,
+			date: transaction.attributes.date,
+		}));
+	}
+	catch (err: unknown) {
+		console.error('fetchTransactions failed:', err);
+	}
 };
 
-const data = ref<Transaction[]>([
-	{
-		id: 4600,
-		userName: 'Martin',
-		date: '2024-03-11T15:30:00',
-		category: 'General',
-		amount: 594,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 4599,
-		userName: 'Luke',
-		date: '2024-03-11T10:10:00',
-		category: 'General',
-		amount: 276,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 4598,
-		userName: 'Jane',
-		date: '2024-03-11T08:50:00',
-		category: 'General',
-		amount: 315,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 4597,
-		userName: 'Patrik',
-		date: '2024-03-10T19:45:00',
-		category: 'General',
-		amount: -529,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 4596,
-		userName: 'Tomas',
-		date: '2024-03-10T15:55:00',
-		category: 'General',
-		amount: 639,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-]);
+onMounted(async (): Promise<void> => {
+	await fetchTransactions();
+});
 </script>

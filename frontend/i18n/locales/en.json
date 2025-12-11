@@ -126,7 +126,7 @@
             "transaction": {
                 "columns": {
                     "id": "# ID",
-                    "userName": "Recipient/Sender",
+                    "sender": "Recipient/Sender",
                     "category": "Category",
                     "date": "Transaction date",
                     "amount": "Amount"

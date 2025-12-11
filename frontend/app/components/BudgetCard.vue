@@ -52,7 +52,7 @@
 		</div>
 
 		<div>
-			<div class="flex justify-between bg-stone-100 rounded p-4">
+			<div class="flex justify-between bg-beige-100 rounded p-4">
 				<div>{{ t('components.budgetCard.latestSpending') }}</div>
 				<div>
 					<UButton
@@ -66,7 +66,7 @@
 				</div>
 			</div>
 
-			<div class="flex justify-between bg-stone-100 p-4">
+			<div class="flex justify-between bg-beige-100 p-4">
 				<UUser
 					name="John Doe"
 					:avatar="{

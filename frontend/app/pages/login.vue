@@ -1,5 +1,5 @@
 <template>
-	<div class="min-h-screen flex items-center justify-center bg-stone-100">
+	<div class="min-h-screen flex items-center justify-center bg-beige-100">
 		<div class="w-1/3 flex items-center justify-center">
 			<NuxtImg
 				src="/guy-chasing-money.jpg"

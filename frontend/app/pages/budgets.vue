@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-stone-100">
+	<div class="bg-beige-100">
 		<div class="flex justify-between items-center p-4">
 			<div class="text-xl">
 				{{ t('pages.budgets.title') }}

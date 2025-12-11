@@ -80,7 +80,7 @@
 import * as z from 'zod';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '~/stores/userStore';
-import type { AuthUser } from '~~/utils/types/api';
+import type { AuthUser } from '~~/utils/types/auth';
 import type OverlayModal from '~/components/OverlayModal.vue';
 import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui';
 

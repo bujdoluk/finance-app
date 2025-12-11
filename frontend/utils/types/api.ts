@@ -10,17 +10,6 @@ export interface Budget {
 	type: 'budgets';
 };
 
-export type AuthUser = {
-	message: string;
-	token: string;
-	user: {
-		first_name: string;
-		last_name: string;
-		email: string;
-		id: string;
-	};
-};
-
 export interface User {
 	type: 'users';
 	id: string;

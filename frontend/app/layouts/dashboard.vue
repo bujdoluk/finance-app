@@ -1,5 +1,5 @@
 <template>
-	<UDashboardGroup class="bg-stone-100">
+	<UDashboardGroup class="bg-beige-100">
 		<OverlayModal ref="overlay" />
 		<UDashboardSidebar
 			open

@@ -50,14 +50,14 @@
 				color="neutral"
 				variant="ghost"
 				size="xl"
-				class="cursor-pointer bg-stone-100 w-1/2 justify-center"
+				class="cursor-pointer bg-beige-100 w-1/2 justify-center"
 			/>
 			<UButton
 				:label="t('components.potDetail.buttons.withdraw')"
 				color="neutral"
 				variant="ghost"
 				size="xl"
-				class="cursor-pointer bg-stone-100 w-1/2 justify-center"
+				class="cursor-pointer bg-beige-100 w-1/2 justify-center"
 			/>
 		</div>
 	</div>

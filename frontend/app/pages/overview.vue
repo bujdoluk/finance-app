@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-stone-100 w-full">
+	<div class="bg-beige-100 w-full">
 		<div class="text-3xl p-8 font-medium">
 			{{ t('pages.overview.title') }}
 		</div>
@@ -102,7 +102,6 @@ const fetchTransactions = async (): Promise<void> => {
 	try {
 		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
 		transactions.value = data;
-		console.log('TRANSACTIONS', transactions.value);
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
