@@ -1,20 +1,12 @@
 <template>
 	<div class="bg-stone-100 w-full">
 		<div class="text-3xl pb-8 font-medium">
-			Overview
+			{{ t('pages.overview.title') }}
 		</div>
-		<ul>
-			<li
-				v-for="user in users"
-				:key="user.id"
-			>
-				{{ user.name }} ({{ user.email }})
-			</li>
-		</ul>
-		<div class="grid grid-cols-3">
+		<div class="grid grid-cols-3 px-8 gap-8">
 			<div class="bg-black rounded-lg p-4 text-white ">
 				<div class="text-sm">
-					Current balance
+					{{ t('pages.overview.balance') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
@@ -23,7 +15,7 @@
 
 			<div class="bg-white rounded-lg p-4">
 				<div class="text-sm">
-					Income
+					{{ t('pages.overview.income') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
@@ -32,7 +24,7 @@
 
 			<div class="bg-white rounded-lg p-4">
 				<div class="text-sm">
-					Expenses
+					{{ t('pages.overview.expenses') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
@@ -44,7 +36,24 @@
 				<div>Pots</div>
 				<div>Budgets</div>
 				<div>Transactions</div>
-				<div>Reccuring Bills</div>
+				<div>
+					<div>
+						<div>Reccuring bills</div>
+						<div>see details</div>
+					</div>
+					<div>
+						<div>Paid Bills</div>
+						<div>190</div>
+					</div>
+					<div>
+						<div>Paid Bills</div>
+						<div>190</div>
+					</div>
+					<div>
+						<div>Paid Bills</div>
+						<div>190</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="width">
@@ -112,40 +121,62 @@
 
 <script setup lang="ts">
 import BudgetChart from '~/components/BudgetChart.client.vue';
+import { useI18n } from 'vue-i18n';
+import type { Bill, Budget, Pot, Transaction } from '../../utils/types/api';
 
 definePageMeta({
 	layout: 'dashboard',
 });
 
-interface User {
-	id: string;
-	name: string;
-	email: string;
-}
+const { t } = useI18n();
+const appConfig = useAppConfig();
+const bills = ref<Array<Bill>>([]);
+const pots = ref<Array<Pot>>([]);
+const budgets = ref<Array<Budget>>([]);
+const transactions = ref<Array<Transaction>>([]);
 
-const users = ref<Array<User>>([]);
-const loading = ref(false);
-const error = ref<string | null>(null);
-const config = useRuntimeConfig();
-
-const fetchUsers = async () => {
-	loading.value = true;
-	error.value = null;
+const fetchBills = async (): Promise<void> => {
 	try {
-		// $fetch automatically handles JSON response
-		users.value = await $fetch(`${config.public.apiBase}/users`);
+		const data = await $fetch<Array<Bill>>(`${appConfig.api}/bills`);
+		bills.value = data;
 	}
-	catch (err) {
-		error.value = 'Failed to fetch users.';
-		console.error(err);
-	}
-	finally {
-		loading.value = false;
+	catch (err: unknown) {
+		console.error('fetchBills failed:', err);
 	}
 };
 
-onMounted(() => {
-	fetchUsers();
+const fetchBudgets = async (): Promise<void> => {
+	try {
+		const data = await $fetch<Array<Budget>>(`${appConfig.api}/budgets`);
+		budgets.value = data;
+	}
+	catch (err: unknown) {
+		console.error('fetchBudgets failed:', err);
+	}
+};
+
+const fetchPots = async (): Promise<void> => {
+	try {
+		const data = await $fetch<Array<Pot>>(`${appConfig.api}/pots`);
+		pots.value = data;
+	}
+	catch (err: unknown) {
+		console.error('fetchPots failed:', err);
+	}
+};
+
+const fetchTransactions = async (): Promise<void> => {
+	try {
+		const data = await $fetch<Array<Transaction>>(`${appConfig.api}/transactions`);
+		transactions.value = data;
+	}
+	catch (err: unknown) {
+		console.error('fetchTransactions failed:', err);
+	}
+};
+
+onMounted(async (): Promise<void> => {
+	await Promise.all([fetchBills, fetchBudgets, fetchPots, fetchTransactions]);
 });
 </script>
 

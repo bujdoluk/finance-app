@@ -164,6 +164,12 @@
         "budgets": {
             "title": "Budgets",
             "free": "Free"
+        },
+        "overview": {
+            "balance": "Current Balance",
+            "income": "Income",
+            "expenses": "Expenses",
+            "title": "title"
         }
     },
     "layouts": {

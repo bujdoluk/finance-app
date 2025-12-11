@@ -10,6 +10,7 @@ export type AuthUser = {
   first_name: string;
   last_name: string;
   email: string;
+  id: string;
 };
 
 export const authService = {
@@ -30,6 +31,7 @@ export const authService = {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
+      id: String(user.id),
     };
 
     return { token, user: safeUser };

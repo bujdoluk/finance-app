@@ -10,7 +10,16 @@ export interface Budget {
 	type: 'budgets';
 };
 
-export type AuthUser = { message: string; token: string; user: { first_name: string; last_name: string; email: string } };
+export type AuthUser = {
+	message: string;
+	token: string;
+	user: {
+		first_name: string;
+		last_name: string;
+		email: string;
+		id: string;
+	};
+};
 
 export interface User {
 	type: 'users';
@@ -19,5 +28,41 @@ export interface User {
 		first_name: string;
 		last_name: string;
 		email: string;
+		id: string;
+	};
+}
+
+export interface Bill {
+	type: 'bills';
+	id: string;
+	attributes: {
+		name: string;
+		amount: number;
+		frequency: string | null;
+		next_run: Date;
+	};
+}
+
+export interface Pot {
+	type: 'pots';
+	id: string;
+	attributes: {
+		name: string;
+		theme: string;
+		target: number;
+		amount: number;
+		total_saved: number;
+	};
+}
+
+export interface Transaction {
+	type: 'transactions';
+	id: string;
+	attributes: {
+		amount: number;
+		category: string;
+		sender: string;
+		sender_picture: string | null;
+		date: Date;
 	};
 }
