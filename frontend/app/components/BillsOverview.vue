@@ -4,7 +4,7 @@
 			<div class="text-xl">
 				{{ t('components.billsOverview.title') }}
 			</div>
-			<div>see details</div>
+			<DetailLink link="transactions" />
 		</div>
 		<div
 			v-for="bill in props.bills"

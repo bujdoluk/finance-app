@@ -8,6 +8,7 @@ export default defineNuxtConfig({
 		'@nuxt/image',
 		'@pinia/nuxt',
 		'@nuxt/icon',
+		'nuxt-lucide-icons',
 	],
 	ssr: false,
 	devtools: { enabled: true },
@@ -65,5 +66,8 @@ export default defineNuxtConfig({
 		],
 		defaultLocale: 'en',
 		langDir: 'locales',
+	},
+	lucide: {
+		namePrefix: 'Icon',
 	},
 });

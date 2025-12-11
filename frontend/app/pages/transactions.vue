@@ -1,43 +1,47 @@
 <template>
-	<div class="p-8">
-		<div class="p-8 py-3 text-2xl">
-			Transactions
+	<div class="p-8 h-750 flex flex-col">
+		<div class="text-2xl pb-8">
+			{{ t('pages.transactions.title') }}
 		</div>
 
-		<div class="h-full flex flex-col bg-white rounded mx-4">
-			<div class="flex p-4 w-full items-center">
+		<div class="flex flex-col p-8 bg-white rounded-lg flex-1">
+			<div class="flex w-full items-center pb-8">
 				<UInput
 					:model-value="table?.tableApi?.getColumn('sender')?.getFilterValue() as string"
 					placeholder="Filter usernames..."
 					@update:model-value="table?.tableApi?.getColumn('sender')?.setFilterValue($event)"
 				/>
 
-				<div class="ml-auto pr-2">
+				<div class="ml-auto pr-2 text-sm">
 					{{ t('components.tables.transaction.filters.sortBy') }}
 				</div>
 				<USelect
 					v-model="sortedValue"
-					class="mr-2"
+					class="mr-2 min-w-50"
 					:items="filters"
 				/>
 
-				<div class="pr-2">
+				<div class="pr-2 text-sm">
 					{{ t('components.tables.transaction.filters.category') }}
 				</div>
 				<USelect
 					v-model="category"
 					:items="categories"
+					class="min-w-50"
 				/>
 			</div>
 
-			<div class="w-full p-4">
+			<div class="flex-1 flex flex-col justify-between">
 				<UTable
 					ref="table"
 					v-model:pagination="pagination"
 					v-model:column-filters="columnFilters"
-					class="flex-1"
 					:data="transactions"
 					:columns="columns"
+					class="flex-1"
+					:loading="loading"
+					loading-color="primary"
+					loading-animation="carousel"
 					:pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
 					:filter-options="{ getFilteredRowModel: getFilteredRowModel() }"
 					:ui="{
@@ -103,8 +107,8 @@ definePageMeta({
 
 const table = useTemplateRef('table');
 const { t } = useI18n();
-const toast = useToast();
 const { copy } = useClipboard();
+const loading = ref<boolean>(false);
 
 const pagination = ref({
 	pageIndex: 0,
@@ -137,12 +141,6 @@ function getDropdownActions(transaction: TransactionColumnDefinition): DropdownM
 				icon: 'i-lucide-copy',
 				onSelect: () => {
 					copy(transaction.id.toString());
-
-					toast.add({
-						title: 'User ID copied to clipboard!',
-						color: 'success',
-						icon: 'i-lucide-circle-check',
-					});
 				},
 			},
 		],
@@ -151,6 +149,9 @@ function getDropdownActions(transaction: TransactionColumnDefinition): DropdownM
 				label: 'Delete',
 				icon: 'i-lucide-trash',
 				color: 'error',
+				onSelect: async (): Promise<void> => {
+					await deleteTransaction(transaction.id);
+				},
 			},
 		],
 	];
@@ -215,6 +216,7 @@ const transactions = ref<TransactionColumnDefinition[]>([]);
 
 const fetchTransactions = async (): Promise<void> => {
 	try {
+		loading.value = true;
 		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
 
 		transactions.value = data.map(transaction => ({
@@ -228,6 +230,25 @@ const fetchTransactions = async (): Promise<void> => {
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+const deleteTransaction = async (id: string): Promise<void> => {
+	try {
+		loading.value = true;
+		await $fetch(`${appConfig.api}/transactions/${id}`, {
+			method: 'DELETE',
+		});
+	}
+	catch (err: unknown) {
+		console.log('Delete transactions failed', err);
+	}
+	finally {
+		await fetchTransactions();
+		loading.value = false;
 	}
 };
 

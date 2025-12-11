@@ -4,17 +4,13 @@
 			<div class="text-xl">
 				{{ t('components.transactionsOverview.title') }}
 			</div>
-			<div class="text-sm">
-				View all
-			</div>
+			<DetailLink link="transactions" />
 		</div>
 		<div
 			v-for="transaction in props.transactions"
 			:key="transaction.id"
 		>
-			<div
-				class="flex justify-between"
-			>
+			<div class="flex justify-between">
 				<div>
 					<UUser
 						name="John Doe"

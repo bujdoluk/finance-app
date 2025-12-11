@@ -1,10 +1,10 @@
 <template>
-	<div class="w-full">
+	<div class="w-full p-8">
 		<div class="flex justify-between">
-			<div class="text-2xl text-black font-medium p-4">
+			<div class="text-2xl font-medium pb-8">
 				{{ t('pages.pots.title') }}
 			</div>
-			<div class="p-4">
+			<div>
 				<UButton
 					:label="t('pages.pots.buttons.addNewPot')"
 					color="neutral"
@@ -14,7 +14,7 @@
 			</div>
 		</div>
 
-		<div class="w-full flex gap-4 p-4">
+		<div class="w-full flex gap-4">
 			<div
 				v-for="pot in pots"
 				:key="pot.id"

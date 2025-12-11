@@ -4,7 +4,7 @@
 			<div class="text-xl">
 				{{ t('components.potsOverview.title') }}
 			</div>
-			<div>see details</div>
+			<DetailLink link="pots" />
 		</div>
 
 		<div class="flex">

@@ -7,6 +7,9 @@
         "transactionsOverview": {
             "title": "Transactions"
         },
+        "detailLink": {
+            "title": "See Details"
+        },
         "potsOverview": {
             "title":  "Pots",
             "seeDetails": "See details"
@@ -175,6 +178,9 @@
             "paidBills": "Paid Bills",
             "totalUpcoming": "Total Upcoming",
             "dueSoon": "Due Soon"
+        },
+        "transactions": {
+            "title": "Transactions"
         },
         "budgets": {
             "title": "Budgets",

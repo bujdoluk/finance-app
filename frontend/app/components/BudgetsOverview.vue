@@ -4,7 +4,7 @@
 			<div class="text-xl">
 				{{ t('components.budgetsOverview.title') }}
 			</div>
-			<div>See Details</div>
+			<DetailLink link="budgets" />
 		</div>
 
 		<div class="flex justify-between">

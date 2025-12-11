@@ -1,9 +1,8 @@
 <template>
-	<UDashboardGroup class="bg-beige-100">
+	<UDashboardGroup>
 		<OverlayModal ref="overlay" />
 		<UDashboardSidebar
 			open
-			class="bg-black"
 		>
 			<template #header>
 				<div>
@@ -16,7 +15,7 @@
 			/>
 		</UDashboardSidebar>
 
-		<div class="w-full flex flex-col">
+		<div class="w-full flex flex-col bg-beige-100">
 			<UDashboardNavbar>
 				<template #left>
 					{{ t('layouts.dashboard.greeting', { timeOfDay, user: userStore.user?.first_name || '' }) }}
