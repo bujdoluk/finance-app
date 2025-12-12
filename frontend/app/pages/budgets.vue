@@ -4,12 +4,9 @@
 			<div class="text-xl">
 				{{ t('pages.budgets.title') }}
 			</div>
-
-			<UButton
-				label="+ Add New Budget"
-				color="primary"
-				@click="open"
-			/>
+			<div>
+				<AddBudgetModal :modal-state="'add'" />
+			</div>
 		</div>
 
 		<div class="flex gap-4 p-4 rounded">
@@ -25,8 +22,8 @@
 					:key="budget.id"
 					:budget="budget"
 					:items="budgets"
-					@edit="() => onEditBudget"
-					@delete="() => onDeleteBudget"
+					@edit="(id) => onEditBudget(String(id))"
+					@delete="(id) => onDeleteBudget(String(id))"
 				/>
 			</div>
 		</div>
@@ -35,7 +32,7 @@
 
 <script setup lang="ts">
 import BudgetChart from '~/components/BudgetChart.client.vue';
-import BudgetModal from '~/components/BudgetModal.vue';
+import AddBudgetModal from '~/components/AddBudgetModal.vue';
 import { useI18n } from 'vue-i18n';
 import type { Budget } from '../../utils/types/api';
 
@@ -44,13 +41,6 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const overlay = useOverlay();
-const modal = overlay.create(BudgetModal);
-
-const open = (): void => {
-	modal.open();
-};
-
 const budgets = ref<Array<Budget>>([]);
 
 const fetchBudgets = async (): Promise<void> => {

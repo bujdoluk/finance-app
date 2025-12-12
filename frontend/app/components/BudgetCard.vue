@@ -107,7 +107,7 @@ const buttons = computed<DropdownMenuItem[]>(() => [
 	{
 		label: t('components.budgetCard.delete'),
 		onSelect(): void {
-			emit('delete', props.budget.id);
+			emit('delete', props.budget.id.toString());
 		},
 	},
 	{

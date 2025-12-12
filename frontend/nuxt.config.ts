@@ -35,6 +35,7 @@ export default defineNuxtConfig({
 				'other-blue',
 				'other-navy-gray',
 				'other-army-green',
+				'other-pink',
 				'other-gold',
 				'other-orange',
 				'white',

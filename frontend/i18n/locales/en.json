@@ -66,6 +66,9 @@
                     "saveChanges": "Save Changes",
                     "addNewBudget": "+ Add New Budget"
                 },
+                "budgetCategory": "Budget Category",
+                "maximumSpend": "Maximum Spend",
+                "theme": "Theme",
                 "description": "Choose a category to set a spending budget. These categories can help you monitor spending.",
                 "title": "Add New Budget"
             },
