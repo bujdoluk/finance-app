@@ -126,7 +126,7 @@
             "totalSaved": "Total saved"
         },
         "tables": {
-            "transaction": {
+            "transactions": {
                 "columns": {
                     "id": "# ID",
                     "sender": "Recipient/Sender",
@@ -135,6 +135,7 @@
                     "amount": "Amount"
                 },
                 "filters": {
+                    "none": "None",
                     "sortBy": "Sort by",
                     "latest": "Latest",
                     "oldest": "Oldest",
@@ -148,11 +149,12 @@
             "reccuringBills": {
                 "columns": {
                     "id": "# ID",
-                    "billTitle": "Bill Title",
+                    "name": "Bill Title",
                     "dueDate": "Due Date",
                     "amount": "Amount"
                 },
                 "filters": {
+                    "none": "None",
                     "sortBy": "Sort by",
                     "latest": "Latest",
                     "oldest": "Oldest",

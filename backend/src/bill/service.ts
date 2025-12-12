@@ -23,9 +23,9 @@ export const billService = {
     }
   },
 
-  async get(): Promise<Bills[]> {
+  async get(query?: Record<string, unknown>): Promise<Bills[]> {
     try {
-      return await billRepository.get();
+      return await billRepository.get(query);
     } catch (err: unknown) {
       logger.error(`getAllBills error: ${getErrorMessage(err)}`);
       throw err;

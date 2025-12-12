@@ -33,9 +33,39 @@ export const billRepository = {
     }
   },
 
-  async get(): Promise<Bills[]> {
+  async get(query?: Record<string, unknown>): Promise<Bills[]> {
     try {
-      const res = await dbPool.query<Bills>(`SELECT * FROM ${tables.bills.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
+      let where = "deleted_at IS NULL";
+      const params: unknown[] = [];
+
+      const allowedFields = ["id", "amount", "name", "next_run", "frequency", "created_at"];
+
+       // Sort
+      let orderBy = "ORDER BY id ASC";
+
+      if (query?.sort) {
+        const sortValue = String(query.sort);
+        const sortFields = sortValue.split(",").map((part) => part.trim());
+        const sqlSortParts: string[] = [];
+
+        for (const part of sortFields) {
+          const isDesc = part.startsWith("-");
+          const field = isDesc ? part.substring(1) : part;
+
+          if (!allowedFields.includes(field)) {
+            throw new Error(`Invalid sort field: "${field}"`);
+          }
+
+          sqlSortParts.push(`${field} ${isDesc ? "DESC" : "ASC"}`);
+        }
+
+        if (sqlSortParts.length > 0) {
+          orderBy = `ORDER BY ${sqlSortParts.join(", ")}`;
+        }
+      }
+
+      const sql = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ${orderBy}`;
+      const res = await dbPool.query<Bills>(sql, params);
       return res.rows;
     } catch (err: unknown) {
       logger.error(`findAll bills failed: ${getErrorMessage(err)}`);

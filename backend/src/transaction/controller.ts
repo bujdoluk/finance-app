@@ -10,15 +10,7 @@ import { validateCreateTransaction } from "./validation";
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
-    const filterString = req.query.filter as string | undefined;
-    const sortString = req.query.sort as string | undefined;
-
-    if (!filterString || !sortString) {
-      const transactions = await transactionService.get();
-      return res.json(transactions.map(mapToTransactionResource));
-    }
-
-    const results = await transactionService.filterAndSortTransactions({ filter: filterString, sort: sortString });
+    const results = await transactionService.get(req.query);
     return res.json(results.map(mapToTransactionResource));
   } catch (err: unknown) {
     logger.error(`getTransactions error: ${getErrorMessage(err)}`);
@@ -28,6 +20,25 @@ export const getTransactions = async (req: Request, res: Response) => {
           StatusCodes.BAD_REQUEST,
           "Invalid filter or sort",
           err instanceof Error ? err.message : "Bad query format"
+        ),
+      ])
+    );
+  }
+};
+
+export const getTransactionCategories = async (_req: Request, res: Response) => {
+  try {
+    const categories = await transactionService.getCategories();
+    return res.json(categories);
+  } catch (err: unknown) {
+    logger.error(`getTransactionCategories error: ${getErrorMessage(err)}`);
+
+    return res.status(StatusCodes.BAD_REQUEST).json(
+      createErrorDocument([
+        createError(
+          StatusCodes.BAD_REQUEST,
+          "Error retrieving categories",
+          err instanceof Error ? err.message : "Unknown error"
         ),
       ])
     );

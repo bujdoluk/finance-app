@@ -8,21 +8,22 @@
 			<div class="flex w-full items-center pb-8">
 				<UInput
 					:model-value="table?.tableApi?.getColumn('sender')?.getFilterValue() as string"
-					placeholder="Filter usernames..."
+					placeholder="Search sender ..."
+					class="mr-2 min-w-50"
 					@update:model-value="table?.tableApi?.getColumn('sender')?.setFilterValue($event)"
 				/>
 
 				<div class="ml-auto pr-2 text-sm">
-					{{ t('components.tables.transaction.filters.sortBy') }}
+					{{ t('components.tables.transactions.filters.sortBy') }}
 				</div>
 				<USelect
-					v-model="sortedValue"
+					v-model="sortedTransations"
 					class="mr-2 min-w-50"
-					:items="filters"
+					:items="sortOptions"
 				/>
 
 				<div class="pr-2 text-sm">
-					{{ t('components.tables.transaction.filters.category') }}
+					{{ t('components.tables.transactions.filters.category') }}
 				</div>
 				<USelect
 					v-model="category"
@@ -115,23 +116,15 @@ const pagination = ref({
 	pageSize: 5,
 });
 
-const sortedValue = ref<string>('Latest');
-const category = ref<string>('Entertaiment');
-
-const filters = ref([
-	t('components.tables.reccuringBills.filters.latest'),
-	t('components.tables.reccuringBills.filters.oldest'),
-	t('components.tables.reccuringBills.filters.atoz'),
-	t('components.tables.reccuringBills.filters.ztoa'),
-	t('components.tables.reccuringBills.filters.highest'),
-	t('components.tables.reccuringBills.filters.lowest'),
-]);
-
-const categories = ref([
-	t('components.tables.reccuringBills.filters.latest'),
-	t('components.tables.reccuringBills.filters.oldest'),
-	t('components.tables.reccuringBills.filters.atoz'),
-]);
+const sortOptions = [
+	{ label: t('components.tables.transactions.filters.none'), value: 'None' },
+	{ label: t('components.tables.transactions.filters.latest'), value: '-date' },
+	{ label: t('components.tables.transactions.filters.oldest'), value: 'date' },
+	{ label: t('components.tables.transactions.filters.atoz'), value: 'sender' },
+	{ label: t('components.tables.transactions.filters.ztoa'), value: '-sender' },
+	{ label: t('components.tables.transactions.filters.highest'), value: '-amount' },
+	{ label: t('components.tables.transactions.filters.lowest'), value: 'amount' },
+];
 
 function getDropdownActions(transaction: TransactionColumnDefinition): DropdownMenuItem[][] {
 	return [
@@ -160,33 +153,33 @@ function getDropdownActions(transaction: TransactionColumnDefinition): DropdownM
 const columns: TableColumn<TransactionColumnDefinition>[] = [
 	{
 		accessorKey: 'id',
-		header: `${t('components.tables.transaction.columns.id')}`,
+		header: `${t('components.tables.transactions.columns.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
 		accessorKey: 'sender',
-		header: `${t('components.tables.transaction.columns.sender')}`,
+		header: `${t('components.tables.transactions.columns.sender')}`,
 		cell: ({ row }) => {
 			return row.getValue('sender');
 		},
 	},
 	{
 		accessorKey: 'category',
-		header: `${t('components.tables.transaction.columns.category')}`,
+		header: `${t('components.tables.transactions.columns.category')}`,
 		cell: ({ row }) => {
 			return row.getValue('category');
 		},
 	},
 	{
 		accessorKey: 'date',
-		header: `${t('components.tables.transaction.columns.date')}`,
+		header: `${t('components.tables.transactions.columns.date')}`,
 		cell: ({ row }) => {
 			return dayjs(row.getValue('date')).format('MMM DD, YYYY');
 		},
 	},
 	{
 		accessorKey: 'amount',
-		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transaction.columns.amount')}`),
+		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transactions.columns.amount')}`),
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue('amount'));
 
@@ -212,12 +205,43 @@ const columnFilters = ref([
 	},
 ]);
 
+const categories = ref<string[]>([]);
+const category = ref<string>('All');
+
+const fetchCategories = async (): Promise<void> => {
+	try {
+		loading.value = true;
+		const data = await $fetch<string[]>(`${appConfig.api}/transactions/categories`);
+		categories.value = ['All', ...data];
+	}
+	catch (err: unknown) {
+		console.error('Failed to fetch categories:', err);
+		categories.value = ['All'];
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
 const transactions = ref<TransactionColumnDefinition[]>([]);
+const sortedTransations = ref<string>('None');
 
 const fetchTransactions = async (): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
+		const query: Record<string, string> = {};
+
+		if (category.value && category.value !== 'All') {
+			query['filter[category]'] = category.value;
+		}
+
+		if (sortedTransations.value && sortedTransations.value !== 'None') {
+			query.sort = sortedTransations.value;
+		}
+
+		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`, {
+			query,
+		});
 
 		transactions.value = data.map(transaction => ({
 			id: transaction.id,
@@ -230,6 +254,7 @@ const fetchTransactions = async (): Promise<void> => {
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
+		transactions.value = [];
 	}
 	finally {
 		loading.value = false;
@@ -248,11 +273,25 @@ const deleteTransaction = async (id: string): Promise<void> => {
 	}
 	finally {
 		await fetchTransactions();
+		await fetchCategories();
 		loading.value = false;
 	}
 };
 
 onMounted(async (): Promise<void> => {
+	await fetchCategories();
 	await fetchTransactions();
+});
+
+watch(category, async (newValue, oldValue): Promise<void> => {
+	if (newValue !== oldValue) {
+		await fetchTransactions();
+	}
+});
+
+watch(sortedTransations, async (newValue, oldValue): Promise<void> => {
+	if (newValue !== oldValue) {
+		await fetchTransactions();
+	}
 });
 </script>

@@ -8,9 +8,9 @@ import { mapToBillResource } from "./mapper";
 import billService from "./service";
 import { createBillSchema, updateBillSchema } from "./validation";
 
-export const getBills = async (_req: Request, res: Response): Promise<Response> => {
+export const getBills = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const bills = await billService.get();
+    const bills = await billService.get(req.query);
     return res.json(bills.map(mapToBillResource));
   } catch (err: unknown) {
     logger.error(`getBills error: ${getErrorMessage(err)}`);

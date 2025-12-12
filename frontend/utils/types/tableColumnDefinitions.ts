@@ -7,3 +7,11 @@ export interface TransactionColumnDefinition {
 	sender_picture: string | null;
 	date: Date;
 }
+
+export interface BillColumnDefinition {
+	id: string;
+	name: string;
+	next_run: Date;
+	frequency: string | null;
+	amount: number;
+}

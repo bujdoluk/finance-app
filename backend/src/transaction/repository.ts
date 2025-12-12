@@ -1,5 +1,3 @@
-import { Filters } from "@/utils/parseFilters";
-
 import { dbPool } from "../../database/db";
 import { tables, Transactions, TransactionsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
@@ -45,75 +43,88 @@ export const transactionRepository = {
     }
   },
 
-  async findFilteredOrSortedTransactions(filter: Filters | null, sort?: string): Promise<Transactions[]> {
+  async getCategories(): Promise<string[]> {
+    try {
+      const sql = `
+        SELECT DISTINCT category 
+        FROM ${tables.transactions.tableName}
+        WHERE deleted_at IS NULL
+        ORDER BY category ASC
+      `;
+
+      const res = await dbPool.query<{ category: string }>(sql);
+      return res.rows.map(r => r.category);
+    } catch (err: unknown) {
+      logger.error(`transactionRepository.getCategories error: ${getErrorMessage(err)}`);
+      throw err; 
+    }
+  },
+
+  async get(query?: Record<string, unknown>): Promise<Transactions[]> {
     try {
       let where = "deleted_at IS NULL";
       const params: unknown[] = [];
-      const allowedFields = ["amount", "category", "date", "sender", "created_at"];
 
-      if (filter) {
-        if (!allowedFields.includes(filter.field)) {
-          throw new Error(`Invalid filter field: ${filter.field}`);
+      const allowedFields = ["id", "amount", "category", "date", "sender", "created_at"];
+
+      // Filter
+      const filterKeys = Object.keys(query ?? {}).filter((k) => k.startsWith("filter"));
+
+      for (const key of filterKeys) {
+        const match = key.match(/^filter(?:\[(.+?)\])?$/);
+
+        if (!match) continue;
+        const field = match[1]; 
+        if (!field) continue; 
+
+        if (!allowedFields.includes(field)) {
+          throw new Error(`Invalid filter field: "${field}"`);
         }
 
-        const paramIndex = params.length + 1; 
+        const value = query![key];
+        if (value === undefined || value === null) continue;
 
-        switch (filter.type) {
-          case "contains":
-            where += ` AND ${filter.field} ILIKE $${String(paramIndex)}`;
-            params.push(`%${filter.value}%`);
-            break;
+        const paramIndex = params.length + 1;
 
-          case "equals":
-            where += ` AND ${filter.field} = $${String(paramIndex)}`;
-            params.push(filter.value);
-            break;
-
-          case "greaterThan":
-            where += ` AND ${filter.field} > $${String(paramIndex)}`;
-            params.push(filter.value);
-            break;
-
-          case "lessThan":
-            where += ` AND ${filter.field} < $${String(paramIndex)}`;
-            params.push(filter.value);
-            break;
+        if (Array.isArray(value)) {
+          const placeholders = value.map((_, i) => `$${paramIndex + i}`).join(", ");
+          where += ` AND ${field} IN (${placeholders})`;
+          params.push(...value);
+        } else {
+          where += ` AND ${field} = $${paramIndex}`;
+          params.push(value);
         }
       }
 
-      const validSortFields = ["id", "amount", "category", "date", "created_at"];
+      // Sort
       let orderBy = "ORDER BY id ASC";
 
-      if (sort) {
-        const isDesc = sort.startsWith("-");
-        const field = isDesc ? sort.substring(1) : sort;
+      if (query?.sort) {
+        const sortValue = String(query.sort);
+        const sortFields = sortValue.split(",").map((part) => part.trim());
+        const sqlSortParts: string[] = [];
 
-        if (!validSortFields.includes(field)) {
-          throw new Error(`Invalid sort field: ${field}`);
+        for (const part of sortFields) {
+          const isDesc = part.startsWith("-");
+          const field = isDesc ? part.substring(1) : part;
+
+          if (!allowedFields.includes(field)) {
+            throw new Error(`Invalid sort field: "${field}"`);
+          }
+
+          sqlSortParts.push(`${field} ${isDesc ? "DESC" : "ASC"}`);
         }
 
-        orderBy = `ORDER BY ${field} ${isDesc ? "DESC" : "ASC"}`;
+        if (sqlSortParts.length > 0) {
+          orderBy = `ORDER BY ${sqlSortParts.join(", ")}`;
+        }
       }
+
       const sql = `SELECT * FROM ${tables.transactions.tableName} WHERE ${where} ${orderBy}`;
       const res = await dbPool.query<Transactions>(sql, params);
       return res.rows;
     } catch (err: unknown) {
-      logger.error(`findFilteredAndSorted error: ${getErrorMessage(err)}`);
-      throw err;
-    }
-  },
-
-  async get(): Promise<Transactions[]> {
-    try {
-      const res = await dbPool.query<Transactions>(
-        `SELECT * FROM ${tables.transactions.tableName}
-         WHERE deleted_at IS NULL
-         ORDER BY id ASC`
-      );
-
-      return res.rows;
-    } catch (err: unknown) {
-      logger.error(`findAll failed: ${getErrorMessage(err)}`);
+      logger.error(`get error: ${getErrorMessage(err)}`);
       throw err;
     }
   },

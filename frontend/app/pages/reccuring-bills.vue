@@ -1,11 +1,11 @@
 <template>
-	<div>
-		<div class="p-4 text-xl font-semibold">
+	<div class="p-8 h-750 flex flex-col">
+		<div class="text-2xl pb-8">
 			{{ t('pages.reccuringBills.title') }}
 		</div>
 
-		<div class="flex">
-			<div class="flex flex-col w-1/3 pb-4 px-4 gap-4">
+		<div class="flex gap-8">
+			<div class="flex flex-col w-1/3 pb-4 gap-8">
 				<div class="p-4 bg-black rounded text-white">
 					<div>
 						<UIcon
@@ -45,44 +45,48 @@
 				</div>
 			</div>
 
-			<div class="flex flex-col flex-1 w-full bg-white rounded p-4">
-				<div class="flex px-4 py-4 w-full justify-between">
+			<div class="flex flex-col p-8 bg-white rounded-lg flex-1">
+				<div class="flex w-full items-center justify-between pb-8">
 					<UInput
-						:model-value="table?.tableApi?.getColumn('billTitle')?.getFilterValue() as string"
-						placeholder="Search bills"
-						@update:model-value="table?.tableApi?.getColumn('billTitle')?.setFilterValue($event)"
+						:model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string"
+						placeholder="Search bill ..."
+						class="mr-2 min-w-50"
+						@update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
 					/>
 
 					<USelect
-						:items="filters"
+						v-model="sortedBills"
+						:items="sortOptions"
+						class="mr-2 min-w-50"
 						:placeholder="t('components.tables.reccuringBills.filters.sortBy')"
 					/>
 				</div>
 
-				<div class="w-full">
+				<div class="flex-1 flex flex-col justify-between">
 					<UTable
 						ref="table"
 						v-model:column-filters="columnFilters"
 						class="flex-1"
-						:data="data"
 						:columns="columns"
-						:filter-options="{
-							getFilteredRowModel: getFilteredRowModel(),
-						}"
+						:loading="loading"
+						loading-color="primary"
+						loading-animation="carousel"
+						:data="bills"
+						:filter-options="{ getFilteredRowModel: getFilteredRowModel() }"
 						:ui="{
 							td: 'p-2 pl-4',
 						}"
 					>
-						<template #billTitle-cell="{ row }">
+						<template #name-cell="{ row }">
 							<div class="flex items-center gap-3">
 								<UAvatar
 									src="https://github.com/benjamincanac.png"
 									size="md"
-									:alt="`${row.original.billTitle} avatar`"
+									:alt="`${row.original.name} avatar`"
 								/>
 								<div>
 									<p class="font-medium text-highlighted">
-										{{ row.original.billTitle }}
+										{{ row.original.name }}
 									</p>
 								</div>
 							</div>
@@ -113,6 +117,9 @@ import { getFilteredRowModel } from '@tanstack/vue-table';
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import type { Bill } from '~~/utils/types/api';
+import appConfig from '#build/app.config';
+import type { BillColumnDefinition } from '~~/utils/types/tableColumnDefinitions';
 
 definePageMeta({
 	layout: 'dashboard',
@@ -120,42 +127,27 @@ definePageMeta({
 
 const table = useTemplateRef('table');
 const { t } = useI18n();
-const toast = useToast();
 const { copy } = useClipboard();
+const loading = ref<boolean>(false);
 
-const filters = ref([
-	t('components.tables.reccuringBills.filters.latest'),
-	t('components.tables.reccuringBills.filters.oldest'),
-	t('components.tables.reccuringBills.filters.atoz'),
-	t('components.tables.reccuringBills.filters.ztoa'),
-	t('components.tables.reccuringBills.filters.highest'),
-	t('components.tables.reccuringBills.filters.lowest'),
-]);
+const sortOptions = [
+	{ label: t('components.tables.reccuringBills.filters.none'), value: 'None' },
+	{ label: t('components.tables.reccuringBills.filters.latest'), value: '-next_run' },
+	{ label: t('components.tables.reccuringBills.filters.oldest'), value: 'next_run' },
+	{ label: t('components.tables.reccuringBills.filters.atoz'), value: 'name' },
+	{ label: t('components.tables.reccuringBills.filters.ztoa'), value: '-name' },
+	{ label: t('components.tables.reccuringBills.filters.highest'), value: '-amount' },
+	{ label: t('components.tables.reccuringBills.filters.lowest'), value: 'amount' },
+];
 
-interface ReccuringBill {
-	id: number;
-	billTitle: string;
-	dueDate: string;
-	amount: number;
-	createdAt: string;
-	updatedAt: string;
-	deletedAt: string;
-}
-
-const getDropdownActions = (transaction: ReccuringBill): DropdownMenuItem[][] => {
+const getDropdownActions = (bill: BillColumnDefinition): DropdownMenuItem[][] => {
 	return [
 		[
 			{
 				label: 'Copy bill Id',
 				icon: 'i-lucide-copy',
 				onSelect: () => {
-					copy(transaction.id.toString());
-
-					toast.add({
-						title: 'Bill ID copied to clipboard!',
-						color: 'success',
-						icon: 'i-lucide-circle-check',
-					});
+					copy(bill.id.toString());
 				},
 			},
 		],
@@ -169,24 +161,24 @@ const getDropdownActions = (transaction: ReccuringBill): DropdownMenuItem[][] =>
 	];
 };
 
-const columns: TableColumn<ReccuringBill>[] = [
+const columns: TableColumn<BillColumnDefinition>[] = [
 	{
 		accessorKey: 'id',
 		header: `${t('components.tables.reccuringBills.columns.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
-		accessorKey: 'billTitle',
-		header: `${t('components.tables.reccuringBills.columns.billTitle')}`,
+		accessorKey: 'name',
+		header: `${t('components.tables.reccuringBills.columns.name')}`,
 		cell: ({ row }) => {
-			return row.getValue('billTitle');
+			return row.getValue('name');
 		},
 	},
 	{
-		accessorKey: 'dueDate',
+		accessorKey: 'next_run',
 		header: `${t('components.tables.reccuringBills.columns.dueDate')}`,
 		cell: ({ row }) => {
-			return new Date(row.getValue('dueDate')).toLocaleString('en-US', {
+			return new Date(row.getValue('next_run')).toLocaleString('en-US', {
 				day: 'numeric',
 				month: 'short',
 				hour: '2-digit',
@@ -218,56 +210,51 @@ const columns: TableColumn<ReccuringBill>[] = [
 
 const columnFilters = ref([
 	{
-		id: 'billTitle',
+		id: 'name',
 		value: '',
 	},
 ]);
 
-const data = ref<Array<ReccuringBill>>([
-	{
-		id: 1,
-		billTitle: 'Martin',
-		dueDate: '2024-03-11T15:30:00',
-		amount: 594,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 2,
-		billTitle: 'Luke',
-		dueDate: '2024-03-11T10:10:00',
-		amount: 276,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 3,
-		billTitle: 'Jane',
-		dueDate: '2024-03-11T08:50:00',
-		amount: 315,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 4,
-		billTitle: 'Patrik',
-		dueDate: '2024-03-10T19:45:00',
-		amount: -529,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-	{
-		id: 5,
-		billTitle: 'Tomas',
-		dueDate: '2024-03-10T15:55:00',
-		amount: 639,
-		createdAt: '2024-03-11T15:30:00',
-		updatedAt: '2024-03-11T15:30:00',
-		deletedAt: '',
-	},
-]);
+const bills = ref<BillColumnDefinition[]>([]);
+const sortedBills = ref<string>('None');
+
+const fetchBills = async (): Promise<void> => {
+	try {
+		loading.value = true;
+		const query: Record<string, string> = {};
+
+		if (sortedBills.value && sortedBills.value !== 'None') {
+			query.sort = sortedBills.value;
+		}
+
+		const data = await $fetch<Bill[]>(`${appConfig.api}/bills`, {
+			query,
+		});
+
+		bills.value = data.map(bill => ({
+			id: bill.id,
+			amount: bill.attributes.amount,
+			next_run: bill.attributes.next_run,
+			name: bill.attributes.name,
+			frequency: bill.attributes.frequency,
+		}));
+	}
+	catch (err: unknown) {
+		console.error('fetchBills failed:', err);
+		bills.value = [];
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+onMounted(async (): Promise<void> => {
+	await fetchBills();
+});
+
+watch(sortedBills, async (newValue, oldValue): Promise<void> => {
+	if (newValue !== oldValue) {
+		await fetchBills();
+	}
+});
 </script>
