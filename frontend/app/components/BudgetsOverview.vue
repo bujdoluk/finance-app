@@ -9,7 +9,7 @@
 
 		<div class="flex justify-between">
 			<ClientOnly>
-				<BudgetChart />
+				<BudgetChart :budgets="budgets" />
 			</ClientOnly>
 
 			<div class="flex flex-col">
@@ -21,14 +21,14 @@
 					<div>
 						<USeparator
 							orientation="vertical"
-							class="h-12"
+							class="h-12 pr-2"
 							size="lg"
-							color="primary"
+							:color="`text--color-${budget.attributes.theme}`"
 						/>
 					</div>
 					<div>
-						<div>Entertainment</div>
-						<div>$50.00</div>
+						<div>{{ budget.attributes.name }}</div>
+						<div>${{ budget.attributes.amount }}</div>
 					</div>
 				</div>
 			</div>

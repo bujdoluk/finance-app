@@ -44,19 +44,13 @@
 		</div>
 
 		<div class="flex justify-between w-full gap-2">
-			<UButton
-				:label="t('components.potDetail.buttons.addMoney')"
-				color="neutral"
-				variant="ghost"
-				size="xl"
-				class="cursor-pointer bg-beige-100 w-1/2 justify-center"
+			<AddToPotModal
+				:pot="pot"
+				:modal-state="'deposit'"
 			/>
-			<UButton
-				:label="t('components.potDetail.buttons.withdraw')"
-				color="neutral"
-				variant="ghost"
-				size="xl"
-				class="cursor-pointer bg-beige-100 w-1/2 justify-center"
+			<AddToPotModal
+				:pot="pot"
+				:modal-state="'withdraw'"
 			/>
 		</div>
 	</div>
@@ -65,6 +59,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import type { Pot } from '~~/utils/types/api';
+import AddToPotModal from './AddToPotModal.vue';
 
 definePageMeta({
 	layout: 'dashboard',

@@ -5,6 +5,7 @@ import { PotsInput } from "../../database/dbSchema";
 import { joiToErrors } from "../utils/jsonapi/error";
 
 const potSchema = Joi.object({
+  amount: Joi.number().positive(),
   name: Joi.string().max(100),
   target: Joi.number().positive(),
   theme: Joi.string().max(50),

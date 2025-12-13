@@ -1,21 +1,34 @@
 <template>
-	<div>
+	<div class="relative w-full h-96 flex justify-center items-center">
 		<apexchart
 			type="donut"
 			height="350"
 			:options="chartData.options"
-			:series="chartData.series"
+			:series="series"
 		/>
+
+		<div class="absolute text-center pointer-events-none">
+			<div class="text-xl font-bold">
+				${{ total }}
+			</div>
+			<div class="text-sm text-gray-500">
+				of limit $975
+			</div>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
+import type { Budget } from '../../utils/types/api';
 
-const { t } = useI18n();
+const props = defineProps<{
+	budgets: Budget[];
+}>();
+
+const series = computed(() => props.budgets.map((budget: Budget) => Number(budget.attributes.amount)));
+const total = computed(() => series.value.reduce((sum: number, val: number) => sum + val, 0));
 
 const chartData = {
-	series: [500, 600, 100, 200],
 	options: {
 		chart: { type: 'donut' },
 		legend: { show: false },
@@ -31,25 +44,22 @@ const chartData = {
 			pie: {
 				expandOnClick: false,
 				donut: {
-					size: '50%',
-					labels: {
-						show: true,
-						name: { show: false },
-						total: {
-							show: true,
-							showAlways: true,
-							formatter: function (w) {
-								const totals = w.globals.seriesTotals;
-
-								const result = totals.reduce((a, b) => a + b, 0);
-
-								return (result / 1000).toFixed(3);
-							},
-						},
-					},
+					size: '60%',
 				},
 			},
 		},
 	},
 };
 </script>
+
+<style scoped>
+.relative {
+  position: relative;
+}
+.absolute {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>

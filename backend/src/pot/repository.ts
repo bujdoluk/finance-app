@@ -46,11 +46,11 @@ export const potRepository = {
 
   async update(id: number, data: PotsInput): Promise<null | Pots> {
     try {
-      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET name = $1, target = $2, total_saved = $3, updated_at = NOW()
-      WHERE id = $4 AND deleted_at IS NULL RETURNING *`, [data.name, data.target, data.total_saved, id]);
+      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET amount = $1, updated_at = NOW()
+      WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.amount, data.id]);
       return res.rows[0] ?? null;
     } catch (err: unknown) {
-      logger.error(`update pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      logger.error(`Update pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
     }
   },

@@ -15,7 +15,7 @@
 		<div class="flex gap-4 p-4 rounded">
 			<div class="bg-white w-1/3 p-4">
 				<ClientOnly>
-					<BudgetChart />
+					<BudgetChart :budgets="budgets" />
 				</ClientOnly>
 			</div>
 
