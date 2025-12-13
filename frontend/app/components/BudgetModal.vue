@@ -13,30 +13,29 @@
 		:ui="{ header: 'text-2xl' }"
 	>
 		<UButton
-			label="+ Add New Budget"
+			:label="t('pages.budgets.buttons.addNewBudget')"
 			color="neutral"
 			class="cursor-pointer"
 		/>
 
 		<template #body>
 			<div class="flex flex-col gap-2 w-full">
-				<span class="text-xs font-medium">{{ t('components.budgetModal.add.budgetCategory') }}</span>
-				<USelect
-					v-model="budgetCategory"
-					:items="budgetCategories"
+				<span class="text-xs font-medium">{{ t('components.budgetModal.add.budgetCategoryName') }}</span>
+				<UInput
+					v-model="budgetCategoryName"
 					class="cursor-pointer"
 				/>
 				<span class="text-xs font-medium">{{ t('components.budgetModal.add.maximumSpend') }}</span>
 				<UInputNumber
-					v-model="value2"
+					v-model="maximumSpending"
 					orientation="vertical"
 					class="cursor-pointer"
 					placeholder="$"
 				/>
 				<span class="text-xs font-medium">{{ t('components.budgetModal.add.theme') }}</span>
 				<USelect
-					v-model="color"
-					:items="items"
+					v-model="theme"
+					:items="themes"
 					class="cursor-pointer"
 					value-key="value"
 				>
@@ -61,6 +60,8 @@
 				variant="solid"
 				class="cursor-pointer w-full flex justify-center p-4"
 				size="lg"
+				:loading="loading"
+				@click="createBudget"
 			/>
 		</template>
 	</UModal>
@@ -74,13 +75,16 @@ const props = defineProps<{
 	modalState: 'add' | 'edit' | 'delete';
 }>();
 
+const emit = defineEmits<{
+	(e: 'created'): void;
+}>();
+
 const { t } = useI18n();
 const open = ref(false);
-const budgetCategories = ref(['Entertainment', 'Rent', 'Food', 'Utilities', 'Insurance', 'Internet']);
-const budgetCategory = ref('Entertainment');
-const color = ref('Green');
+const budgetCategoryName = ref();
+const loading = ref<boolean>(false);
 
-const items = ref([
+const themes = ref([
 	{
 		label: 'Green',
 		value: 'Green',
@@ -195,11 +199,13 @@ const items = ref([
 	},
 ] satisfies SelectItem[]);
 
+const theme = ref(themes.value[0]?.value);
+
 const getChip = (color: string) => {
-	return items.value.find(item => item.value === color)?.chip;
+	return themes.value.find(theme => theme.value === color)?.chip;
 };
 
-const value2 = ref();
+const maximumSpending = ref();
 
 const title = computed(() => {
 	if (props.modalState === 'add') {
@@ -209,7 +215,7 @@ const title = computed(() => {
 		return t('components.budgetModal.edit.title');
 	}
 	else {
-		return t('components.budgetModal.delete.title', { budgetCategory: budgetCategory.value });
+		return t('components.budgetModal.delete.title', { budgetCategory: budgetCategoryName.value });
 	}
 });
 
@@ -236,4 +242,27 @@ const footerButtonLabel = computed(() => {
 		return t('components.budgetModal.delete.buttons.confirmDeletion');
 	}
 });
+
+const createBudget = async (): Promise<void> => {
+	try {
+		loading.value = true;
+		await $fetch('http://localhost:3001/v1/budgets', {
+			method: 'POST',
+			body: {
+				name: budgetCategoryName.value,
+				maximum_spending: maximumSpending.value,
+				theme: theme.value,
+				amount: 10,
+			},
+		});
+	}
+	catch (err: unknown) {
+		console.error('Failed to create budget:', err);
+	}
+	finally {
+		loading.value = false;
+		emit('created');
+		open.value = false;
+	}
+};
 </script>

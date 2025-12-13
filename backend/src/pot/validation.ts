@@ -5,15 +5,13 @@ import { PotsInput } from "../../database/dbSchema";
 import { joiToErrors } from "../utils/jsonapi/error";
 
 const potSchema = Joi.object({
-  amount: Joi.number().positive(),
   name: Joi.string().max(100),
   target: Joi.number().positive(),
   theme: Joi.string().max(50),
-  total_saved: Joi.number().min(0),
 });
 
 export const createPotSchema = potSchema.fork(
-  ["name", "theme", "target", "total_saved", "amount"],
+  ["name", "theme", "target"],
   (field) => field.required()
 );
 

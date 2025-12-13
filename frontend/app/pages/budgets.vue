@@ -5,7 +5,10 @@
 				{{ t('pages.budgets.title') }}
 			</div>
 			<div>
-				<AddBudgetModal :modal-state="'add'" />
+				<BudgetModal
+					:modal-state="'add'"
+					@created="onBudgetCreated"
+				/>
 			</div>
 		</div>
 
@@ -32,7 +35,7 @@
 
 <script setup lang="ts">
 import BudgetChart from '~/components/BudgetChart.client.vue';
-import AddBudgetModal from '~/components/AddBudgetModal.vue';
+import BudgetModal from '~/components/BudgetModal.vue';
 import { useI18n } from 'vue-i18n';
 import type { Budget } from '../../utils/types/api';
 
@@ -41,10 +44,12 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const budgets = ref<Array<Budget>>([]);
+const budgets = ref<Budget[]>([]);
+const loading = ref<boolean>(false);
 
 const fetchBudgets = async (): Promise<void> => {
 	try {
+		loading.value = true;
 		const data = await $fetch<Array<Budget>>('http://localhost:3001/v1/budgets');
 		budgets.value = data;
 		console.log(budgets.value);
@@ -52,10 +57,14 @@ const fetchBudgets = async (): Promise<void> => {
 	catch (err: unknown) {
 		console.error('Failed to fetch budgets:', err);
 	}
+	finally {
+		loading.value = false;
+	}
 };
 
 const editBudget = async (id: string): Promise<void> => {
 	try {
+		loading.value = true;
 		const data = await $fetch<Array<Budget>>(`http://localhost:3001/v1/budgets/${id}`);
 		budgets.value = data;
 		console.log(budgets.value);
@@ -63,16 +72,23 @@ const editBudget = async (id: string): Promise<void> => {
 	catch (err: unknown) {
 		console.error('Failed to edit budget:', err);
 	}
+	finally {
+		loading.value = false;
+	}
 };
 
 const deleteBudget = async (id: string): Promise<void> => {
 	try {
+		loading.value = true;
 		const data = await $fetch<Array<Budget>>(`http://localhost:3001/v1/budgets/${id}`);
 		budgets.value = data;
 		console.log(budgets.value);
 	}
 	catch (err: unknown) {
 		console.error('Failed to delete budget:', err);
+	}
+	finally {
+		loading.value = false;
 	}
 };
 
@@ -82,6 +98,10 @@ const onEditBudget = async (id: string): Promise<void> => {
 
 const onDeleteBudget = async (id: string): Promise<void> => {
 	await deleteBudget(id);
+};
+
+const onBudgetCreated = async (): Promise<void> => {
+	await fetchBudgets();
 };
 
 onMounted(async (): Promise<void> => {

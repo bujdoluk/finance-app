@@ -5,8 +5,8 @@ import logger, { getErrorMessage } from "../utils/logger/logger";
 export const potRepository = {
   async create(data: PotsInput): Promise<Pots> {
     try {
-      const res = await dbPool.query<Pots>(`INSERT INTO ${tables.pots.tableName} (name, target, total_saved) VALUES ($1, $2, $3) RETURNING *`,
-      [data.name, data.target, data.total_saved]);
+      const res = await dbPool.query<Pots>(`INSERT INTO ${tables.pots.tableName} (name, target, theme) VALUES ($1, $2, $3) RETURNING *`,
+      [data.name, data.target, data.theme]);
       return res.rows[0];
     } catch (err: unknown) {
       logger.error(`create pot failed [name=${data.name}]: ${getErrorMessage(err)}`);

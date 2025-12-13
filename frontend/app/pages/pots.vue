@@ -1,15 +1,13 @@
 <template>
-	<div class="w-full p-8">
-		<div class="flex justify-between">
-			<div class="text-2xl font-medium pb-8">
+	<div class="bg-beige-100">
+		<div class="flex justify-between items-center p-4">
+			<div class="text-xl">
 				{{ t('pages.pots.title') }}
 			</div>
 			<div>
-				<UButton
-					:label="t('pages.pots.buttons.addNewPot')"
-					color="neutral"
-					size="xl"
-					class="cursor-pointer"
+				<PotModal
+					:modal-state="'add'"
+					@created="onPotCreated"
 				/>
 			</div>
 		</div>
@@ -18,7 +16,7 @@
 			<div
 				v-for="pot in pots"
 				:key="pot.id"
-				class="w-1/4 min-w-[300px]"
+				class="w-1/2"
 			>
 				<PotDetail :pot="pot" />
 			</div>
@@ -28,48 +26,37 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
+import type { Pot } from '../../utils/types/api';
+import PotModal from '~/components/PotModal.vue';
 
 definePageMeta({
 	layout: 'dashboard',
 });
 
-const pots = [
-	{
-		id: 1,
-		name: 'Savings',
-		target: 2000,
-		theme: 'primary',
-		saved: 159,
-	},
-	{
-		id: 2,
-		name: 'Gift',
-		target: 60,
-		theme: 'primary',
-		saved: 40,
-	},
-	{
-		id: 2,
-		name: 'Gift',
-		target: 60,
-		theme: 'primary',
-		saved: 40,
-	},
-	{
-		id: 2,
-		name: 'Gift',
-		target: 60,
-		theme: 'primary',
-		saved: 40,
-	},
-	{
-		id: 2,
-		name: 'Gift',
-		target: 60,
-		theme: 'primary',
-		saved: 40,
-	},
-];
+const { t } = useI18n();
+const pots = ref<Pot[]>([]);
+const loading = ref<boolean>(false);
+
+const fetchPots = async (): Promise<void> => {
+	try {
+		loading.value = true;
+		const data = await $fetch<Array<Pot>>('http://localhost:3001/v1/pots');
+		pots.value = data;
+		console.log(pots.value);
+	}
+	catch (err: unknown) {
+		console.error('Failed to fetch pots:', err);
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+const onPotCreated = async (): Promise<void> => {
+	await fetchPots();
+};
+
+onMounted(async (): Promise<void> => {
+	await fetchPots();
+});
 </script>

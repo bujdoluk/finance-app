@@ -7,11 +7,10 @@
 						standalone
 						inset
 						size="2xl"
-						:color="props.pot.theme"
 					/>
 				</div>
 				<div class="text-xl">
-					{{ props.pot.name }}
+					{{ props.pot.attributes.name }}
 				</div>
 			</div>
 
@@ -29,7 +28,7 @@
 		<div class="flex items-center justify-between w-full py-2">
 			<div>{{ t('components.potDetail.totalSaved') }}</div>
 			<div class="text-2xl text-black font-bold">
-				{{ `$${props.pot.saved}` }}
+				{{ `$${props.pot.attributes.total_saved}` }}
 			</div>
 		</div>
 
@@ -65,6 +64,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import type { Pot } from '~~/utils/types/api';
 
 definePageMeta({
 	layout: 'dashboard',
@@ -72,17 +72,10 @@ definePageMeta({
 
 const { t } = useI18n();
 
-interface Pot {
-	name: string;
-	target: number;
-	theme: string;
-	saved: number;
-}
-
 const props = defineProps<{
 	pot: Pot;
 }>();
 
-const progress = computed(() => props.pot.saved / props.pot.target * 100);
+const progress = computed(() => props.pot.attributes.total_saved / props.pot.attributes.target * 100);
 const percentage = computed(() => Math.abs(progress.value).toFixed(2));
 </script>

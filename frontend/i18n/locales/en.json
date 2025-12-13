@@ -63,10 +63,9 @@
                     "goBack": "No, Go Back",
                     "deleteBudget": "Delete Budget",
                     "editBudget": "Edit Budget",
-                    "saveChanges": "Save Changes",
-                    "addNewBudget": "+ Add New Budget"
+                    "saveChanges": "Save Changes"
                 },
-                "budgetCategory": "Budget Category",
+                "budgetCategoryName": "Budget Category",
                 "maximumSpend": "Maximum Spend",
                 "theme": "Theme",
                 "description": "Choose a category to set a spending budget. These categories can help you monitor spending.",
@@ -97,9 +96,11 @@
                     "goBack": "No, Go Back",
                     "deletePot": "Delete Pot",
                     "editPot": "Edit Pot",
-                    "saveChanges": "Save Changes",
-                    "addNewPot": "+ Add New pot"
+                    "saveChanges": "Save Changes"
                 },
+                "potName": "Pot Name",
+                "target": "Target",
+                "theme": "Theme",
                 "description": "Create a pot to set savings targets. These can help keep you on track as you save for your special purchases.",
                 "title": "Add New Pot"
             },
@@ -189,7 +190,10 @@
         },
         "budgets": {
             "title": "Budgets",
-            "free": "Free"
+            "free": "Free",
+             "buttons": {
+                "addNewBudget": "+ Add New Budget"
+            }
         },
         "overview": {
             "balance": "Current Balance",
