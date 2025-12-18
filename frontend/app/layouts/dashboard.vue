@@ -3,10 +3,14 @@
 		<OverlayModal ref="overlay" />
 		<UDashboardSidebar
 			open
+			class="bg-gray-900"
 		>
 			<template #header>
 				<div>
-					Finance
+					<NuxtImg
+						src="../../public/finance.png"
+						alt="Finance app logo"
+					/>
 				</div>
 			</template>
 			<UNavigationMenu
@@ -22,11 +26,6 @@
 				</template>
 
 				<template #right>
-					<ULocaleSelect
-						v-model="locale"
-						:locales="Object.values(locales)"
-						class="w-48"
-					/>
 					<UColorModeButton />
 					<UAvatar
 						src="https://github.com/benjamincanac.png"
@@ -54,11 +53,9 @@
 <script setup lang="ts">
 import { useUserStore } from '~/stores/userStore';
 import type { NavigationMenuItem } from '@nuxt/ui';
-import * as locales from '@nuxt/ui/locale';
 import { useI18n } from 'vue-i18n';
 import type OverlayModal from '~/components/OverlayModal.vue';
 
-const locale = ref('en');
 const { t } = useI18n();
 const userStore = useUserStore();
 const router = useRouter();
@@ -73,11 +70,11 @@ const timeOfDay = computed(() => {
 
 const items = ref<NavigationMenuItem[][]>([
 	[
-		{ label: t('layouts.dashboard.navigation.overview'), icon: 'i-lucide-book-open', to: '/overview' },
-		{ label: t('layouts.dashboard.navigation.transactions'), icon: 'i-tabler:arrows-sort', to: '/transactions' },
-		{ label: t('layouts.dashboard.navigation.budgets'), icon: 'i-basil:chart-pie-solid', to: '/budgets' },
-		{ label: t('layouts.dashboard.navigation.pots'), icon: 'i-solar:money-bag-bold', to: '/pots' },
-		{ label: t('layouts.dashboard.navigation.reccuringBills'), icon: 'i-icon-park-outline:bill', to: '/reccuring-bills' },
+		{ label: t('layouts.dashboard.navigation.overview'), icon: 'i-lucide-book-open', to: '/overview', class: 'p-4' },
+		{ label: t('layouts.dashboard.navigation.transactions'), icon: 'i-tabler:arrows-sort', to: '/transactions', class: 'p-4' },
+		{ label: t('layouts.dashboard.navigation.budgets'), icon: 'i-basil:chart-pie-solid', to: '/budgets', class: 'p-4' },
+		{ label: t('layouts.dashboard.navigation.pots'), icon: 'i-solar:money-bag-bold', to: '/pots', class: 'p-4' },
+		{ label: t('layouts.dashboard.navigation.reccuringBills'), icon: 'i-icon-park-outline:bill', to: '/reccuring-bills', class: 'p-4' },
 	],
 ]);
 

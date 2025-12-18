@@ -1,8 +1,8 @@
 <template>
-	<div class="relative w-full h-96 flex justify-center items-center">
+	<div class="relative w-full h-65 flex justify-center items-center">
 		<apexchart
 			type="donut"
-			height="350"
+			height="250"
 			:options="chartData.options"
 			:series="series"
 		/>
@@ -27,14 +27,18 @@ const props = defineProps<{
 
 const series = computed(() => props.budgets.map((budget: Budget) => Number(budget.attributes.amount)));
 const total = computed(() => series.value.reduce((sum: number, val: number) => sum + val, 0));
+const colors = computed(() => props.budgets.map(b => b.attributes.theme));
 
 const chartData = {
+	theme: {
+		palette: [colors.value],
+	},
 	options: {
 		chart: { type: 'donut' },
 		legend: { show: false },
 		dataLabels: { enabled: false },
 		tooltip: { enabled: false },
-		fill: { colors: ['#9B9B9B', '#7FD320', 'red', 'yellow'] },
+		fill: { colors: colors.value },
 		states: {
 			hover: { filter: { type: 'lighten', value: 0.5 } },
 			active: { filter: { type: 'none', value: 0 } },

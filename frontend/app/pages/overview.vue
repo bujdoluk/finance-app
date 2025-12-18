@@ -4,32 +4,32 @@
 			{{ t('pages.overview.title') }}
 		</div>
 		<div class="grid grid-cols-3 px-8 gap-8">
-			<div class="bg-black rounded-lg p-4 text-white ">
+			<UCard class="bg-black rounded-lg text-white">
 				<div class="text-sm">
 					{{ t('pages.overview.balance') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
 				</div>
-			</div>
+			</UCard>
 
-			<div class="bg-white rounded-lg p-4">
+			<UCard class="bg-white rounded-lg">
 				<div class="text-sm">
 					{{ t('pages.overview.income') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
 				</div>
-			</div>
+			</UCard>
 
-			<div class="bg-white rounded-lg p-4">
+			<UCard class="bg-white rounded-lg">
 				<div class="text-sm">
 					{{ t('pages.overview.expenses') }}
 				</div>
 				<div class="text-3xl font-bold">
 					$4,836.00
 				</div>
-			</div>
+			</UCard>
 		</div>
 		<div class="grid grid-cols-2">
 			<div>

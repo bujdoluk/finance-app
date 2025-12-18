@@ -1,6 +1,6 @@
 <template>
 	<div class="p-8 h-750 flex flex-col">
-		<div class="text-2xl pb-8">
+		<div class="text-3xl pb-8 font-medium">
 			{{ t('pages.transactions.title') }}
 		</div>
 

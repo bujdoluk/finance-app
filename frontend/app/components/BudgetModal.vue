@@ -87,115 +87,78 @@ const loading = ref<boolean>(false);
 const themes = ref([
 	{
 		label: 'Green',
-		value: 'Green',
-		chip: {
-			color: 'secondary-green',
-		},
+		value: '#277C78',
+		chip: { color: 'secondary-green' },
 	},
 	{
 		label: 'Yellow',
-		value: 'Yellow',
-		chip: {
-			color: 'secondary-yellow',
-		},
+		value: '#F2CDAC',
+		chip: { color: 'secondary-yellow' },
 	},
 	{
 		label: 'Cyan',
-		value: 'Cyan',
-		chip: {
-			color: 'secondary-cyan',
-		},
+		value: '#82C9D7',
+		chip: { color: 'secondary-cyan' },
 	},
 	{
 		label: 'Navy',
-		value: 'Navy',
-		chip: {
-			color: 'secondary-navy',
-		},
+		value: '#626070',
+		chip: { color: 'secondary-navy' },
 	},
 	{
 		label: 'Red',
-		value: 'Red',
-		chip: {
-			color: 'secondary-red',
-		},
+		value: '#C94736',
+		chip: { color: 'secondary-red' },
 	},
 	{
 		label: 'Purple',
-		value: 'Purple',
-		chip: {
-			color: 'secondary-purple',
-		},
+		value: '#826CB0',
+		chip: { color: 'secondary-purple' },
 	},
 	{
 		label: 'Turquoise',
-		value: 'Turquoise',
-		chip: {
-			color: 'other-turqoise',
-		},
-	},
-	{
-		label: 'Purple',
-		value: 'Purple',
-		chip: {
-			color: 'secondary-purple',
-		},
+		value: '#597C7C',
+		chip: { color: 'other-turqoise' },
 	},
 	{
 		label: 'Brown',
-		value: 'Brown',
-		chip: {
-			color: 'other-brown',
-		},
+		value: '#93674F',
+		chip: { color: 'other-brown' },
 	},
 	{
 		label: 'Magenta',
-		value: 'Magenta',
-		chip: {
-			color: 'other-magenta',
-		},
+		value: '#934F6F',
+		chip: { color: 'other-magenta' },
 	},
 	{
 		label: 'Blue',
-		value: 'Blue',
-		chip: {
-			color: 'other-blue',
-		},
+		value: '#3F82B2',
+		chip: { color: 'other-blue' },
 	},
 	{
 		label: 'Navy Gray',
-		value: 'Navy Gray',
-		chip: {
-			color: 'other-navy-gray',
-		},
+		value: '#97A0AC',
+		chip: { color: 'other-navy-gray' },
 	},
 	{
 		label: 'Army Green',
-		value: 'Army Green',
-		chip: {
-			color: 'other-army-green',
-		},
+		value: '#7F9161',
+		chip: { color: 'other-army-green' },
 	},
 	{
 		label: 'Pink',
-		value: 'Pink',
-		chip: {
-			color: 'other-pink',
-		},
+		value: '#AF81BA',
+		chip: { color: 'other-pink' },
 	},
 	{
 		label: 'Gold',
-		value: 'Gold',
-		chip: {
-			color: 'other-gold',
-		},
+		value: '#CAB361',
+		chip: { color: 'other-gold' },
 	},
 	{
 		label: 'Orange',
-		value: 'Orange',
-		chip: {
-			color: 'other-orange',
-		},
+		value: '#BE6C49',
+		chip: { color: 'other-orange' },
 	},
 ] satisfies SelectItem[]);
 

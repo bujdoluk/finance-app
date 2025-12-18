@@ -9,6 +9,7 @@ export default defineNuxtConfig({
 		'@pinia/nuxt',
 		'@nuxt/icon',
 		'nuxt-lucide-icons',
+		'nuxt-svgo',
 	],
 	ssr: false,
 	devtools: { enabled: true },

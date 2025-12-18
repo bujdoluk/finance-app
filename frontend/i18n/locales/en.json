@@ -5,22 +5,27 @@
             "spendingSummary": "Spending Summary"
         },
         "transactionsOverview": {
-            "title": "Transactions"
+            "title": "Transactions",
+            "moreTransactions": "View 1 more transaction | View {count} more transactions"
         },
         "detailLink": {
             "title": "See Details"
         },
         "potsOverview": {
             "title":  "Pots",
-            "seeDetails": "See details"
+            "seeDetails": "See details",
+            "total": "Total Saved",
+            "morePots": "View 1 more pot | View {count} more pots"
         },
         "budgetsOverview": {
             "title":  "Budgets",
-            "seeDetails": "See details"
+            "seeDetails": "See details",
+            "moreBudgets": "View 1 more budget | View {count} more budgets"
         },
         "billsOverview": {
             "title":  "Reccuring bills",
-            "seeDetails": "See details"
+            "seeDetails": "See details",
+            "moreBills": "View 1 more bill | View {count} more bills"
         },
         "budgetCard": {
             "maximum": "Maximum of ${maximum}",

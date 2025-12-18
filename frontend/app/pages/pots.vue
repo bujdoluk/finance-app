@@ -1,7 +1,7 @@
 <template>
-	<div class="bg-beige-100">
-		<div class="flex justify-between items-center p-4">
-			<div class="text-xl">
+	<div class="bg-beige-100 p-8">
+		<div class="flex justify-between items-center">
+			<div class="text-3xl pb-8 font-medium">
 				{{ t('pages.pots.title') }}
 			</div>
 			<div>
