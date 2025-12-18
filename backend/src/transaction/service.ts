@@ -1,6 +1,8 @@
 import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
 import transactionRepository from "./repository";
+import { importTransactionsFromCSV } from '../utils/imports/csv';
+import fs from 'fs/promises';
 
 export const transactionService = {
   async create(body: TransactionsInput): Promise<Transactions> {
@@ -9,6 +11,18 @@ export const transactionService = {
     } catch (err: unknown) {
       logger.error(`createTransaction error: ${getErrorMessage(err)}`);
       throw err; 
+    }
+  },
+
+  async importFromCSV(filePath: string): Promise<number> {
+    try {
+      const transactions = await importTransactionsFromCSV(filePath);
+      await transactionRepository.createMany(transactions);
+      await fs.unlink(filePath); 
+      return transactions.length;
+    } catch (err: unknown) {
+      logger.error(`importFromCSV error: ${getErrorMessage(err)}`);
+      throw err;
     }
   },
 

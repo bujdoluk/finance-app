@@ -1,7 +1,28 @@
 <template>
 	<div class="p-8 h-750 flex flex-col">
-		<div class="text-3xl pb-8 font-medium">
-			{{ t('pages.transactions.title') }}
+		<div class="flex justify-between text-3xl font-medium">
+			<div>
+				{{ t('pages.transactions.title') }}
+			</div>
+			<div class="flex items-center pb-6 gap-3">
+				<UFileUpload
+					v-model="file"
+					accept=".csv"
+					:multiple="false"
+				>
+					<template #default="{ open }">
+						<UButton
+							label="Import CSV"
+							color="secondary-green"
+							variant="solid"
+							class="cursor-pointer"
+							icon="i-lucide-upload"
+							:loading="loading"
+							@click="open()"
+						/>
+					</template>
+				</UFileUpload>
+			</div>
 		</div>
 
 		<div class="flex flex-col p-8 bg-white rounded-lg flex-1">
@@ -278,6 +299,33 @@ const deleteTransaction = async (id: string): Promise<void> => {
 	}
 };
 
+const file = ref<File | null>(null);
+
+const importTransactions = async (): Promise<void> => {
+	if (!file.value) return;
+
+	const formData = new FormData();
+	formData.append('file', file.value);
+
+	try {
+		loading.value = true;
+		await $fetch(`${appConfig.api}/transactions/import`, {
+			method: 'POST',
+			body: formData,
+		});
+		console.log('CSV imported successfully');
+	}
+	catch (err: unknown) {
+		console.error('CSV import failed', err);
+	}
+	finally {
+		loading.value = false;
+		file.value = null;
+		await fetchTransactions();
+		await fetchCategories();
+	}
+};
+
 onMounted(async (): Promise<void> => {
 	await fetchCategories();
 	await fetchTransactions();
@@ -293,5 +341,12 @@ watch(sortedTransations, async (newValue, oldValue): Promise<void> => {
 	if (newValue !== oldValue) {
 		await fetchTransactions();
 	}
+});
+
+watch(file, async (newFile): Promise<void> => {
+	if (!newFile) return;
+	if (!newFile.name.endsWith('.csv')) return;
+
+	await importTransactions();
 });
 </script>

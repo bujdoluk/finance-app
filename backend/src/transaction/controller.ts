@@ -26,6 +26,37 @@ export const getTransactions = async (req: Request, res: Response) => {
   }
 };
 
+export const importTransactions = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    if (!req.file) {
+      return res.status(StatusCodes.BAD_REQUEST).json(
+        createErrorDocument([
+          createError(StatusCodes.BAD_REQUEST, 'Missing file', 'CSV file is required'),
+        ])
+      );
+    }
+
+    const count = await transactionService.importFromCSV(req.file.path);
+
+    return res.status(StatusCodes.CREATED).json({
+      message: 'Transactions imported',
+      imported: count,
+    });
+  } catch (err: unknown) {
+    logger.error(`importTransactions error: ${getErrorMessage(err)}`);
+
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
+      createErrorDocument([
+        createError(
+          StatusCodes.INTERNAL_SERVER_ERROR,
+          'Import failed',
+          err instanceof Error ? err.message : 'Unknown error'
+        ),
+      ])
+    );
+  }
+};
+
 export const getTransactionCategories = async (_req: Request, res: Response) => {
   try {
     const categories = await transactionService.getCategories();

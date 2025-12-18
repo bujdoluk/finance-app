@@ -26,6 +26,38 @@ export const transactionRepository = {
     }
   },
 
+  async createMany(transactions: TransactionsInput[]): Promise<Transactions[]> {
+    if (transactions.length === 0) return [];
+
+    const values: string[] = [];
+    const params: unknown[] = [];
+
+    transactions.forEach((transaction, index) => {
+      const baseIndex = index * 5;
+      values.push(
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, NOW(), NOW())`
+      );
+
+        params.push(
+          transaction.amount,
+          transaction.category,
+          transaction.date,
+          transaction.sender,
+          transaction.sender_picture
+        );
+    });
+
+    const sql = `
+      INSERT INTO ${tables.transactions.tableName}
+        (amount, category, date, sender, sender_picture, created_at, updated_at)
+      VALUES ${values.join(',')}
+      RETURNING *
+    `;
+
+    const res = await dbPool.query<Transactions>(sql, params);
+    return res.rows;
+  },
+
   async delete(id: number): Promise<Transactions> {
     try {
       const res = await dbPool.query<Transactions>(

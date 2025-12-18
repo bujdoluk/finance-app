@@ -1,9 +1,22 @@
 import { Router } from "express";
 
-import { createTransaction, deleteTransaction, getTransactionById, getTransactions, getTransactionCategories } from "./controller";
+import { createTransaction, deleteTransaction, getTransactionById, getTransactions, getTransactionCategories, importTransactions } from "./controller";
+import multer from 'multer';
+import path from 'path';
+
+const upload = multer({
+  dest: path.join(process.cwd(), 'tmp'),
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype !== 'text/csv') {
+      return cb(new Error('Only CSV files allowed'));
+    }
+    cb(null, true);
+  },
+});
 
 const router = Router();
 
+router.post('/import', upload.single('file'), importTransactions);
 router.get("/categories", getTransactionCategories);
 router.get("/", getTransactions);
 router.get("/:id", getTransactionById);
