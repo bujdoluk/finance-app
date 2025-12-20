@@ -2,6 +2,7 @@
 @import "@nuxt/ui";
 
 @theme {
+    --color-primary: #277C78;
     --color-beige-100: #F8F4F0;
     --color-beige-500: #98908B;
     --color-gray-100: #F2F2F2;

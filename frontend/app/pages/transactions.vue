@@ -25,31 +25,31 @@
 			</div>
 		</div>
 
-		<div class="flex flex-col p-8 bg-white rounded-lg flex-1">
-			<div class="flex w-full items-center pb-8">
+		<UCard class="flex flex-col bg-white rounded-lg flex-1">
+			<div class="flex flex-col w-full pb-8 lg:flex-row">
 				<UInput
 					:model-value="table?.tableApi?.getColumn('sender')?.getFilterValue() as string"
 					placeholder="Search sender ..."
-					class="mr-2 min-w-50"
+					class="mr-2 w-50"
 					@update:model-value="table?.tableApi?.getColumn('sender')?.setFilterValue($event)"
 				/>
 
-				<div class="ml-auto pr-2 text-sm">
+				<div class="py-1 pr-2 text-sm my-auto lg:ml-auto lg:py-0 ">
 					{{ t('components.tables.transactions.filters.sortBy') }}
 				</div>
 				<USelect
 					v-model="sortedTransations"
-					class="mr-2 min-w-50"
+					class="mr-2 w-50"
 					:items="sortOptions"
 				/>
 
-				<div class="pr-2 text-sm">
+				<div class="py-1 pr-2 text-sm my-auto lg:py-0">
 					{{ t('components.tables.transactions.filters.category') }}
 				</div>
 				<USelect
 					v-model="category"
 					:items="categories"
-					class="min-w-50"
+					class="w-50"
 				/>
 			</div>
 
@@ -108,7 +108,7 @@
 					/>
 				</div>
 			</div>
-		</div>
+		</UCard>
 	</div>
 </template>
 
@@ -130,7 +130,7 @@ definePageMeta({
 const table = useTemplateRef('table');
 const { t } = useI18n();
 const { copy } = useClipboard();
-const loading = ref<boolean>(false);
+const loading = ref<boolean>();
 
 const pagination = ref({
 	pageIndex: 0,

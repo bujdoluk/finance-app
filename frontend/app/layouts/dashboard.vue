@@ -74,7 +74,7 @@ const items = ref<NavigationMenuItem[][]>([
 		{ label: t('layouts.dashboard.navigation.transactions'), icon: 'i-tabler:arrows-sort', to: '/transactions', class: 'p-4' },
 		{ label: t('layouts.dashboard.navigation.budgets'), icon: 'i-basil:chart-pie-solid', to: '/budgets', class: 'p-4' },
 		{ label: t('layouts.dashboard.navigation.pots'), icon: 'i-solar:money-bag-bold', to: '/pots', class: 'p-4' },
-		{ label: t('layouts.dashboard.navigation.reccuringBills'), icon: 'i-icon-park-outline:bill', to: '/reccuring-bills', class: 'p-4' },
+		{ label: t('layouts.dashboard.navigation.bills'), icon: 'i-icon-park-outline:bill', to: '/bills', class: 'p-4' },
 	],
 ]);
 

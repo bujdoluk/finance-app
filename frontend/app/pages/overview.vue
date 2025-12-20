@@ -5,7 +5,17 @@
 		</div>
 		<div class="grid grid-cols-1 md:grid-cols-3 px-8 gap-8">
 			<UCard
-				v-if="!loading"
+				v-if="loading"
+				class="rounded-lg"
+			>
+				<div class="space-y-3">
+					<USkeleton class="h-4 w-24" />
+					<USkeleton class="h-8 w-32" />
+				</div>
+			</UCard>
+
+			<UCard
+				v-else
 				class="bg-black rounded-lg text-white"
 			>
 				<div class="text-sm">
@@ -17,7 +27,7 @@
 			</UCard>
 
 			<UCard
-				v-else
+				v-if="loading"
 				class="rounded-lg"
 			>
 				<div class="space-y-3">
@@ -27,7 +37,7 @@
 			</UCard>
 
 			<UCard
-				v-if="!loading"
+				v-else
 				class="bg-white rounded-lg"
 			>
 				<div class="text-sm">
@@ -39,7 +49,7 @@
 			</UCard>
 
 			<UCard
-				v-else
+				v-if="loading"
 				class="rounded-lg"
 			>
 				<div class="space-y-3">
@@ -49,7 +59,7 @@
 			</UCard>
 
 			<UCard
-				v-if="!loading"
+				v-else
 				class="bg-white rounded-lg"
 			>
 				<div class="text-sm">
@@ -59,25 +69,10 @@
 					$4,836.00
 				</div>
 			</UCard>
-
-			<UCard
-				v-else
-				class="rounded-lg"
-			>
-				<div class="space-y-3">
-					<USkeleton class="h-4 w-24" />
-					<USkeleton class="h-8 w-32" />
-				</div>
-			</UCard>
 		</div>
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
 			<div class="flex flex-col min-h-0">
 				<div class="pb-8">
-					<PotsOverview
-						v-if="!loadingPots"
-						:pots="pots"
-					/>
-
 					<UCard v-if="loadingPots">
 						<div class="flex justify-between pb-4 items-center">
 							<USkeleton class="h-6 w-40" />
@@ -112,14 +107,14 @@
 							</div>
 						</div>
 					</UCard>
+
+					<PotsOverview
+						v-else
+						:pots="pots"
+					/>
 				</div>
 
 				<div class="flex-1 min-h-0">
-					<TransactionsOverview
-						v-if="!loadingTransactions"
-						:transactions="transactions"
-					/>
-
 					<UCard
 						v-if="loadingTransactions"
 						class="h-[320px] flex flex-col p-4"
@@ -144,16 +139,16 @@
 							</div>
 						</div>
 					</UCard>
+
+					<TransactionsOverview
+						v-else
+						:transactions="transactions"
+					/>
 				</div>
 			</div>
 
 			<div class="flex flex-col gap-8">
 				<div>
-					<BudgetsOverview
-						v-if="!loadingBudgets"
-						:budgets="budgets"
-					/>
-
 					<UCard
 						v-if="loadingBudgets"
 						class="h-[330px] flex flex-col"
@@ -183,13 +178,13 @@
 							</div>
 						</div>
 					</UCard>
+
+					<BudgetsOverview
+						v-else
+						:budgets="budgets"
+					/>
 				</div>
 				<div>
-					<BillsOverview
-						v-if="!loadingBills"
-						:bills="bills"
-					/>
-
 					<UCard
 						v-if="loadingBills"
 						class="h-[220px] flex flex-col p-4"
@@ -212,6 +207,11 @@
 							</div>
 						</div>
 					</UCard>
+
+					<BillsOverview
+						v-else
+						:bills="bills"
+					/>
 				</div>
 			</div>
 		</div>

@@ -1,52 +1,79 @@
 <template>
-	<div class="p-8 h-750 flex flex-col">
+	<div class="p-8 h-750 flex flex-col overflow-auto">
 		<div class="text-3xl pb-8 font-medium">
-			{{ t('pages.reccuringBills.title') }}
+			{{ t('pages.bills.title') }}
 		</div>
 
-		<div class="flex gap-8">
-			<div class="flex flex-col w-1/3 pb-4 gap-8">
-				<div class="p-4 bg-black rounded text-white">
+		<div class="flex flex-col lg:flex-row gap-8">
+			<div class="flex flex-col w-full lg:w-1/3 gap-8">
+				<div
+					v-if="loadingTotal"
+					class="p-4 bg-black rounded text-white flex flex-col gap-2"
+				>
+					<USkeleton class="h-8 w-8 rounded" />
+					<USkeleton class="h-4 w-32" />
+					<USkeleton class="h-8 w-32" />
+				</div>
+				<UCard
+					v-else
+					class="bg-black rounded text-white"
+				>
 					<div>
 						<UIcon
 							name="i-material-symbols:payments-outline"
 							class="size-5"
 						/>
 					</div>
-					<div>{{ t('pages.reccuringBills.totalBills') }}</div>
+					<div>{{ t('pages.bills.totalBills') }}</div>
 					<div class="text-2xl font-bold">
 						$1,500.00
 					</div>
+				</UCard>
+
+				<div
+					v-if="loadingSummary"
+					class="flex flex-col rounded bg-white p-4 gap-4"
+				>
+					<USkeleton class="h-6 w-40" />
+					<div class="flex flex-col gap-2">
+						<USkeleton class="h-4 w-full rounded" />
+						<USkeleton class="h-4 w-full rounded" />
+						<USkeleton class="h-4 w-full rounded" />
+					</div>
 				</div>
-				<div class="flex flex-col rounded bg-white p-4 gap-4">
+
+				<UCard
+					v-else
+					class="flex flex-col rounded bg-white"
+				>
 					<div class="text-lg font-medium">
-						{{ t('pages.reccuringBills.summary') }}
+						{{ t('pages.bills.summary') }}
 					</div>
 					<div class="flex justify-between border-b border-accented py-2">
-						<div>{{ t('pages.reccuringBills.paidBills') }}</div>
+						<div>{{ t('pages.bills.paidBills') }}</div>
 						<div class="font-medium">
 							$50
 						</div>
 					</div>
 
 					<div class="flex justify-between border-b border-accented py-2">
-						<div>{{ t('pages.reccuringBills.totalUpcoming') }}</div>
+						<div>{{ t('pages.bills.totalUpcoming') }}</div>
 						<div class="font-medium">
 							$50
 						</div>
 					</div>
 
 					<div class="flex justify-between text-red-500">
-						<div>{{ t('pages.reccuringBills.dueSoon') }}</div>
+						<div>{{ t('pages.bills.dueSoon') }}</div>
 						<div class="font-medium">
 							$50
 						</div>
 					</div>
-				</div>
+				</UCard>
 			</div>
 
-			<div class="flex flex-col p-8 bg-white rounded-lg flex-1">
-				<div class="flex w-full items-center justify-between pb-8">
+			<UCard class="flex flex-1 flex-col bg-white rounded-lg flex-1">
+				<div class="flex w-full items-center justify-between pb-4">
 					<UInput
 						:model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string"
 						placeholder="Search bill ..."
@@ -58,7 +85,7 @@
 						v-model="sortedBills"
 						:items="sortOptions"
 						class="mr-2 min-w-50"
-						:placeholder="t('components.tables.reccuringBills.filters.sortBy')"
+						:placeholder="t('components.tables.bills.filters.sortBy')"
 					/>
 				</div>
 
@@ -66,9 +93,9 @@
 					<UTable
 						ref="table"
 						v-model:column-filters="columnFilters"
-						class="flex-1"
+						class="flex-1 min-h-154"
 						:columns="columns"
-						:loading="loading"
+						:loading="loadingTable"
 						loading-color="primary"
 						loading-animation="carousel"
 						:data="bills"
@@ -106,7 +133,7 @@
 						</template>
 					</UTable>
 				</div>
-			</div>
+			</UCard>
 		</div>
 	</div>
 </template>
@@ -128,16 +155,18 @@ definePageMeta({
 const table = useTemplateRef('table');
 const { t } = useI18n();
 const { copy } = useClipboard();
-const loading = ref<boolean>(false);
+const loadingTable = ref<boolean>();
+const loadingTotal = ref<boolean>();
+const loadingSummary = ref<boolean>();
 
 const sortOptions = [
-	{ label: t('components.tables.reccuringBills.filters.none'), value: 'None' },
-	{ label: t('components.tables.reccuringBills.filters.latest'), value: '-next_run' },
-	{ label: t('components.tables.reccuringBills.filters.oldest'), value: 'next_run' },
-	{ label: t('components.tables.reccuringBills.filters.atoz'), value: 'name' },
-	{ label: t('components.tables.reccuringBills.filters.ztoa'), value: '-name' },
-	{ label: t('components.tables.reccuringBills.filters.highest'), value: '-amount' },
-	{ label: t('components.tables.reccuringBills.filters.lowest'), value: 'amount' },
+	{ label: t('components.tables.bills.filters.none'), value: 'None' },
+	{ label: t('components.tables.bills.filters.latest'), value: '-next_run' },
+	{ label: t('components.tables.bills.filters.oldest'), value: 'next_run' },
+	{ label: t('components.tables.bills.filters.atoz'), value: 'name' },
+	{ label: t('components.tables.bills.filters.ztoa'), value: '-name' },
+	{ label: t('components.tables.bills.filters.highest'), value: '-amount' },
+	{ label: t('components.tables.bills.filters.lowest'), value: 'amount' },
 ];
 
 const getDropdownActions = (bill: BillColumnDefinition): DropdownMenuItem[][] => {
@@ -164,19 +193,19 @@ const getDropdownActions = (bill: BillColumnDefinition): DropdownMenuItem[][] =>
 const columns: TableColumn<BillColumnDefinition>[] = [
 	{
 		accessorKey: 'id',
-		header: `${t('components.tables.reccuringBills.columns.id')}`,
+		header: `${t('components.tables.bills.columns.id')}`,
 		cell: ({ row }) => `#${row.getValue('id')}`,
 	},
 	{
 		accessorKey: 'name',
-		header: `${t('components.tables.reccuringBills.columns.name')}`,
+		header: `${t('components.tables.bills.columns.name')}`,
 		cell: ({ row }) => {
 			return row.getValue('name');
 		},
 	},
 	{
 		accessorKey: 'next_run',
-		header: `${t('components.tables.reccuringBills.columns.dueDate')}`,
+		header: `${t('components.tables.bills.columns.dueDate')}`,
 		cell: ({ row }) => {
 			return new Date(row.getValue('next_run')).toLocaleString('en-US', {
 				day: 'numeric',
@@ -189,7 +218,7 @@ const columns: TableColumn<BillColumnDefinition>[] = [
 	},
 	{
 		accessorKey: 'amount',
-		header: () => h('div', { class: 'text-right' }, `${t('components.tables.reccuringBills.columns.amount')}`),
+		header: () => h('div', { class: 'text-right' }, `${t('components.tables.bills.columns.amount')}`),
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue('amount'));
 
@@ -220,7 +249,7 @@ const sortedBills = ref<string>('None');
 
 const fetchBills = async (): Promise<void> => {
 	try {
-		loading.value = true;
+		loadingTable.value = true;
 		const query: Record<string, string> = {};
 
 		if (sortedBills.value && sortedBills.value !== 'None') {
@@ -244,7 +273,7 @@ const fetchBills = async (): Promise<void> => {
 		bills.value = [];
 	}
 	finally {
-		loading.value = false;
+		loadingTable.value = false;
 	}
 };
 

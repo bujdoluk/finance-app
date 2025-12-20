@@ -175,7 +175,7 @@
                     "category": "Category"
                 } 
             },
-            "reccuringBills": {
+            "bills": {
                 "columns": {
                     "id": "# ID",
                     "name": "Bill Title",
@@ -202,7 +202,7 @@
                 "addNewPot": "+ Add New Pot"
             }
         },
-        "reccuringBills": {
+        "bills": {
             "title": "Reccuring Bills",
             "totalBills": "Total Bills",
             "summary": "Summary",
@@ -238,7 +238,7 @@
                 "transactions": "Transactions",
                 "budgets": "Budgets",
                 "pots": "Pots",
-                "reccuringBills": "Reccuring Bills"
+                "bills": "Reccuring Bills"
             }
         }
     }
