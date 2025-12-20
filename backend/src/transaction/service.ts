@@ -47,7 +47,7 @@ export const transactionService = {
     }
   },
 
-  async get(query?: Record<string, unknown>): Promise<Transactions[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Transactions[]; total: number }> {
     try {
       return await transactionRepository.get(query); 
     } catch (err: unknown) {

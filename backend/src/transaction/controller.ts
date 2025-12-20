@@ -4,14 +4,15 @@ import { StatusCodes } from "http-status-codes";
 import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import { mapToTransactionResource } from "./mapper";
+import { mapToTransactionResource, mapToTransactionsResponse } from "./mapper";
 import transactionService from "./service";
 import { validateCreateTransaction } from "./validation";
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
-    const results = await transactionService.get(req.query);
-    return res.json(results.map(mapToTransactionResource));
+    const { rows, total } = await transactionService.get(req.query);
+
+    return res.json(mapToTransactionsResponse(rows, total, req));
   } catch (err: unknown) {
     logger.error(`getTransactions error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.BAD_REQUEST).json(

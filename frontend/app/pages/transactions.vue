@@ -64,7 +64,6 @@
 					:loading="loading"
 					loading-color="primary"
 					loading-animation="carousel"
-					:pagination-options="{ getPaginationRowModel: getPaginationRowModel() }"
 					:filter-options="{ getFilteredRowModel: getFilteredRowModel() }"
 					:ui="{
 						td: 'p-2 pl-4',
@@ -101,10 +100,10 @@
 
 				<div class="flex justify-end border-t border-default pt-4 pr-4">
 					<UPagination
-						:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-						:items-per-page="table?.tableApi?.getState().pagination.pageSize"
-						:total="table?.tableApi?.getFilteredRowModel().rows.length"
-						@update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+						:default-page="pagination.pageIndex + 1"
+						:items-per-page="pagination.pageSize"
+						:total="total ?? 0"
+						@update:page="onPageChange"
 					/>
 				</div>
 			</div>
@@ -114,12 +113,13 @@
 
 <script setup lang="ts">
 import { h } from 'vue';
-import { getPaginationRowModel, getFilteredRowModel } from '@tanstack/vue-table';
+import type { PaginationState } from '@tanstack/vue-table';
+import { getFilteredRowModel } from '@tanstack/vue-table';
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import type { TransactionColumnDefinition } from '../../utils/types/tableColumnDefinitions';
-import type { Transaction } from '../../utils/types/api';
+import type { TransactionsResponse } from '../../utils/types/api';
 import appConfig from '#build/app.config';
 import dayjs from 'dayjs';
 
@@ -131,11 +131,6 @@ const table = useTemplateRef('table');
 const { t } = useI18n();
 const { copy } = useClipboard();
 const loading = ref<boolean>();
-
-const pagination = ref({
-	pageIndex: 0,
-	pageSize: 5,
-});
 
 const sortOptions = [
 	{ label: t('components.tables.transactions.filters.none'), value: 'None' },
@@ -247,10 +242,20 @@ const fetchCategories = async (): Promise<void> => {
 const transactions = ref<TransactionColumnDefinition[]>([]);
 const sortedTransations = ref<string>('None');
 
+const pagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 2,
+});
+const total = ref<number>(0);
+
 const fetchTransactions = async (): Promise<void> => {
 	try {
 		loading.value = true;
-		const query: Record<string, string> = {};
+
+		const query: Record<string, string | number> = {
+			'page[limit]': pagination.value.pageSize,
+			'page[offset]': pagination.value.pageSize * pagination.value.pageIndex,
+		};
 
 		if (category.value && category.value !== 'All') {
 			query['filter[category]'] = category.value;
@@ -260,11 +265,9 @@ const fetchTransactions = async (): Promise<void> => {
 			query.sort = sortedTransations.value;
 		}
 
-		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`, {
-			query,
-		});
+		const res = await $fetch<TransactionsResponse>(`${appConfig.api}/transactions`, { query });
 
-		transactions.value = data.map(transaction => ({
+		transactions.value = res.data.map(transaction => ({
 			id: transaction.id,
 			amount: transaction.attributes.amount,
 			category: transaction.attributes.category,
@@ -272,14 +275,22 @@ const fetchTransactions = async (): Promise<void> => {
 			sender_picture: transaction.attributes.sender_picture,
 			date: transaction.attributes.date,
 		}));
+
+		total.value = res.meta.total;
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
 		transactions.value = [];
+		total.value = 0;
 	}
 	finally {
 		loading.value = false;
 	}
+};
+
+const onPageChange = async (newPage: number): Promise<void> => {
+	pagination.value.pageIndex = newPage - 1;
+	await fetchTransactions();
 };
 
 const deleteTransaction = async (id: string): Promise<void> => {

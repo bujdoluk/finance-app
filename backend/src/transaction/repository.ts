@@ -92,8 +92,10 @@ export const transactionRepository = {
     }
   },
 
-  async get(query?: Record<string, unknown>): Promise<Transactions[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Transactions[], total: number }> {
     try {
+      await dbPool.query('BEGIN');
+
       let where = "deleted_at IS NULL";
       const params: unknown[] = [];
 
@@ -152,10 +154,28 @@ export const transactionRepository = {
         }
       }
 
-      const sql = `SELECT * FROM ${tables.transactions.tableName} WHERE ${where} ${orderBy}`;
-      const res = await dbPool.query<Transactions>(sql, params);
-      return res.rows;
+      // Pagination 
+      const limit = Number(query?.['page[limit]']);
+      const offset = Number(query?.['page[offset]']);
+
+      params.push(limit, offset);
+
+      const data = `SELECT * FROM ${tables.transactions.tableName} WHERE ${where} ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      const count = `SELECT COUNT(*)::int AS total FROM ${tables.transactions.tableName} WHERE ${where}`;
+
+      const [dataRes, countRes] = await Promise.all([
+        dbPool.query<Transactions>(data, params),
+        dbPool.query<{ total: number }>(count, params.slice(0, params.length - 2)),
+      ]);
+
+      await dbPool.query('COMMIT');
+
+      return {
+        rows: dataRes.rows,
+        total: countRes.rows[0].total,
+      };
     } catch (err: unknown) {
+      await dbPool.query('ROLLBACK');
       logger.error(`get error: ${getErrorMessage(err)}`);
       throw err;
     }

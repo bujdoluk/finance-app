@@ -55,3 +55,18 @@ export interface Transaction {
 		date: Date;
 	};
 }
+
+export interface TransactionsResponse {
+	data: Transaction[];
+	links: {
+		first: string;
+		last: string;
+		prev: string;
+		next: string;
+	};
+	meta: {
+		total: number;
+		offset: number;
+		limit: number;
+	};
+}
