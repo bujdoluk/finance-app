@@ -1,5 +1,5 @@
 <template>
-	<div class="relative w-full h-65 flex justify-center items-center">
+	<div class="relative w-full flex justify-center items-center">
 		<apexchart
 			type="donut"
 			height="250"

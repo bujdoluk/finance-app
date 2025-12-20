@@ -150,14 +150,14 @@
                 "title": "Delete '{name}'?"
             }
         },
-        "potDetail": {
+        "potCard": {
             "target": "Target of ${target}",
             "totalSaved": "Total saved"
         },
         "tables": {
             "transactions": {
                 "columns": {
-                    "id": "# ID",
+                    "id": "#ID",
                     "sender": "Recipient/Sender",
                     "category": "Category",
                     "date": "Transaction date",
@@ -177,7 +177,7 @@
             },
             "bills": {
                 "columns": {
-                    "id": "# ID",
+                    "id": "#ID",
                     "name": "Bill Title",
                     "dueDate": "Due Date",
                     "amount": "Amount"

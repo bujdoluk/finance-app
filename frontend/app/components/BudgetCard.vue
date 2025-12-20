@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-white p-4 flex flex-col gap-4 rounded">
+	<UCard class="min-h-80">
 		<div class="flex justify-between">
 			<div class="flex items-center">
 				<UChip
@@ -29,17 +29,18 @@
 			</div>
 		</div>
 
-		<div>{{ t('components.budgetCard.maximum', { maximum: budget.attributes.maximum_spending }) }}</div>
-
-		<div>
-			<UProgress
-				v-model="value"
-				size="xl"
-				:color="themeHexToColorNameMap[budget.attributes.theme]"
-			/>
+		<div class="py-1">
+			{{ t('components.budgetCard.maximum', { maximum: budget.attributes.maximum_spending }) }}
 		</div>
 
-		<div class="flex">
+		<UProgress
+			v-model="value"
+			size="xl"
+			class="py-1"
+			:color="themeHexToColorNameMap[budget.attributes.theme]"
+		/>
+
+		<div class="flex py-1">
 			<div class="flex w-1/2">
 				<div>
 					<USeparator
@@ -111,7 +112,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</UCard>
 </template>
 
 <script setup lang="ts">

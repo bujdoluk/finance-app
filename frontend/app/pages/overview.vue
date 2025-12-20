@@ -16,7 +16,7 @@
 
 			<UCard
 				v-else
-				class="bg-black rounded-lg text-white"
+				class="bg-gray-900 rounded-lg text-white"
 			>
 				<div class="text-sm">
 					{{ t('pages.overview.balance') }}

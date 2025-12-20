@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-beige-100 p-8">
+	<div class="bg-beige-100 p-8 h-750 oveflow-y-auto">
 		<div class="flex justify-between items-center">
 			<div class="text-3xl pb-8 font-medium">
 				{{ t('pages.budgets.title') }}
@@ -12,14 +12,14 @@
 			</div>
 		</div>
 
-		<div class="flex gap-8 rounded">
-			<div class="bg-white w-1/3 p-4">
+		<div class="flex flex-col lg:flex-row gap-8 rounded-lg">
+			<div class="bg-white w-full lg:w-1/3">
 				<ClientOnly>
 					<BudgetChart :budgets="budgets" />
 				</ClientOnly>
 			</div>
 
-			<div class="w-2/3 flex flex-col gap-8 max-h-[80vh] overflow-y-auto">
+			<div class="w-full lg:w-2/3 flex flex-col gap-8 max-h-[80vh] overflow-y-auto">
 				<BudgetCard
 					v-for="budget in budgets"
 					:key="budget.id"

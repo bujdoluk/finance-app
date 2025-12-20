@@ -1,5 +1,5 @@
 <template>
-	<div class="p-8 h-750 flex flex-col overflow-auto">
+	<div class="p-8 h-750 flex flex-col overflow-y-auto">
 		<div class="text-3xl pb-8 font-medium">
 			{{ t('pages.bills.title') }}
 		</div>
@@ -8,7 +8,7 @@
 			<div class="flex flex-col w-full lg:w-1/3 gap-8">
 				<div
 					v-if="loadingTotal"
-					class="p-4 bg-black rounded text-white flex flex-col gap-2"
+					class="flex flex-col gap-2 p-4 rounded"
 				>
 					<USkeleton class="h-8 w-8 rounded" />
 					<USkeleton class="h-4 w-32" />
@@ -16,7 +16,7 @@
 				</div>
 				<UCard
 					v-else
-					class="bg-black rounded text-white"
+					class="bg-gray-900 rounded text-white"
 				>
 					<div>
 						<UIcon
@@ -73,7 +73,7 @@
 			</div>
 
 			<UCard class="flex flex-1 flex-col bg-white rounded-lg flex-1">
-				<div class="flex w-full items-center justify-between pb-4">
+				<div class="flex w-full items-center pb-4 lg:justify-between">
 					<UInput
 						:model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string"
 						placeholder="Search bill ..."

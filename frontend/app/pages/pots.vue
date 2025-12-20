@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-beige-100 p-8">
+	<div class="bg-beige-100 p-8 h-750 overflow-y-auto">
 		<div class="flex justify-between items-center">
 			<div class="text-3xl pb-8 font-medium">
 				{{ t('pages.pots.title') }}
@@ -12,14 +12,14 @@
 			</div>
 		</div>
 
-		<div class="w-full flex gap-4">
-			<div
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+			<PotCard
 				v-for="pot in pots"
 				:key="pot.id"
-				class="w-1/2"
-			>
-				<PotDetail :pot="pot" />
-			</div>
+				:pot="pot"
+				@edit="(id) => onEditPot(String(id))"
+				@delete="(id) => onDeletePot(String(id))"
+			/>
 		</div>
 	</div>
 </template>
@@ -50,6 +50,44 @@ const fetchPots = async (): Promise<void> => {
 	finally {
 		loading.value = false;
 	}
+};
+
+const editPot = async (id: string): Promise<void> => {
+	try {
+		loading.value = true;
+		const data = await $fetch<Array<Pot>>(`http://localhost:3001/v1/pots/${id}`);
+		pots.value = data;
+		console.log(pots.value);
+	}
+	catch (err: unknown) {
+		console.error('Failed to edit pot:', err);
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+const deletePot = async (id: string): Promise<void> => {
+	try {
+		loading.value = true;
+		const data = await $fetch<Array<Pot>>(`http://localhost:3001/v1/pots/${id}`);
+		pots.value = data;
+		console.log(pots.value);
+	}
+	catch (err: unknown) {
+		console.error('Failed to delete pot:', err);
+	}
+	finally {
+		loading.value = false;
+	}
+};
+
+const onEditPot = async (id: string): Promise<void> => {
+	await editPot(id);
+};
+
+const onDeletePot = async (id: string): Promise<void> => {
+	await deletePot(id);
 };
 
 const onPotCreated = async (): Promise<void> => {
