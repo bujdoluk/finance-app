@@ -14,14 +14,14 @@ dotenv.config();
 import { dbPool } from './database/db';
 
 const app = express();
-app.use(helmet());
+//app.use(helmet());
 app.use(cors({
   origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
 }));
-app.use(limiter);
-app.use(hpp());
+//app.use(limiter);
+//app.use(hpp());
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
