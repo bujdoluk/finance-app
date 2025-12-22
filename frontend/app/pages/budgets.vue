@@ -24,7 +24,6 @@
 					v-for="budget in budgets"
 					:key="budget.id"
 					:budget="budget"
-					:items="budgets"
 					@edit="(id) => onEditBudget(String(id))"
 					@delete="(id) => onDeleteBudget(String(id))"
 				/>
@@ -38,15 +37,15 @@ import BudgetChart from '~/components/BudgetChart.client.vue';
 import BudgetModal from '~/components/BudgetModal.vue';
 import { useI18n } from 'vue-i18n';
 import type { BudgetResource, BudgetsResponse } from '../../utils/types/api';
-import appConfig from '~/app.config';
 
 definePageMeta({
 	layout: 'dashboard',
 });
 
 const { t } = useI18n();
+const appConfig = useAppConfig();
 const budgets = ref<BudgetResource[]>([]);
-const loading = ref<boolean>(false);
+const loading = ref<boolean>();
 
 const fetchBudgets = async (): Promise<void> => {
 	try {
@@ -54,10 +53,10 @@ const fetchBudgets = async (): Promise<void> => {
 
 		const res = await $fetch<BudgetsResponse>(`${appConfig.api}/budgets`);
 		budgets.value = res.data;
-		console.log(budgets.value);
 	}
 	catch (err: unknown) {
 		console.error('Failed to fetch budgets:', err);
+		budgets.value = [];
 	}
 	finally {
 		loading.value = false;
@@ -107,6 +106,8 @@ const onBudgetCreated = async (): Promise<void> => {
 };
 
 onMounted(async (): Promise<void> => {
-	await fetchBudgets();
+	await Promise.all([
+		fetchBudgets(),
+	]);
 });
 </script>

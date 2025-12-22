@@ -290,7 +290,7 @@ const fetchBudgets = async (): Promise<void> => {
 		budgets.value = res.data;
 	}
 	catch (err: unknown) {
-		console.error('fetchBudgets failed:', err);
+		console.error('Failed to fetch budgets:', err);
 		budgets.value = [];
 	}
 	finally {

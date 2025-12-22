@@ -118,14 +118,11 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui';
 import dayjs from 'dayjs';
-import { ref } from 'vue';
-import type { Budget } from '../../utils/types/api';
+import type { BudgetResource } from '../../utils/types/api';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
 
 const props = defineProps<{
-	budget: Budget;
-	items: DropdownMenuItem[];
-	value?: number;
+	budget: BudgetResource;
 }>();
 
 const emit = defineEmits<{
@@ -134,7 +131,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const value = ref(props.value ?? 50);
 
 const buttons = computed<DropdownMenuItem[]>(() => [
 	{

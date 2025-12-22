@@ -19,17 +19,17 @@
 </template>
 
 <script setup lang="ts">
-import type { Budget } from '../../utils/types/api';
+import type { BudgetResource } from '../../utils/types/api';
 
 const props = defineProps<{
-	budgets: Budget[];
+	budgets: BudgetResource[];
 }>();
 
-const series = computed(() => props.budgets.map((budget: Budget) => Number(budget.attributes.amount)));
+const series = computed(() => props.budgets.map((budget: BudgetResource) => Number(budget.attributes.amount)));
 const total = computed(() => series.value.reduce((sum: number, val: number) => sum + val, 0));
 const colors = computed(() => props.budgets.map(b => b.attributes.theme));
 
-const chartData = {
+const chartData = computed(() => ({
 	theme: {
 		palette: [colors.value],
 	},
@@ -53,7 +53,7 @@ const chartData = {
 			},
 		},
 	},
-};
+}));
 </script>
 
 <style scoped>

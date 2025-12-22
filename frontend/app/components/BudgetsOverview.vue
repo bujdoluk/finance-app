@@ -56,12 +56,12 @@
 
 <script setup lang="ts">
 import BudgetChart from '~/components/BudgetChart.client.vue';
-import type { Budget } from '../../utils/types/api';
+import type { BudgetResource } from '../../utils/types/api';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
-	budgets: Budget[];
+	budgets: BudgetResource[];
 }>();
 
 const MAX_BUDGETS = 4;

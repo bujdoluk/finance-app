@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { Pot } from '~~/utils/types/api';
+import type { PotResource } from '~~/utils/types/api';
 import AddToPotModal from './AddToPotModal.vue';
 import type { DropdownMenuItem } from '@nuxt/ui';
 
@@ -71,7 +71,7 @@ definePageMeta({
 });
 
 const props = defineProps<{
-	pot: Pot;
+	pot: PotResource;
 }>();
 
 const emit = defineEmits<{
