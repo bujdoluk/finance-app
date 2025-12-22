@@ -33,14 +33,16 @@ export const billRepository = {
     }
   },
 
-  async get(query?: Record<string, unknown>): Promise<Bills[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Bills[], total: number }> {
     try {
+      await dbPool.query('BEGIN');
+
       let where = "deleted_at IS NULL";
       const params: unknown[] = [];
 
       const allowedFields = ["id", "amount", "name", "next_run", "frequency", "created_at"];
 
-       // Sort
+      // Sort
       let orderBy = "ORDER BY id ASC";
 
       if (query?.sort) {
@@ -64,10 +66,28 @@ export const billRepository = {
         }
       }
 
-      const sql = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ${orderBy}`;
-      const res = await dbPool.query<Bills>(sql, params);
-      return res.rows;
+      // Pagination 
+      const limit = Number(query?.['page[limit]']);
+      const offset = Number(query?.['page[offset]']);
+
+      params.push(limit, offset);
+
+      const data = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      const count = `SELECT COUNT(*)::int AS total FROM ${tables.bills.tableName} WHERE ${where}`;
+
+      const [dataRes, countRes] = await Promise.all([
+        dbPool.query<Bills>(data, params),
+        dbPool.query<{ total: number }>(count, params.slice(0, params.length - 2)),
+      ]);
+
+      await dbPool.query('COMMIT');
+
+      return {
+        rows: dataRes.rows,
+        total: countRes.rows[0].total,
+      };
     } catch (err: unknown) {
+      await dbPool.query('ROLLBACK');
       logger.error(`findAll bills failed: ${getErrorMessage(err)}`);
       throw err;
     }

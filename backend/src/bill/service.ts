@@ -23,7 +23,7 @@ export const billService = {
     }
   },
 
-  async get(query?: Record<string, unknown>): Promise<Bills[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Bills[], total: number}> {
     try {
       return await billRepository.get(query);
     } catch (err: unknown) {

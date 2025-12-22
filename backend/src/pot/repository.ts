@@ -24,11 +24,61 @@ export const potRepository = {
     }
   },
 
-  async get(): Promise<Pots[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Pots[], total: number }> {
     try {
-      const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
-      return res.rows;
+      await dbPool.query('BEGIN');
+
+      let where = "deleted_at IS NULL";
+      const params: unknown[] = [];
+
+      const allowedFields = ["id", "name", "theme", "target", "amount", "total_saved"];
+
+       // Sort
+      let orderBy = "ORDER BY id ASC";
+
+      if (query?.sort) {
+        const sortValue = String(query.sort);
+        const sortFields = sortValue.split(",").map((part) => part.trim());
+        const sqlSortParts: string[] = [];
+
+        for (const part of sortFields) {
+          const isDesc = part.startsWith("-");
+          const field = isDesc ? part.substring(1) : part;
+
+          if (!allowedFields.includes(field)) {
+            throw new Error(`Invalid sort field: "${field}"`);
+          }
+
+          sqlSortParts.push(`${field} ${isDesc ? "DESC" : "ASC"}`);
+        }
+
+        if (sqlSortParts.length > 0) {
+          orderBy = `ORDER BY ${sqlSortParts.join(", ")}`;
+        }
+      }
+
+      // Pagination 
+      const limit = Number(query?.['page[limit]']);
+      const offset = Number(query?.['page[offset]']);
+
+      params.push(limit, offset);
+
+      const data = `SELECT * FROM ${tables.pots.tableName} WHERE ${where} ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      const count = `SELECT COUNT(*)::int AS total FROM ${tables.pots.tableName} WHERE ${where}`;
+
+      const [dataRes, countRes] = await Promise.all([
+        dbPool.query<Pots>(data, params),
+        dbPool.query<{ total: number }>(count, params.slice(0, params.length - 2)),
+      ]);
+
+      await dbPool.query('COMMIT');
+
+      return {
+        rows: dataRes.rows,
+        total: countRes.rows[0].total,
+      };
     } catch (err: unknown) {
+      await dbPool.query('ROLLBACK');
       logger.error(`findAll pots failed: ${getErrorMessage(err)}`);
       throw err;
     }

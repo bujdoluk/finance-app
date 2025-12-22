@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import mapToBudgetResource from "./mapper";
+import { mapToBudgetResource, mapToBudgetsResponse } from "./mapper";
 import budgetService from "./service";
 import { validateCreateBudget, validateDepositWithdraw, validateUpdateBudget } from "./validation";
 
@@ -18,10 +18,11 @@ const formatValidationErrors = (errors: unknown[]): string => {
     .join(" ");
 };
 
-export const getBudgets = async (_req: Request, res: Response): Promise<Response> => {
+export const getBudgets = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const budgets = await budgetService.get();
-    return res.json(budgets.map(mapToBudgetResource));
+    const { rows, total } = await budgetService.get(req.query);
+
+    return res.json(mapToBudgetsResponse(rows, total, req));
   } catch (err: unknown) {
     logger.error(`getAllBudgets error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(

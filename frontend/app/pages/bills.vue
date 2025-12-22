@@ -140,11 +140,11 @@
 
 <script setup lang="ts">
 import { h } from 'vue';
-import { getFilteredRowModel } from '@tanstack/vue-table';
+import { getFilteredRowModel, type PaginationState } from '@tanstack/vue-table';
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
-import type { Bill } from '~~/utils/types/api';
+import type { BillsResponse } from '~~/utils/types/api';
 import appConfig from '#build/app.config';
 import type { BillColumnDefinition } from '~~/utils/types/tableColumnDefinitions';
 
@@ -246,21 +246,27 @@ const columnFilters = ref([
 
 const bills = ref<BillColumnDefinition[]>([]);
 const sortedBills = ref<string>('None');
+const billsPagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 10,
+});
 
 const fetchBills = async (): Promise<void> => {
 	try {
 		loadingTable.value = true;
-		const query: Record<string, string> = {};
+
+		const query: Record<string, string | number> = {
+			'page[limit]': billsPagination.value.pageSize,
+			'page[offset]': billsPagination.value.pageSize * billsPagination.value.pageIndex,
+		};
 
 		if (sortedBills.value && sortedBills.value !== 'None') {
 			query.sort = sortedBills.value;
 		}
 
-		const data = await $fetch<Bill[]>(`${appConfig.api}/bills`, {
-			query,
-		});
+		const res = await $fetch<BillsResponse>(`${appConfig.api}/bills`, { query });
 
-		bills.value = data.map(bill => ({
+		bills.value = res.data.map(bill => ({
 			id: bill.id,
 			amount: bill.attributes.amount,
 			next_run: bill.attributes.next_run,

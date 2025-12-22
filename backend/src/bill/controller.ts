@@ -4,14 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { BillsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import { mapToBillResource } from "./mapper";
+import mapToBillsResponse, { mapToBillResource } from "./mapper";
 import billService from "./service";
 import { createBillSchema, updateBillSchema } from "./validation";
 
 export const getBills = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const bills = await billService.get(req.query);
-    return res.json(bills.map(mapToBillResource));
+    const { rows, total } = await billService.get(req.query);
+    return res.json(mapToBillsResponse(rows, total, req));
   } catch (err: unknown) {
     logger.error(`getBills error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(

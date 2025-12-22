@@ -220,8 +220,9 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { Bill, Budget, Pot, Transaction } from '../../utils/types/api';
+import type { BillResource, BillsResponse, BudgetResource, BudgetsResponse, PotResource, PotsResponse, TransactionResource, TransactionsResponse } from '../../utils/types/api';
 import TransactionsOverview from '~/components/TransactionsOverview.vue';
+import type { PaginationState } from '@tanstack/vue-table';
 
 definePageMeta({
 	layout: 'dashboard',
@@ -229,66 +230,114 @@ definePageMeta({
 
 const { t } = useI18n();
 const appConfig = useAppConfig();
-const bills = ref<Bill[]>([]);
-const pots = ref<Pot[]>([]);
-const budgets = ref<Budget[]>([]);
-const transactions = ref<Transaction[]>([]);
 const loading = ref<boolean>();
+
+const bills = ref<BillResource[]>([]);
 const loadingBills = ref<boolean>();
-const loadingBudgets = ref<boolean>();
-const loadingPots = ref<boolean>();
-const loadingTransactions = ref<boolean>();
+const billsPagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 3,
+});
 
 const fetchBills = async (): Promise<void> => {
 	try {
 		loadingBills.value = true;
-		const data = await $fetch<Bill[]>(`${appConfig.api}/bills`);
-		bills.value = data;
+
+		const query: Record<string, string | number> = {
+			'page[limit]': billsPagination.value.pageSize,
+			'page[offset]': billsPagination.value.pageSize * billsPagination.value.pageIndex,
+		};
+
+		const res = await $fetch<BillsResponse>(`${appConfig.api}/bills`, { query });
+		bills.value = res.data;
 	}
 	catch (err: unknown) {
 		console.error('fetchBills failed:', err);
+		bills.value = [];
 	}
 	finally {
 		loadingBills.value = false;
 	}
 };
 
+const budgets = ref<BudgetResource[]>([]);
+const loadingBudgets = ref<boolean>();
+const budgetsPagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 4,
+});
+
 const fetchBudgets = async (): Promise<void> => {
 	try {
 		loadingBudgets.value = true;
-		const data = await $fetch<Budget[]>(`${appConfig.api}/budgets`);
-		budgets.value = data;
+
+		const query: Record<string, string | number> = {
+			'page[limit]': budgetsPagination.value.pageSize,
+			'page[offset]': budgetsPagination.value.pageSize * budgetsPagination.value.pageIndex,
+		};
+
+		const res = await $fetch<BudgetsResponse>(`${appConfig.api}/budgets`, { query });
+		budgets.value = res.data;
 	}
 	catch (err: unknown) {
 		console.error('fetchBudgets failed:', err);
+		budgets.value = [];
 	}
 	finally {
 		loadingBudgets.value = false;
 	}
 };
 
+const pots = ref<PotResource[]>([]);
+const loadingPots = ref<boolean>();
+const potsPagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 4,
+});
+
 const fetchPots = async (): Promise<void> => {
 	try {
 		loadingPots.value = true;
-		const data = await $fetch<Pot[]>(`${appConfig.api}/pots`);
-		pots.value = data;
+
+		const query: Record<string, string | number> = {
+			'page[limit]': potsPagination.value.pageSize,
+			'page[offset]': potsPagination.value.pageSize * potsPagination.value.pageIndex,
+		};
+
+		const res = await $fetch<PotsResponse>(`${appConfig.api}/pots`, { query });
+		pots.value = res.data;
 	}
 	catch (err: unknown) {
 		console.error('fetchPots failed:', err);
+		pots.value = [];
 	}
 	finally {
 		loadingPots.value = false;
 	}
 };
 
+const transactions = ref<TransactionResource[]>([]);
+const loadingTransactions = ref<boolean>();
+const transactionsPagination = ref<PaginationState>({
+	pageIndex: 0,
+	pageSize: 4,
+});
+
 const fetchTransactions = async (): Promise<void> => {
 	try {
 		loadingTransactions.value = true;
-		const data = await $fetch<Transaction[]>(`${appConfig.api}/transactions`);
-		transactions.value = data;
+
+		const query: Record<string, string | number> = {
+			'page[limit]': transactionsPagination.value.pageSize,
+			'page[offset]': transactionsPagination.value.pageSize * transactionsPagination.value.pageIndex,
+		};
+
+		const res = await $fetch<TransactionsResponse>(`${appConfig.api}/transactions`, { query });
+		transactions.value = res.data;
 	}
 	catch (err: unknown) {
 		console.error('fetchTransactions failed:', err);
+		transactions.value = [];
 	}
 	finally {
 		loadingTransactions.value = false;

@@ -50,9 +50,9 @@ export const potService = {
     }
   },
 
-  async get(): Promise<Pots[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Pots[]; total: number }> {
     try {
-      return await potRepository.get();
+      return await potRepository.get(query);
     } catch (err: unknown) {
       logger.error(`getAllPots error: ${getErrorMessage(err)}`);
       throw err;

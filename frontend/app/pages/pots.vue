@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { Pot } from '../../utils/types/api';
+import type { PotResource } from '../../utils/types/api';
 import PotModal from '~/components/PotModal.vue';
 
 definePageMeta({
@@ -34,14 +34,14 @@ definePageMeta({
 });
 
 const { t } = useI18n();
-const pots = ref<Pot[]>([]);
+const pots = ref<PotResource[]>([]);
 const loading = ref<boolean>(false);
 
 const fetchPots = async (): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Pot>>('http://localhost:3001/v1/pots');
-		pots.value = data;
+		const res = await $fetch<Array<PotResource>>('http://localhost:3001/v1/pots');
+		pots.value = res;
 		console.log(pots.value);
 	}
 	catch (err: unknown) {
@@ -55,7 +55,7 @@ const fetchPots = async (): Promise<void> => {
 const editPot = async (id: string): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Pot>>(`http://localhost:3001/v1/pots/${id}`);
+		const data = await $fetch<Array<PotResource>>(`http://localhost:3001/v1/pots/${id}`);
 		pots.value = data;
 		console.log(pots.value);
 	}
@@ -70,7 +70,7 @@ const editPot = async (id: string): Promise<void> => {
 const deletePot = async (id: string): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Pot>>(`http://localhost:3001/v1/pots/${id}`);
+		const data = await $fetch<Array<PotResource>>(`http://localhost:3001/v1/pots/${id}`);
 		pots.value = data;
 		console.log(pots.value);
 	}

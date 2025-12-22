@@ -34,9 +34,9 @@ export const budgetService = {
     }
   },
 
-  async get(): Promise<Budgets[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Budgets[]; total: number }> {
     try {
-      return await budgetRepository.get();
+      return await budgetRepository.get(query);
     } catch (err: unknown) {
       logger.error(`getAllBudgets failed: ${getErrorMessage(err)}`);
       throw err;

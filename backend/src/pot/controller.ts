@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 
-import { Pots, PotsInput } from "../../database/dbSchema";
+import { PotsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument, joiToErrors } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import { mapToPotResource } from "./mapper";
+import { mapToPotResource, mapToPotsResponse } from "./mapper";
 import potService from "./service";
 import { createPotSchema, depositWithdrawSchema, updatePotSchema } from "./validation";
 
@@ -13,10 +13,10 @@ const formatValidationErrors = (errors: Joi.ValidationErrorItem[]): string => {
   return errors.map(e => formatValidationMessage(e.message)).join(" ");
 };
 
-export const getAllPots = async (_req: Request, res: Response): Promise<Response> => {
+export const getAllPots = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const pots: Pots[] = await potService.get();
-    return res.json(pots.map(mapToPotResource));
+    const { rows, total } = await potService.get(req.query);
+    return res.json(mapToPotsResponse(rows, total, req));
   } catch (err: unknown) {
     logger.error(`getAllPots error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(

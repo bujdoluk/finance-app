@@ -244,7 +244,7 @@ const sortedTransations = ref<string>('None');
 
 const pagination = ref<PaginationState>({
 	pageIndex: 0,
-	pageSize: 2,
+	pageSize: 10,
 });
 const total = ref<number>(0);
 

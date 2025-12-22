@@ -51,11 +51,35 @@ export const budgetRepository = {
     }
   },
 
-  async get(): Promise<Budgets[]> {
+  async get(query?: Record<string, unknown>): Promise<{ rows: Budgets[], total: number }> {
     try {
-      const res = await dbPool.query<Budgets>(`SELECT * FROM ${tables.budgets.tableName} WHERE deleted_at IS NULL ORDER BY id ASC`);
-      return res.rows;
+      await dbPool.query('BEGIN');
+
+      let where = "deleted_at IS NULL";
+      const params: unknown[] = [];
+
+      // Pagination 
+      const limit = Number(query?.['page[limit]']);
+      const offset = Number(query?.['page[offset]']);
+
+      params.push(limit, offset);
+
+      const data = `SELECT * FROM ${tables.budgets.tableName} WHERE ${where} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      const count = `SELECT COUNT(*)::int AS total FROM ${tables.budgets.tableName} WHERE ${where}`;
+
+      const [dataRes, countRes] = await Promise.all([
+        dbPool.query<Budgets>(data, params),
+        dbPool.query<{ total: number }>(count, params.slice(0, params.length - 2)),
+      ]);
+
+      await dbPool.query('COMMIT');
+
+      return {
+        rows: dataRes.rows,
+        total: countRes.rows[0].total,
+      };
     } catch (err: unknown) {
+      await dbPool.query('ROLLBACK');
       logger.error(`findAll budgets failed: ${getErrorMessage(err)}`);
       throw err;
     }
