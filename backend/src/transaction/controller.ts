@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { Transactions, TransactionsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
-import { mapToTransactionResource, mapToTransactionsResponse } from "./mapper";
+import { mapToBalanceResource, mapToTransactionResource, mapToTransactionsResponse } from "./mapper";
 import transactionService from "./service";
 import { validateCreateTransaction } from "./validation";
 
@@ -170,6 +170,18 @@ export const deleteTransaction = async (req: Request<{ id: string }>, res: Respo
           err instanceof Error ? err.message : "Something went wrong"
         ),
       ])
+    );
+  }
+};
+
+export const getBalance = async (_req: Request, res: Response) => {
+  try {
+    const balance = await transactionService.getBalance();
+    return res.status(StatusCodes.OK).json(mapToBalanceResource(balance));
+  } catch (err: unknown) {
+    logger.error(`getBalance error: ${getErrorMessage(err)}`);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
   }
 };

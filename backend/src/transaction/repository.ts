@@ -8,11 +8,12 @@ export const transactionRepository = {
       const res = await dbPool.query<Transactions>(
         `INSERT INTO ${tables.transactions.tableName} 
           (amount, category, date, sender, sender_picture, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
          RETURNING *`,
         [
           transaction.amount,
           transaction.category,
+          transaction.transaction_type,
           transaction.date,
           transaction.sender,
           transaction.sender_picture,
@@ -35,12 +36,13 @@ export const transactionRepository = {
     transactions.forEach((transaction, index) => {
       const baseIndex = index * 5;
       values.push(
-        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, NOW(), NOW())`
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, NOW(), NOW())`
       );
 
         params.push(
           transaction.amount,
           transaction.category,
+          transaction.transaction_type,
           transaction.date,
           transaction.sender,
           transaction.sender_picture
@@ -49,7 +51,7 @@ export const transactionRepository = {
 
     const sql = `
       INSERT INTO ${tables.transactions.tableName}
-        (amount, category, date, sender, sender_picture, created_at, updated_at)
+        (amount, category, transaction_type, date, sender, sender_picture, created_at, updated_at)
       VALUES ${values.join(',')}
       RETURNING *
     `;
@@ -99,7 +101,7 @@ export const transactionRepository = {
       let where = "deleted_at IS NULL";
       const params: unknown[] = [];
 
-      const allowedFields = ["id", "amount", "category", "date", "sender", "created_at"];
+      const allowedFields = ["id", "amount", "category", "transaction_type", "date", "sender", "created_at"];
 
       // Filter
       const filterKeys = Object.keys(query ?? {}).filter((k) => k.startsWith("filter"));
@@ -195,6 +197,30 @@ export const transactionRepository = {
       throw err;
     }
   },
+
+  async getIncome(): Promise<number> {
+    try {
+      const res = await dbPool.query<{ total: string }>(
+        `SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} WHERE transaction_type = 'income' AND deleted_at IS NULL`
+      );
+      return parseFloat(res.rows[0].total);
+    } catch (err: unknown) {
+      logger.error(`getIncome error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async getExpenses(): Promise<number> {
+    try {
+      const res = await dbPool.query<{ total: number }>(`SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} WHERE transaction_type = 'expense' AND deleted_at IS NULL`
+      );
+      return Number(res.rows[0].total);
+    } catch (err: unknown) {
+      logger.error(`getExpenses error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  }
+
 };
 
 export default transactionRepository;

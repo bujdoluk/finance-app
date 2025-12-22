@@ -58,13 +58,27 @@ export const potRepository = {
       }
 
       // Pagination 
-      const limit = Number(query?.['page[limit]']);
-      const offset = Number(query?.['page[offset]']);
+      let limit: number | undefined;
+      let offset: number | undefined;
 
-      params.push(limit, offset);
+      if (query) {
+        if (query['page[limit]'] !== undefined) {
+          limit = Number(query['page[limit]']);
+          if (isNaN(limit) || limit <= 0) limit = undefined;
+        }
+        if (query['page[offset]'] !== undefined) {
+          offset = Number(query['page[offset]']);
+          if (isNaN(offset) || offset < 0) offset = undefined;
+        }
+      }
 
-      const data = `SELECT * FROM ${tables.pots.tableName} WHERE ${where} ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      let data = `SELECT * FROM ${tables.pots.tableName} WHERE ${where} ORDER BY created_at DESC`;
       const count = `SELECT COUNT(*)::int AS total FROM ${tables.pots.tableName} WHERE ${where}`;
+
+      if (limit !== undefined && offset !== undefined) {
+        params.push(limit, offset);
+        data += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      }
 
       const [dataRes, countRes] = await Promise.all([
         dbPool.query<Pots>(data, params),

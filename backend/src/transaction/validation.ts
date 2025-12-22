@@ -7,6 +7,7 @@ import { joiToErrors } from "../utils/jsonapi/error";
 const transactionSchema = Joi.object({
   amount: Joi.number().required().positive(),
   category: Joi.string().required(),
+  transaction_type: Joi.string().valid("income", "expense").required(),
   date: Joi.string().isoDate().required(),
   sender: Joi.string().required(),
   sender_picture: Joi.string().required(),

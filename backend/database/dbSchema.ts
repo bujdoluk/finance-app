@@ -134,6 +134,7 @@ export interface Transactions {
   id: number;
   amount: number;
   category: string;
+  transaction_type: string;
   sender: string;
   sender_picture: string | null;
   date: Date;
@@ -145,6 +146,7 @@ export interface TransactionsInput {
   id?: number;
   amount: number;
   category: string;
+  transaction_type: string;
   sender: string;
   sender_picture?: string | null;
   date: Date;
@@ -154,8 +156,8 @@ export interface TransactionsInput {
 }
 const transactions = {
   tableName: 'transactions',
-  columns: ['id', 'amount', 'category', 'sender', 'sender_picture', 'date', 'created_at', 'updated_at', 'deleted_at'],
-  requiredForInsert: ['amount', 'category', 'sender', 'date'],
+  columns: ['id', 'amount', 'category', 'transaction_type', 'sender', 'sender_picture', 'date', 'created_at', 'updated_at', 'deleted_at'],
+  requiredForInsert: ['amount', 'category', 'transaction_type', 'sender', 'date'],
   primaryKey: 'id',
   foreignKeys: {},
   $type: null as unknown as Transactions,

@@ -1,6 +1,14 @@
 import { Router } from "express";
 
-import { createTransaction, deleteTransaction, getTransactionById, getTransactions, getTransactionCategories, importTransactions } from "./controller";
+import { 
+  createTransaction, 
+  deleteTransaction, 
+  getTransactionById, 
+  getTransactions, 
+  getTransactionCategories, 
+  importTransactions, 
+  getBalance, 
+} from "./controller";
 import multer from 'multer';
 import path from 'path';
 
@@ -17,6 +25,7 @@ const upload = multer({
 const router = Router();
 
 router.post('/import', upload.single('file'), importTransactions);
+router.get("/balance", getBalance);
 router.get("/categories", getTransactionCategories);
 router.get("/", getTransactions);
 router.get("/:id", getTransactionById);

@@ -37,21 +37,23 @@
 import BudgetChart from '~/components/BudgetChart.client.vue';
 import BudgetModal from '~/components/BudgetModal.vue';
 import { useI18n } from 'vue-i18n';
-import type { Budget } from '../../utils/types/api';
+import type { BudgetResource, BudgetsResponse } from '../../utils/types/api';
+import appConfig from '~/app.config';
 
 definePageMeta({
 	layout: 'dashboard',
 });
 
 const { t } = useI18n();
-const budgets = ref<Budget[]>([]);
+const budgets = ref<BudgetResource[]>([]);
 const loading = ref<boolean>(false);
 
 const fetchBudgets = async (): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Budget>>('http://localhost:3001/v1/budgets');
-		budgets.value = data;
+
+		const res = await $fetch<BudgetsResponse>(`${appConfig.api}/budgets`);
+		budgets.value = res.data;
 		console.log(budgets.value);
 	}
 	catch (err: unknown) {
@@ -65,8 +67,8 @@ const fetchBudgets = async (): Promise<void> => {
 const editBudget = async (id: string): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Budget>>(`http://localhost:3001/v1/budgets/${id}`);
-		budgets.value = data;
+		const res = await $fetch<BudgetsResponse>(`http://localhost:3001/v1/budgets/${id}`);
+		budgets.value = res.data;
 		console.log(budgets.value);
 	}
 	catch (err: unknown) {
@@ -80,8 +82,8 @@ const editBudget = async (id: string): Promise<void> => {
 const deleteBudget = async (id: string): Promise<void> => {
 	try {
 		loading.value = true;
-		const data = await $fetch<Array<Budget>>(`http://localhost:3001/v1/budgets/${id}`);
-		budgets.value = data;
+		const res = await $fetch<BudgetsResponse>(`http://localhost:3001/v1/budgets/${id}`);
+		budgets.value = res.data;
 		console.log(budgets.value);
 	}
 	catch (err: unknown) {

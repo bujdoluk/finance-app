@@ -9,6 +9,7 @@ export const mapToTransactionResource = (transaction: Transactions): Resource =>
   attributes: {
     amount: transaction.amount,
     category: transaction.category,
+    transaction_type: transaction.transaction_type,
     created_at: transaction.created_at,
     date: transaction.date,
     sender: transaction.sender,
@@ -55,5 +56,21 @@ export const mapToTransactionsResponse = (data: Transactions[], total: number, r
     },
   };
 };
+
+/**
+ * Balance JSON:API Resource
+ */
+export const mapToBalanceResource = (summary: { income: number; expenses: number; balance: number }): Resource => ({
+  id: "balance",
+  type: "balance",
+  attributes: {
+    income: summary.income,
+    expenses: summary.expenses,
+    balance: summary.balance,
+  },
+  links: {
+    self: "/v1/transactions/balance",
+  },
+});
 
 export default mapToTransactionsResponse;

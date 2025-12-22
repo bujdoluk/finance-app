@@ -95,6 +95,7 @@ export interface TransactionResource {
 	attributes: {
 		amount: number;
 		category: string;
+		transaction_type: string;
 		sender: string;
 		sender_picture: string | null;
 		date: Date;
@@ -115,3 +116,13 @@ export interface TransactionsResponse {
 		limit: number;
 	};
 };
+
+export interface BalanceResource {
+	type: 'balance';
+	id: string;
+	attributes: {
+		income: number;
+		expenses: number;
+		balance: number;
+	};
+}

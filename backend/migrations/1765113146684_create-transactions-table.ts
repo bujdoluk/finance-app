@@ -7,6 +7,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       id: 'id', 
       amount: { type: 'numeric', notNull: true },
       category: { type: 'text', notNull: true },
+      transaction_type: { type: "text", notNull: true, check: "transaction_type IN ('income', 'expense')" },
       sender: { type: 'text', notNull: true },
       sender_picture: { type: 'text', notNull: false },
       date: { type: 'timestamptz', notNull: true },
@@ -18,6 +19,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   );
 
   pgm.createIndex('transactions', 'category');
+  pgm.createIndex("transactions", "transaction_type");
   pgm.createIndex('transactions', 'sender');
   pgm.createIndex('transactions', 'date');
 
@@ -41,6 +43,7 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('transactions', 'transactions_set_updated_at');
   pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('transactions', 'category');
+  pgm.dropIndex("transactions", "transaction_type");
   pgm.dropIndex('transactions', 'sender');
   pgm.dropIndex('transactions', 'date');
   pgm.dropTable('transactions', { ifExists: true });

@@ -64,6 +64,19 @@ export const transactionService = {
       throw err;
     }
   },
+
+  async getBalance(): Promise<{ income: number; expenses: number; balance: number }> {
+    try {
+      const income = await transactionRepository.getIncome();
+      const expenses = await transactionRepository.getExpenses();
+      const balance = income - expenses;
+
+      return { income, expenses, balance };
+    } catch (err: unknown) {
+      logger.error(`getBalance error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  }
 };
 
 export default transactionService;

@@ -22,7 +22,7 @@
 					{{ t('pages.overview.balance') }}
 				</div>
 				<div class="text-3xl font-bold break-words">
-					$4,836.00
+					${{ summary?.attributes.balance.toFixed(2) ?? 0 }}
 				</div>
 			</UCard>
 
@@ -44,7 +44,7 @@
 					{{ t('pages.overview.income') }}
 				</div>
 				<div class="text-3xl font-bold break-words">
-					$4,836.00
+					${{ summary?.attributes.income.toFixed(2) ?? 0 }}
 				</div>
 			</UCard>
 
@@ -66,7 +66,7 @@
 					{{ t('pages.overview.expenses') }}
 				</div>
 				<div class="text-3xl font-bold break-words">
-					$4,836.00
+					${{ summary?.attributes.expenses.toFixed(2) ?? 0 }}
 				</div>
 			</UCard>
 		</div>
@@ -220,7 +220,17 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { BillResource, BillsResponse, BudgetResource, BudgetsResponse, PotResource, PotsResponse, TransactionResource, TransactionsResponse } from '../../utils/types/api';
+import type {
+	BalanceResource,
+	BillResource,
+	BillsResponse,
+	BudgetResource,
+	BudgetsResponse,
+	PotResource,
+	PotsResponse,
+	TransactionResource,
+	TransactionsResponse,
+} from '../../utils/types/api';
 import TransactionsOverview from '~/components/TransactionsOverview.vue';
 import type { PaginationState } from '@tanstack/vue-table';
 
@@ -344,7 +354,31 @@ const fetchTransactions = async (): Promise<void> => {
 	}
 };
 
+const summary = ref<BalanceResource | null>(null);
+const loadingSummary = ref<boolean>();
+
+const fetchBalance = async () => {
+	loadingSummary.value = true;
+	try {
+		const res = await $fetch<BalanceResource>(`${appConfig.api}/transactions/balance`);
+		summary.value = res;
+	}
+	catch (err: unknown) {
+		console.error('fetchBalance failed:', err);
+		summary.value = null;
+	}
+	finally {
+		loadingSummary.value = false;
+	}
+};
+
 onMounted(async (): Promise<void> => {
-	await Promise.all([fetchBills(), fetchBudgets(), fetchPots(), fetchTransactions()]);
+	await Promise.all([
+		fetchBills(),
+		fetchBudgets(),
+		fetchPots(),
+		fetchTransactions(),
+		fetchBalance(),
+	]);
 });
 </script>
