@@ -204,10 +204,10 @@ const columns: TableColumn<BillColumnDefinition>[] = [
 		},
 	},
 	{
-		accessorKey: 'next_run',
+		accessorKey: 'due_date',
 		header: `${t('components.tables.bills.columns.dueDate')}`,
 		cell: ({ row }) => {
-			return new Date(row.getValue('next_run')).toLocaleString('en-US', {
+			return new Date(row.getValue('due_date')).toLocaleString('en-US', {
 				day: 'numeric',
 				month: 'short',
 				hour: '2-digit',
@@ -269,7 +269,7 @@ const fetchBills = async (): Promise<void> => {
 		bills.value = res.data.map(bill => ({
 			id: bill.id,
 			amount: bill.attributes.amount,
-			next_run: bill.attributes.next_run,
+			next_run: bill.attributes.due_date,
 			name: bill.attributes.name,
 			frequency: bill.attributes.frequency,
 		}));

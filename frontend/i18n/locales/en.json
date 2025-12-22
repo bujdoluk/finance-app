@@ -152,7 +152,9 @@
         },
         "potCard": {
             "target": "Target of ${target}",
-            "totalSaved": "Total saved"
+            "totalSaved": "Total saved",
+            "delete": "Delete Pot",
+            "edit": "Edit Pot"
         },
         "tables": {
             "transactions": {

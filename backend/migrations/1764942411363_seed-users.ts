@@ -9,7 +9,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
         'John',
         'Doe',
         'john@example.com',
-        '$2b$10$EXAMPLE_HASH',
+        'secret123',
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP,
         null

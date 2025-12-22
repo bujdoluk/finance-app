@@ -4,11 +4,18 @@ import Joi from "joi";
 import { PotsInput } from "../../database/dbSchema";
 import { joiToErrors } from "../utils/jsonapi/error";
 
+const allowedThemes = [
+  'secondary-green', 'secondary-yellow', 'secondary-cyan', 'secondary-navy',
+  'secondary-red', 'secondary-purple', 'other-pink', 'other-turquoise',
+  'other-brown', 'other-magenta', 'other-blue', 'other-navy-gray',
+  'other-army-green', 'other-gold', 'other-orange', 'white', 'neutral'
+];
+
 const potSchema = Joi.object({
   amount: Joi.number().positive(),
   name: Joi.string().max(100),
   target: Joi.number().positive(),
-  theme: Joi.string().max(50),
+  theme: Joi.string().valid(...allowedThemes),
 });
 
 export const createPotSchema = potSchema.fork(

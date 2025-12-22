@@ -19,7 +19,7 @@ export interface Bills {
   name: string;
   amount: number;
   frequency: string | null;
-  next_run: Date;
+  due_date: Date;
   created_at: Date;
   updated_at: Date;
   deleted_at: Date | null;
@@ -29,15 +29,15 @@ export interface BillsInput {
   name: string;
   amount: number;
   frequency?: string | null;
-  next_run: Date;
+  due_date: Date;
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date | null;
 }
 const bills = {
   tableName: 'bills',
-  columns: ['id', 'name', 'amount', 'frequency', 'next_run', 'created_at', 'updated_at', 'deleted_at'],
-  requiredForInsert: ['name', 'amount', 'next_run'],
+  columns: ['id', 'name', 'amount', 'frequency', 'due_date', 'created_at', 'updated_at', 'deleted_at'],
+  requiredForInsert: ['name', 'amount', 'due_date'],
   primaryKey: 'id',
   foreignKeys: {},
   $type: null as unknown as Bills,

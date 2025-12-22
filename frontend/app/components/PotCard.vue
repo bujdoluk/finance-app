@@ -7,6 +7,7 @@
 						standalone
 						inset
 						size="2xl"
+						:color="themeHexToColorNameMap[props.pot.attributes.theme]"
 					/>
 				</div>
 				<div class="text-xl">
@@ -65,6 +66,7 @@ import { useI18n } from 'vue-i18n';
 import type { PotResource } from '~~/utils/types/api';
 import AddToPotModal from './AddToPotModal.vue';
 import type { DropdownMenuItem } from '@nuxt/ui';
+import { themeHexToColorNameMap } from '../../utils/types/theme';
 
 definePageMeta({
 	layout: 'dashboard',

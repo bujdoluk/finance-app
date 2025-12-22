@@ -118,7 +118,7 @@ const themes = ref([
 	{
 		label: 'Turquoise',
 		value: '#597C7C',
-		chip: { color: 'other-turqoise' },
+		chip: { color: 'other-turquoise' },
 	},
 	{
 		label: 'Brown',

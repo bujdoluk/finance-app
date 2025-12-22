@@ -6,9 +6,9 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.sql(`
     INSERT INTO pots (name, theme, target, amount, total_saved)
     VALUES
-      ('Vacation Fund', 'Travel', 2000, 0, 0),
-      ('Emergency Fund', 'Safety', 5000, 0, 0),
-      ('New Laptop', 'Gadgets', 1500, 0, 0)
+      ('Vacation Fund', '#626070', 2000, 0, 0),
+      ('Emergency Fund', '#597C7C', 5000, 0, 0),
+      ('New Laptop', '#7F9161', 1500, 0, 0)
     ON CONFLICT (name) DO NOTHING;
   `);
 }

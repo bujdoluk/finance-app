@@ -37,8 +37,11 @@
 					/>
 				</div>
 				<div>
-					<div class="text-md font-medium text-end">
-						${{ transaction.attributes.amount }}
+					<div
+						class="text-md font-medium text-end"
+						:class="transaction.attributes.transaction_type === 'income' ? 'text-primary': 'text-secondary-red'"
+					>
+						{{ transaction.attributes.transaction_type === 'income' ? '' : '-' }}${{ transaction.attributes.amount }}
 					</div>
 					<div class="text-xs text--color-gray-900">
 						{{ dayjs(transaction.attributes.date).format('MMM DD, YYYY') }}
@@ -54,12 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Transaction } from '../../utils/types/api';
+import type { TransactionResource } from '../../utils/types/api';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
 
 const props = defineProps<{
-	transactions: Transaction[];
+	transactions: TransactionResource[];
 }>();
 
 const MAX_TRANSACTIONS = 4;

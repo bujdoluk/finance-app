@@ -8,7 +8,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       name: { type: 'text', notNull: true, unique: true },
       amount: { type: 'numeric', notNull: true },
       frequency: { type: 'text', notNull: false },
-      next_run: { type: 'timestamptz', notNull: true },
+      due_date: { type: 'timestamptz', notNull: true },
       created_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
       updated_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
       deleted_at: { type: 'timestamptz', default: null },
@@ -17,7 +17,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   );
 
   pgm.createIndex('bills', 'name');
-  pgm.createIndex('bills', 'next_run');
+  pgm.createIndex('bills', 'due_date');
   pgm.createIndex('bills', 'created_at');
 
   pgm.sql(`
@@ -40,7 +40,7 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('bills', 'bills_set_updated_at');
   pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('bills', 'name');
-  pgm.dropIndex('bills', 'next_run');
+  pgm.dropIndex('bills', 'due_date');
   pgm.dropIndex('bills', 'created_at');
   pgm.dropTable('bills', { ifExists: true });
 }

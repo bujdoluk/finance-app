@@ -49,7 +49,7 @@
 							orientation="vertical"
 							class="h-12"
 							size="lg"
-							color="primary"
+							:color="themeHexToColorNameMap[pot.attributes.theme]"
 						/>
 					</div>
 					<div class="ml-2">
@@ -67,12 +67,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Pot } from '../../utils/types/api';
+import type { PotResource } from '../../utils/types/api';
 import { useI18n } from 'vue-i18n';
 import PotsMoneyIcon from '../../public/pots-money.svg';
+import { themeHexToColorNameMap } from '../../utils/types/theme';
 
 const props = defineProps<{
-	pots: Pot[];
+	pots: PotResource[];
 }>();
 
 const MAX_POTS = 4;

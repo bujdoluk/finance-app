@@ -6,7 +6,7 @@ type ThemeColor
 		| 'secondary-red'
 		| 'secondary-purple'
 		| 'other-pink'
-		| 'other-turqoise'
+		| 'other-turquoise'
 		| 'other-brown'
 		| 'other-magenta'
 		| 'other-blue'
@@ -25,7 +25,7 @@ export const themeHexToColorNameMap: Record<string, ThemeColor> = {
 	'#C94736': 'secondary-red',
 	'#826CB0': 'secondary-purple',
 	'#AF81BA': 'other-pink',
-	'#597C7C': 'other-turqoise',
+	'#597C7C': 'other-turquoise',
 	'#93674F': 'other-brown',
 	'#934F6F': 'other-magenta',
 	'#3F82B2': 'other-blue',

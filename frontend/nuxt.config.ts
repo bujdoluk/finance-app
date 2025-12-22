@@ -30,7 +30,7 @@ export default defineNuxtConfig({
 				'secondary-red',
 				'secondary-purple',
 				'other-purple',
-				'other-turqoise',
+				'other-turquoise',
 				'other-brown',
 				'other-magenta',
 				'other-blue',

@@ -6,8 +6,8 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.sql(`
     INSERT INTO budgets (name, theme, amount, maximum_spending)
     VALUES
-      ('Groceries', 'Food', 500, 500),
-      ('Vacation', 'Travel', 1000, 1000);
+      ('Groceries', '#82C9D7', 500, 500),
+      ('Vacation', '#934F6F', 1000, 1000)
   `);
 }
 

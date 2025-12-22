@@ -3,6 +3,7 @@ export interface TransactionColumnDefinition {
 	id: string;
 	amount: number;
 	category: string;
+	transaction_type: string;
 	sender: string;
 	sender_picture: string | null;
 	date: Date;

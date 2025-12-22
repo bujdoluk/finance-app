@@ -4,7 +4,7 @@ export const shorthands = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.sql(`
-    INSERT INTO bills (name, amount, frequency, next_run)
+    INSERT INTO bills (name, amount, frequency, due_date)
     VALUES
       ('Electricity', 100, 'monthly', NOW() + INTERVAL '1 month'),
       ('Internet', 50, 'monthly', NOW() + INTERVAL '1 month'),

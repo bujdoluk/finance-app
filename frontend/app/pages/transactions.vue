@@ -198,15 +198,20 @@ const columns: TableColumn<TransactionColumnDefinition>[] = [
 		header: () => h('div', { class: 'text-right' }, `${t('components.tables.transactions.columns.amount')}`),
 		cell: ({ row }) => {
 			const amount = Number.parseFloat(row.getValue('amount'));
+			const type = row.original.transaction_type;
 
 			const formatted = new Intl.NumberFormat('en-US', {
 				style: 'currency',
 				currency: 'EUR',
 			}).format(amount);
 
-			return h('div', { class: amount > 0
-				? 'text-right font-medium text-green-600 text-lg'
-				: 'text-right font-medium text-red-500 text-lg' }, formatted);
+			return h('div', {
+				class: [
+					'text-right font-medium text-lg',
+					type === 'income' ? 'text-primary' : 'text-secondary-red',
+				],
+			},
+			`${type === 'expense' ? '-' : ''}${formatted}`);
 		},
 	},
 	{
@@ -271,6 +276,7 @@ const fetchTransactions = async (): Promise<void> => {
 			id: transaction.id,
 			amount: transaction.attributes.amount,
 			category: transaction.attributes.category,
+			transaction_type: transaction.attributes.transaction_type,
 			sender: transaction.attributes.sender,
 			sender_picture: transaction.attributes.sender_picture,
 			date: transaction.attributes.date,

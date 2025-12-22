@@ -43,7 +43,7 @@ export interface BillResource {
 		name: string;
 		amount: number;
 		frequency: string | null;
-		next_run: Date;
+		due_date: Date;
 	};
 };
 
