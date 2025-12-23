@@ -5,8 +5,11 @@ import logger, { getErrorMessage } from "../utils/logger/logger";
 export const potRepository = {
   async create(data: PotsInput): Promise<Pots> {
     try {
-      const res = await dbPool.query<Pots>(`INSERT INTO ${tables.pots.tableName} (name, target, theme) VALUES ($1, $2, $3) RETURNING *`,
-      [data.name, data.target, data.theme]);
+      const res = await dbPool.query<Pots>(
+        ` INSERT INTO ${tables.pots.tableName} (name, target, theme) 
+          VALUES ($1, $2, $3) RETURNING *`,
+        [data.name, data.target, data.theme]
+      );
       return res.rows[0];
     } catch (err: unknown) {
       logger.error(`create pot failed [name=${data.name}]: ${getErrorMessage(err)}`);
@@ -16,7 +19,10 @@ export const potRepository = {
 
   async delete(id: number): Promise<null | Pots> {
     try {
-      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]);
+      const res = await dbPool.query<Pots>(
+        ` UPDATE ${tables.pots.tableName} SET deleted_at = NOW() 
+          WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]
+        );
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`delete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
@@ -100,7 +106,10 @@ export const potRepository = {
 
   async getById(id: number): Promise<null | Pots> {
     try {
-      const res = await dbPool.query<Pots>(`SELECT * FROM ${tables.pots.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
+      const res = await dbPool.query<Pots>(
+        ` SELECT * FROM ${tables.pots.tableName} 
+          WHERE id = $1 AND deleted_at IS NULL`, [id]
+      );
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`findById pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
@@ -110,8 +119,10 @@ export const potRepository = {
 
   async update(id: number, data: PotsInput): Promise<null | Pots> {
     try {
-      const res = await dbPool.query<Pots>(`UPDATE ${tables.pots.tableName} SET amount = $1, updated_at = NOW()
-      WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.amount, data.id]);
+      const res = await dbPool.query<Pots>(
+        ` UPDATE ${tables.pots.tableName} SET amount = $1, updated_at = NOW()
+          WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.amount, data.id]
+      );
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`Update pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);

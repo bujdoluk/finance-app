@@ -4,11 +4,11 @@ export const shorthands = undefined;
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
   pgm.sql(`
-    INSERT INTO bills (name, amount, frequency, due_date)
+    INSERT INTO bills (name, amount, frequency, due_date, status)
     VALUES
-      ('Electricity', 100, 'monthly', NOW() + INTERVAL '1 month'),
-      ('Internet', 50, 'monthly', NOW() + INTERVAL '1 month'),
-      ('Gym', 30, 'monthly', NOW() + INTERVAL '1 month')
+      ('Electricity', 100, 'monthly', NOW() - INTERVAL '1 month', 'paid'),
+      ('Internet', 50, 'monthly', NOW() - INTERVAL '1 month', 'due_soon'),
+      ('Gym', 30, 'monthly', NOW() + INTERVAL '1 month', 'unpaid')
     ON CONFLICT (name) DO NOTHING;
   `);
 }

@@ -44,6 +44,7 @@ export interface BillResource {
 		amount: number;
 		frequency: string | null;
 		due_date: Date;
+		status: string | null;
 	};
 };
 
@@ -124,5 +125,18 @@ export interface BalanceResource {
 		income: number;
 		expenses: number;
 		balance: number;
+	};
+}
+
+export interface BillSummaryResource {
+	type: 'summary';
+	id: string;
+	attributes: {
+		paid: number;
+		unpaid: number;
+		due_soon: number;
+		paidTotal: number;
+		unpaidTotal: number;
+		dueSoonTotal: number;
 	};
 }

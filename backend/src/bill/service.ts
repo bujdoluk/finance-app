@@ -51,6 +51,19 @@ export const billService = {
       throw err;
     }
   },
+
+  async getSummary(): Promise<{ paid: number; unpaid: number; due_soon: number, paidTotal: number, unpaidTotal: number, dueSoonTotal: number }> {
+    try {
+      const paid = await billRepository.getPaidBills();
+      const unpaid = await billRepository.getUnpaidBills();
+      const dueSoon = await billRepository.getDueSoonBills();
+      const summaryTotal = await billRepository.getBillSummaryTotal();
+      return { paid, unpaid, due_soon: dueSoon, paidTotal: summaryTotal.paid, unpaidTotal: summaryTotal.unpaid, dueSoonTotal: summaryTotal.dueSoon };
+    } catch (err: unknown) {
+      logger.error(`getSummary error ${getErrorMessage(err)}`);
+      throw err;
+    }
+  }
 };
 
 export default billService;

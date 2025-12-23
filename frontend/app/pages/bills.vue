@@ -52,21 +52,21 @@
 					<div class="flex justify-between border-b border-accented py-2">
 						<div>{{ t('pages.bills.paidBills') }}</div>
 						<div class="font-medium">
-							$50
+							{{ billSummary?.attributes.paid }} (${{ billSummary?.attributes.paidTotal }})
 						</div>
 					</div>
 
 					<div class="flex justify-between border-b border-accented py-2">
 						<div>{{ t('pages.bills.totalUpcoming') }}</div>
 						<div class="font-medium">
-							$50
+							{{ billSummary?.attributes.unpaid }} (${{ billSummary?.attributes.unpaidTotal }})
 						</div>
 					</div>
 
-					<div class="flex justify-between text-red-500">
+					<div class="flex justify-between text-secondary-red">
 						<div>{{ t('pages.bills.dueSoon') }}</div>
 						<div class="font-medium">
-							$50
+							{{ billSummary?.attributes.due_soon }} (${{ billSummary?.attributes.dueSoonTotal }})
 						</div>
 					</div>
 				</UCard>
@@ -144,7 +144,7 @@ import { getFilteredRowModel, type PaginationState } from '@tanstack/vue-table';
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
-import type { BillsResponse } from '~~/utils/types/api';
+import type { BillsResponse, BillSummaryResource } from '~~/utils/types/api';
 import appConfig from '#build/app.config';
 import type { BillColumnDefinition } from '~~/utils/types/tableColumnDefinitions';
 
@@ -157,7 +157,6 @@ const { t } = useI18n();
 const { copy } = useClipboard();
 const loadingTable = ref<boolean>();
 const loadingTotal = ref<boolean>();
-const loadingSummary = ref<boolean>();
 
 const sortOptions = [
 	{ label: t('components.tables.bills.filters.none'), value: 'None' },
@@ -283,8 +282,28 @@ const fetchBills = async (): Promise<void> => {
 	}
 };
 
+const loadingSummary = ref<boolean>();
+const billSummary = ref<BillSummaryResource | null>(null);
+
+const fetchSummary = async (): Promise<void> => {
+	try {
+		loadingSummary.value = true;
+
+		const res = await $fetch<BillSummaryResource>(`${appConfig.api}/bills/summary`);
+		billSummary.value = res;
+	}
+	catch (err: unknown) {
+		console.error('fetchSummary failed:', err);
+		billSummary.value = null;
+	}
+	finally {
+		loadingSummary.value = false;
+	}
+};
+
 onMounted(async (): Promise<void> => {
 	await fetchBills();
+	await fetchSummary();
 });
 
 watch(sortedBills, async (newValue, oldValue): Promise<void> => {

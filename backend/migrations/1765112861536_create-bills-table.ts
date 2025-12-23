@@ -9,6 +9,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       amount: { type: 'numeric', notNull: true },
       frequency: { type: 'text', notNull: false },
       due_date: { type: 'timestamptz', notNull: true },
+      status: { type: 'text', notNull: false, check: "status IN ('paid', 'unpaid', 'due_soon')" },
       created_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
       updated_at: { type: 'timestamptz', notNull: true, default: pgm.func('current_timestamp') },
       deleted_at: { type: 'timestamptz', default: null },
@@ -18,6 +19,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
   pgm.createIndex('bills', 'name');
   pgm.createIndex('bills', 'due_date');
+  pgm.createIndex('bills', 'status');
   pgm.createIndex('bills', 'created_at');
 
   pgm.sql(`
@@ -41,6 +43,7 @@ export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('bills', 'name');
   pgm.dropIndex('bills', 'due_date');
+  pgm.dropIndex('bills', 'status');
   pgm.dropIndex('bills', 'created_at');
   pgm.dropTable('bills', { ifExists: true });
 }

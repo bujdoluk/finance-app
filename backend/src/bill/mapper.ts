@@ -11,7 +11,7 @@ export const mapToBillResource = (bill: Bills): Resource => ({
     created_at: bill.created_at,
     frequency: bill.frequency,
     name: bill.name,
-    next_run: bill.next_run,
+    due_date: bill.due_date,
   },
   id: String(bill.id),
   links: {
@@ -54,6 +54,30 @@ export const mapToBillsResponse = (data: Bills[], total: number, req: Request) =
     },
   };
 };
+
+export const mapToSummaryResource = (
+  summary: { 
+    paid: number, 
+    unpaid: number; 
+    due_soon: number, 
+    paidTotal: number, 
+    unpaidTotal: number, 
+    dueSoonTotal: number, 
+}): Resource => ({
+  id: "summary",
+  type: "summary",
+  attributes: {
+    paid: summary.paid,
+    unpaid: summary.unpaid,
+    due_soon: summary.due_soon,
+    paidTotal: summary.paidTotal,
+    unpaidTotal: summary.unpaidTotal,
+    dueSoonTotal: summary.dueSoonTotal,
+  },
+  links: {
+    self: "/v1/bills/summary"
+  }
+});
 
 export default mapToBillsResponse;
 

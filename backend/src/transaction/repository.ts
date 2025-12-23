@@ -6,10 +6,9 @@ export const transactionRepository = {
   async create(transaction: TransactionsInput): Promise<Transactions> {
     try {
       const res = await dbPool.query<Transactions>(
-        `INSERT INTO ${tables.transactions.tableName} 
-          (amount, category, date, sender, sender_picture, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-         RETURNING *`,
+        ` INSERT INTO ${tables.transactions.tableName} (amount, category, date, sender, sender_picture, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+          RETURNING *`,
         [
           transaction.amount,
           transaction.category,
@@ -49,12 +48,9 @@ export const transactionRepository = {
         );
     });
 
-    const sql = `
-      INSERT INTO ${tables.transactions.tableName}
-        (amount, category, transaction_type, date, sender, sender_picture, created_at, updated_at)
-      VALUES ${values.join(',')}
-      RETURNING *
-    `;
+    const sql = 
+      ` INSERT INTO ${tables.transactions.tableName} (amount, category, transaction_type, date, sender, sender_picture, created_at, updated_at)
+        VALUES ${values.join(',')} RETURNING *`;
 
     const res = await dbPool.query<Transactions>(sql, params);
     return res.rows;
@@ -63,10 +59,10 @@ export const transactionRepository = {
   async delete(id: number): Promise<Transactions> {
     try {
       const res = await dbPool.query<Transactions>(
-        `UPDATE ${tables.transactions.tableName}
-         SET deleted_at = NOW(), updated_at = NOW()
-         WHERE id = $1
-         RETURNING *`,
+        ` UPDATE ${tables.transactions.tableName}
+          SET deleted_at = NOW(), updated_at = NOW()
+          WHERE id = $1
+          RETURNING *`,
         [id]
       );
 
@@ -79,12 +75,11 @@ export const transactionRepository = {
 
   async getCategories(): Promise<string[]> {
     try {
-      const sql = `
-        SELECT DISTINCT category 
+      const sql = 
+      ` SELECT DISTINCT category 
         FROM ${tables.transactions.tableName}
         WHERE deleted_at IS NULL
-        ORDER BY category ASC
-      `;
+        ORDER BY category ASC`;
 
       const res = await dbPool.query<{ category: string }>(sql);
       return res.rows.map(r => r.category);
@@ -186,8 +181,8 @@ export const transactionRepository = {
   async getById(id: number): Promise<null | Transactions> {
     try {
       const res = await dbPool.query<Transactions>(
-        `SELECT * FROM ${tables.transactions.tableName}
-         WHERE id = $1 AND deleted_at IS NULL`,
+        ` SELECT * FROM ${tables.transactions.tableName}
+          WHERE id = $1 AND deleted_at IS NULL`,
         [id]
       );
 
@@ -201,7 +196,8 @@ export const transactionRepository = {
   async getIncome(): Promise<number> {
     try {
       const res = await dbPool.query<{ total: string }>(
-        `SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} WHERE transaction_type = 'income' AND deleted_at IS NULL`
+        ` SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} 
+        WHERE transaction_type = 'income' AND deleted_at IS NULL`
       );
       return parseFloat(res.rows[0].total);
     } catch (err: unknown) {
@@ -212,7 +208,9 @@ export const transactionRepository = {
 
   async getExpenses(): Promise<number> {
     try {
-      const res = await dbPool.query<{ total: number }>(`SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} WHERE transaction_type = 'expense' AND deleted_at IS NULL`
+      const res = await dbPool.query<{ total: number }>(
+        ` SELECT COALESCE(SUM(amount), 0)::numeric AS total FROM ${tables.transactions.tableName} 
+          WHERE transaction_type = 'expense' AND deleted_at IS NULL`
       );
       return Number(res.rows[0].total);
     } catch (err: unknown) {

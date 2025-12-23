@@ -6,9 +6,9 @@ export const billRepository = {
   async create(bill: BillsInput): Promise<Bills> {
     try {
       const res = await dbPool.query<Bills>(
-        `INSERT INTO ${tables.bills.tableName} (name, amount, frequency, next_run, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
-        [bill.name, bill.amount, bill.frequency ?? null, bill.next_run]
+        ` INSERT INTO ${tables.bills.tableName} (name, amount, frequency, due_date, status, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
+        [bill.name, bill.amount, bill.frequency ?? null, bill.due_date, bill.status]
       );
       return res.rows[0];
     } catch (err: unknown) {
@@ -20,10 +20,10 @@ export const billRepository = {
   async delete(id: number): Promise<Bills> {
     try {
       const res = await dbPool.query<Bills>(
-        `UPDATE ${tables.bills.tableName}
-         SET deleted_at = NOW(), updated_at = NOW()
-         WHERE id = $1
-         RETURNING *`,
+        ` UPDATE ${tables.bills.tableName}
+          SET deleted_at = NOW(), updated_at = NOW()
+          WHERE id = $1
+          RETURNING *`,
         [id]
       );
       return res.rows[0];
@@ -40,7 +40,7 @@ export const billRepository = {
       let where = "deleted_at IS NULL";
       const params: unknown[] = [];
 
-      const allowedFields = ["id", "amount", "name", "next_run", "frequency", "created_at"];
+      const allowedFields = ["id", "amount", "name", "due_date", "frequency", "status", "created_at"];
 
       // Sort
       let orderBy = "ORDER BY id ASC";
@@ -72,7 +72,7 @@ export const billRepository = {
 
       params.push(limit, offset);
 
-      const data = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      const data = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`;
       const count = `SELECT COUNT(*)::int AS total FROM ${tables.bills.tableName} WHERE ${where}`;
 
       const [dataRes, countRes] = await Promise.all([
@@ -95,7 +95,10 @@ export const billRepository = {
 
   async getById(id: number): Promise<Bills | null> {
     try {
-      const res = await dbPool.query<Bills>(`SELECT * FROM ${tables.bills.tableName} WHERE id = $1 AND deleted_at IS NULL`, [id]);
+      const res = await dbPool.query<Bills>(
+        ` SELECT * FROM ${tables.bills.tableName} 
+          WHERE id = $1 AND deleted_at IS NULL`, [id]
+      );
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`findById failed [billId=${String(id)}]: ${getErrorMessage(err)}`);
@@ -106,11 +109,11 @@ export const billRepository = {
   async update(id: number, bill: BillsInput): Promise<Bills> {
     try {
       const res = await dbPool.query<Bills>(
-        `UPDATE ${tables.bills.tableName}
-         SET name = $1, amount = $2, frequency = $3, next_run = $4, updated_at = NOW()
-         WHERE id = $5
-         RETURNING *`,
-        [bill.name, bill.amount, bill.frequency ?? null, bill.next_run, id]
+        ` UPDATE ${tables.bills.tableName}
+          SET name = $1, amount = $2, frequency = $3, due_date = $4, status = $5, updated_at = NOW()
+          WHERE id = $5
+          RETURNING *`,
+        [bill.name, bill.amount, bill.frequency ?? null, bill.due_date, bill.status, id]
       );
       return res.rows[0];
     } catch (err: unknown) {
@@ -118,6 +121,69 @@ export const billRepository = {
       throw err;
     }
   },
+
+  async getPaidBills(): Promise<number> {
+    try {
+      const res = await dbPool.query<{ paid: number }>(
+        ` SELECT COUNT(*)::int as paid FROM ${tables.bills.tableName} 
+          WHERE status = 'paid' AND deleted_at IS NULL`
+      );
+      return Number(res.rows[0].paid);
+    } catch (err: unknown) {
+      logger.error(`getPaidBills error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async getUnpaidBills(): Promise<number> {
+    try {
+      const res = await dbPool.query<{ unpaid: number }>(
+        ` SELECT COUNT(*)::int as unpaid FROM ${tables.bills.tableName} 
+          WHERE status = 'unpaid' AND deleted_at IS NULL`
+      );
+      return Number(res.rows[0].unpaid);
+    } catch (err: unknown) {
+      logger.error(`getUnpaidBills error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async getDueSoonBills(): Promise<number> {
+    try {
+      const res = await dbPool.query<{ due_soon: number }>(
+        ` SELECT 
+          COUNT(*)::int as due_soon FROM ${tables.bills.tableName} 
+          WHERE status = 'due_soon' AND deleted_at IS NULL`
+      );
+      return Number(res.rows[0].due_soon);
+    } catch (err: unknown) {
+      logger.error(`getDueSoonBills error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async getBillSummaryTotal(): Promise<{ paid: number; unpaid: number; dueSoon: number }> {
+    try {
+      const res = await dbPool.query<{ paid: number; unpaid: number; due_soon: number }>(
+        ` SELECT
+          COALESCE(SUM(amount) FILTER (WHERE status = 'paid'), 0)     AS paid,
+          COALESCE(SUM(amount) FILTER (WHERE status = 'unpaid'), 0)   AS unpaid,
+          COALESCE(SUM(amount) FILTER (WHERE status = 'due_soon'), 0) AS due_soon
+          FROM ${tables.bills.tableName}
+          WHERE deleted_at IS NULL `
+      );
+
+      return {
+        paid: Number(res.rows[0].paid),
+        unpaid: Number(res.rows[0].unpaid),
+        dueSoon: Number(res.rows[0].due_soon),
+      };
+    } catch (err: unknown) {
+      logger.error(`getBillSummaryTotal error: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  }
+
 };
 
 export default billRepository;

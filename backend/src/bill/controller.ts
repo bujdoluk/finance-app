@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { BillsInput } from "../../database/dbSchema";
 import { createError, createErrorDocument } from "../utils/jsonapi/error";
 import logger, { getErrorMessage } from "../utils/logger/logger";
-import mapToBillsResponse, { mapToBillResource } from "./mapper";
+import mapToBillsResponse, { mapToBillResource, mapToSummaryResource } from "./mapper";
 import billService from "./service";
 import { createBillSchema, updateBillSchema } from "./validation";
 
@@ -107,5 +107,17 @@ export const deleteBill = async (req: Request<{ id: string }>, res: Response): P
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
       createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
     );
+  }
+};
+
+export const getSummary = async (_req: Request, res: Response) => {
+  try {
+    const summary = await billService.getSummary();
+    return res.status(StatusCodes.OK).json(mapToSummaryResource(summary));
+  } catch (err: unknown) {
+    logger.error(`getSummary error: ${getErrorMessage(err)}`);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(
+      createErrorDocument([createError(StatusCodes.INTERNAL_SERVER_ERROR, "Internal Server Error", getErrorMessage(err))])
+    )
   }
 };
