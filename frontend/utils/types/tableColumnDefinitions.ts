@@ -12,7 +12,8 @@ export interface TransactionColumnDefinition {
 export interface BillColumnDefinition {
 	id: string;
 	name: string;
-	next_run: Date;
+	due_date: Date;
 	frequency: string | null;
 	amount: number;
+	status: string | null;
 }

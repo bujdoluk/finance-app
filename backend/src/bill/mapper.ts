@@ -12,6 +12,7 @@ export const mapToBillResource = (bill: Bills): Resource => ({
     frequency: bill.frequency,
     name: bill.name,
     due_date: bill.due_date,
+    status: bill.status,
   },
   id: String(bill.id),
   links: {

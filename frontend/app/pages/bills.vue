@@ -118,6 +118,18 @@
 								</div>
 							</div>
 						</template>
+						<template #status-cell="{ row }">
+							<div class="flex justify-end">
+								<UBadge
+									:trailing-icon="getStatusIcon(row.original.status)"
+									size="md"
+									class="flex justify-center items-center w-22"
+									:class="getStatusClass(row.original.status)"
+								>
+									{{ formatStatusLabel(row.original.status) }}
+								</UBadge>
+							</div>
+						</template>
 						<template #action-cell="{ row }">
 							<UDropdownMenu
 								:items="getDropdownActions(row.original)"
@@ -193,48 +205,104 @@ const columns: TableColumn<BillColumnDefinition>[] = [
 	{
 		accessorKey: 'id',
 		header: `${t('components.tables.bills.columns.id')}`,
-		cell: ({ row }) => `#${row.getValue('id')}`,
+		cell: ({ row }) => `#${row.getValue<string>('id')}`,
 	},
 	{
 		accessorKey: 'name',
 		header: `${t('components.tables.bills.columns.name')}`,
 		cell: ({ row }) => {
-			return row.getValue('name');
+			return row.getValue<string>('name');
 		},
 	},
 	{
-		accessorKey: 'due_date',
-		header: `${t('components.tables.bills.columns.dueDate')}`,
-		cell: ({ row }) => {
-			return new Date(row.getValue('due_date')).toLocaleString('en-US', {
-				day: 'numeric',
-				month: 'short',
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false,
-			});
+		id: 'frequency',
+		header: t('components.tables.bills.columns.frequency'),
+		accessorFn: row => row.frequency,
+		cell: ({ row, getValue }) => {
+			const frequency = getValue<string | null>();
+			const dueDate = row.original.due_date;
+
+			if (!frequency || !dueDate) return '—';
+
+			const day = new Date(dueDate).getDate();
+
+			const ordinal = (number: number) => {
+				const rule = new Intl.PluralRules('en', { type: 'ordinal' }).select(number);
+				const suffixes: Record<string, string> = {
+					one: 'st',
+					two: 'nd',
+					few: 'rd',
+					other: 'th',
+				};
+
+				return `${number}${suffixes[rule]}`;
+			};
+
+			const frequencyLabel = frequency.charAt(0).toUpperCase() + frequency.slice(1).toLowerCase();
+
+			return `${frequencyLabel} ${ordinal(day)}`;
 		},
 	},
 	{
 		accessorKey: 'amount',
 		header: () => h('div', { class: 'text-right' }, `${t('components.tables.bills.columns.amount')}`),
 		cell: ({ row }) => {
-			const amount = Number.parseFloat(row.getValue('amount'));
+			const amount = Number.parseFloat(row.getValue<string>('amount'));
+			const status = row.original.status;
 
 			const formatted = new Intl.NumberFormat('en-US', {
 				style: 'currency',
-				currency: 'EUR',
+				currency: 'USD',
 			}).format(amount);
 
-			return h('div', { class: amount > 0
-				? 'text-right font-medium text-green-600 text-lg'
-				: 'text-right font-medium text-red-500 text-lg' }, formatted);
+			return h('div', { class: status === 'due_soon'
+				? 'text-right text-secondary-red font-medium text-lg'
+				: 'text-right text-gray-900 font-medium text-lg',
+			}, formatted);
+		},
+	},
+	{
+		accessorKey: 'status',
+		header: () => h('div', { class: 'text-right' }, `${t('components.tables.bills.columns.status')}`),
+		cell: ({ row }) => {
+			return row.getValue<string>('status');
 		},
 	},
 	{
 		id: 'action',
 	},
 ];
+
+const getStatusIcon = (status: string | null): string => {
+	switch (status) {
+		case 'paid':
+			return 'i-lucide-check';
+		case 'due_soon':
+			return 'i-lucide-triangle-alert';
+		case 'unpaid':
+			return 'i-lucide-x';
+		default:
+			return '';
+	}
+};
+
+const getStatusClass = (status: string | null): string => {
+	switch (status) {
+		case 'paid':
+			return 'bg-secondary-green text-white';
+		case 'unpaid':
+			return 'bg-gray-900 text-white';
+		case 'due_soon':
+			return 'bg-secondary-red text-white';
+		default:
+			return 'bg-gray-900 text-white';
+	}
+};
+
+const formatStatusLabel = (status: string | null) => {
+	if (!status) return '—';
+	return status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1);
+};
 
 const columnFilters = ref([
 	{
@@ -268,9 +336,10 @@ const fetchBills = async (): Promise<void> => {
 		bills.value = res.data.map(bill => ({
 			id: bill.id,
 			amount: bill.attributes.amount,
-			next_run: bill.attributes.due_date,
+			due_date: bill.attributes.due_date,
 			name: bill.attributes.name,
 			frequency: bill.attributes.frequency,
+			status: bill.attributes.status,
 		}));
 	}
 	catch (err: unknown) {

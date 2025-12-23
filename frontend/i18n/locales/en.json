@@ -181,8 +181,9 @@
                 "columns": {
                     "id": "#ID",
                     "name": "Bill Title",
-                    "dueDate": "Due Date",
-                    "amount": "Amount"
+                    "amount": "Amount",
+                    "frequency": "Due Date",
+                    "status": "Status"
                 },
                 "filters": {
                     "none": "None",
