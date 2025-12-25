@@ -39,6 +39,12 @@
 
 		<UProgress v-model="progress" />
 
+		<div class="h-4 text-xs font-medium text-green-600 mt-1">
+			<span :class="{ invisible: savedPercentage <= 100 }">
+				{{ t('components.potCard.targetExceeded') }}
+			</span>
+		</div>
+
 		<div class="flex items-center justify-between w-full py-2">
 			<div class="text-xs font-bold">
 				{{ percentage }}%
@@ -84,8 +90,22 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const progress = computed(() => props.pot.attributes.total_saved / props.pot.attributes.target * 100);
-const percentage = computed(() => Math.abs(progress.value).toFixed(2));
+
+const progress = computed(() => {
+	const target = props.pot.attributes.target;
+	const total_saved = props.pot.attributes.total_saved;
+	if (!target || target <= 0) return 0;
+	return Math.min((total_saved / target) * 100, 100);
+});
+
+const percentage = computed(() => Math.min((savedPercentage.value), 100).toFixed(2));
+
+const savedPercentage = computed(() => {
+	const target = props.pot.attributes.target;
+	const total_saved = props.pot.attributes.total_saved;
+	if (!target || target <= 0) return 0;
+	return (total_saved / target) * 100;
+});
 
 const buttons = computed<DropdownMenuItem[]>(() => [
 	{

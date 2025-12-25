@@ -2,7 +2,6 @@
 	<UModal
 		v-model:open="open"
 		:overlay="true"
-		:dismissible="false"
 		:title="title"
 		:description="description"
 		:close="{
@@ -11,6 +10,7 @@
 			class: 'rounded-full cursor-pointer',
 		}"
 		:ui="{ header: 'text-2xl' }"
+		@keydown.esc.prevent="onClose"
 	>
 		<UButton
 			:label="t('pages.pots.buttons.addNewPot')"
@@ -104,7 +104,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const open = ref(false);
+const open = ref<boolean>(false);
 const potName = ref<string>('');
 const target = ref<number | undefined>();
 const loading = ref<boolean>(false);
@@ -186,5 +186,10 @@ const submit = async (): Promise<void> => {
 	finally {
 		loading.value = false;
 	}
+};
+
+const onClose = (): void => {
+	if (loading.value) return;
+	open.value = false;
 };
 </script>

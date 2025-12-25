@@ -2,7 +2,6 @@
 	<UModal
 		v-model:open="open"
 		:overlay="true"
-		:dismissible="false"
 		:title="title"
 		:description="description"
 		:close="{
@@ -11,6 +10,7 @@
 			class: 'rounded-full cursor-pointer',
 		}"
 		:ui="{ header: 'text-2xl' }"
+		@keydown.esc.prevent="onClose"
 	>
 		<UButton
 			:label="t('pages.budgets.buttons.addNewBudget')"
@@ -31,7 +31,16 @@
 					orientation="vertical"
 					class="cursor-pointer"
 					placeholder="$"
+					@input="validateMaximumSpeding"
+					@keydown.enter.prevent="submit"
 				/>
+
+				<span
+					v-if="maximumSpendingError"
+					class="text-xs text-secondary-red red mt-1"
+				>
+					{{ maximumSpendingError }}
+				</span>
 				<span class="text-xs font-medium">{{ t('components.budgetModal.add.theme') }}</span>
 				<USelect
 					v-model="theme"
@@ -61,15 +70,16 @@
 				class="cursor-pointer w-full flex justify-center p-4"
 				size="lg"
 				:loading="loading"
-				@click="createBudget"
+				@click="submit"
 			/>
 		</template>
 	</UModal>
 </template>
 
 <script setup lang="ts">
-import type { SelectItem, ChipProps } from '@nuxt/ui';
+import type { ChipProps } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
+import type { ThemeColor, ThemeSelectItem } from '~~/utils/types/theme';
 
 const props = defineProps<{
 	modalState: 'add' | 'edit' | 'delete';
@@ -80,134 +90,67 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const open = ref(false);
-const budgetCategoryName = ref();
+const open = ref<boolean>(false);
+const budgetCategoryName = ref<string>();
+const maximumSpending = ref<number | undefined>();
 const loading = ref<boolean>(false);
 
-const themes = ref([
-	{
-		label: 'Green',
-		value: '#277C78',
-		chip: { color: 'secondary-green' },
-	},
-	{
-		label: 'Yellow',
-		value: '#F2CDAC',
-		chip: { color: 'secondary-yellow' },
-	},
-	{
-		label: 'Cyan',
-		value: '#82C9D7',
-		chip: { color: 'secondary-cyan' },
-	},
-	{
-		label: 'Navy',
-		value: '#626070',
-		chip: { color: 'secondary-navy' },
-	},
-	{
-		label: 'Red',
-		value: '#C94736',
-		chip: { color: 'secondary-red' },
-	},
-	{
-		label: 'Purple',
-		value: '#826CB0',
-		chip: { color: 'secondary-purple' },
-	},
-	{
-		label: 'Turquoise',
-		value: '#597C7C',
-		chip: { color: 'other-turquoise' },
-	},
-	{
-		label: 'Brown',
-		value: '#93674F',
-		chip: { color: 'other-brown' },
-	},
-	{
-		label: 'Magenta',
-		value: '#934F6F',
-		chip: { color: 'other-magenta' },
-	},
-	{
-		label: 'Blue',
-		value: '#3F82B2',
-		chip: { color: 'other-blue' },
-	},
-	{
-		label: 'Navy Gray',
-		value: '#97A0AC',
-		chip: { color: 'other-navy-gray' },
-	},
-	{
-		label: 'Army Green',
-		value: '#7F9161',
-		chip: { color: 'other-army-green' },
-	},
-	{
-		label: 'Pink',
-		value: '#AF81BA',
-		chip: { color: 'other-pink' },
-	},
-	{
-		label: 'Gold',
-		value: '#CAB361',
-		chip: { color: 'other-gold' },
-	},
-	{
-		label: 'Orange',
-		value: '#BE6C49',
-		chip: { color: 'other-orange' },
-	},
-] satisfies SelectItem[]);
+const themes = ref<ThemeSelectItem[]>([
+	{ label: 'Green', value: 'secondary-green', chip: { color: 'secondary-green' } },
+	{ label: 'Yellow', value: 'secondary-yellow', chip: { color: 'secondary-yellow' } },
+	{ label: 'Cyan', value: 'secondary-cyan', chip: { color: 'secondary-cyan' } },
+	{ label: 'Navy', value: 'secondary-navy', chip: { color: 'secondary-navy' } },
+	{ label: 'Red', value: 'secondary-red', chip: { color: 'secondary-red' } },
+	{ label: 'Purple', value: 'secondary-purple', chip: { color: 'secondary-purple' } },
+	{ label: 'Pink', value: 'other-pink', chip: { color: 'other-pink' } },
+	{ label: 'Turquoise', value: 'other-turquoise', chip: { color: 'other-turquoise' } },
+	{ label: 'Brown', value: 'other-brown', chip: { color: 'other-brown' } },
+	{ label: 'Magenta', value: 'other-magenta', chip: { color: 'other-magenta' } },
+	{ label: 'Blue', value: 'other-blue', chip: { color: 'other-blue' } },
+	{ label: 'Navy Gray', value: 'other-navy-gray', chip: { color: 'other-navy-gray' } },
+	{ label: 'Army Green', value: 'other-army-green', chip: { color: 'other-army-green' } },
+	{ label: 'Gold', value: 'other-gold', chip: { color: 'other-gold' } },
+	{ label: 'Orange', value: 'other-orange', chip: { color: 'other-orange' } },
+]);
 
-const theme = ref(themes.value[0]?.value);
+const theme = ref<ThemeColor>(themes.value[0]?.value ?? 'neutral');
 
-const getChip = (color: string) => {
+const getChip = (color: ThemeColor) => {
 	return themes.value.find(theme => theme.value === color)?.chip;
 };
 
-const maximumSpending = ref();
-
 const title = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.title');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.title');
-	}
-	else {
-		return t('components.budgetModal.delete.title', { budgetCategory: budgetCategoryName.value });
-	}
+	if (props.modalState === 'add') return t('components.budgetModal.add.title');
+	if (props.modalState === 'edit') return t('components.budgetModal.edit.title');
+	return t('components.budgetModal.delete.title', { budgetCategory: budgetCategoryName.value });
 });
 
 const description = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.description');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.description');
-	}
-	else {
-		return t('components.budgetModal.delete.description');
-	}
+	if (props.modalState === 'add') return t('components.budgetModal.add.description');
+	if (props.modalState === 'edit') return t('components.budgetModal.edit.description');
+	return t('components.budgetModal.delete.description');
 });
 
 const footerButtonLabel = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.budgetModal.add.buttons.addBudget');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.budgetModal.edit.buttons.saveChanges');
-	}
-	else {
-		return t('components.budgetModal.delete.buttons.confirmDeletion');
-	}
+	if (props.modalState === 'add') return t('components.budgetModal.add.buttons.addBudget');
+	if (props.modalState === 'edit') return t('components.budgetModal.edit.buttons.saveChanges');
+	return t('components.budgetModal.delete.buttons.confirmDeletion');
 });
 
-const createBudget = async (): Promise<void> => {
+const maximumSpendingError = ref<string | null>(null);
+
+const validateMaximumSpeding = () => {
+	if (maximumSpending.value === null || maximumSpending.value === undefined || maximumSpending.value <= 0) {
+		maximumSpendingError.value = t('components.budgetModal.add.errorMessages.invalidMaximumSpending');
+		return false;
+	}
+	maximumSpendingError.value = null;
+	return true;
+};
+
+const submit = async (): Promise<void> => {
 	try {
+		if (!validateMaximumSpeding()) return;
 		loading.value = true;
 		await $fetch('http://localhost:3001/v1/budgets', {
 			method: 'POST',
@@ -215,7 +158,6 @@ const createBudget = async (): Promise<void> => {
 				name: budgetCategoryName.value,
 				maximum_spending: maximumSpending.value,
 				theme: theme.value,
-				amount: 10,
 			},
 		});
 	}
@@ -227,5 +169,10 @@ const createBudget = async (): Promise<void> => {
 		emit('created');
 		open.value = false;
 	}
+};
+
+const onClose = (): void => {
+	if (loading.value) return;
+	open.value = false;
 };
 </script>

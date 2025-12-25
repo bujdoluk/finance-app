@@ -70,6 +70,9 @@
                     "editBudget": "Edit Budget",
                     "saveChanges": "Save Changes"
                 },
+                "errorMessages": {
+                    "invalidMaximumSpending": "Maximum spending number must be greater than 0"
+                },
                 "budgetCategoryName": "Budget Category",
                 "maximumSpend": "Maximum Spend",
                 "theme": "Theme",
@@ -154,6 +157,7 @@
             }
         },
         "potCard": {
+            "targetExceeded": "🎉 Target exceeded!",
             "target": "Target of ${target}",
             "totalSaved": "Total saved",
             "delete": "Delete Pot",
