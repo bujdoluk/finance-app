@@ -127,6 +127,9 @@
                     "editPot": "Edit Pot",
                     "saveChanges": "Save Changes"
                 },
+                "errorMessages": {
+                    "invalidTarget": "Target number must be greater than 0"
+                },
                 "potName": "Pot Name",
                 "target": "Target",
                 "theme": "Theme",

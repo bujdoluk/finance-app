@@ -1,3 +1,4 @@
+import transactionRepository from "@/transaction/repository";
 import { dbPool } from "../../database/db";
 import { Pots, PotsInput, tables } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
@@ -17,15 +18,40 @@ export const potRepository = {
     }
   },
 
-  async delete(id: number): Promise<null | Pots> {
+  async deleteWithRefund(id: number): Promise<Pots | null> {
     try {
-      const res = await dbPool.query<Pots>(
-        ` UPDATE ${tables.pots.tableName} SET deleted_at = NOW() 
-          WHERE id = $1 AND deleted_at IS NULL RETURNING *`, [id]
-        );
-      return res.rows[0] ?? null;
+      await dbPool.query("BEGIN");
+      const potRes = await dbPool.query<Pots>(
+        ` SELECT * FROM ${tables.pots.tableName}
+          WHERE id = $1 AND deleted_at IS NULL`,
+        [id]
+      );
+
+      const pot = potRes.rows[0];
+      if (!pot) return null;
+
+      if (pot.total_saved > 0) {
+        await transactionRepository.create({
+          amount: pot.total_saved,
+          category: pot.name, 
+          transaction_type: "income",
+          date: new Date(),
+          sender: pot.name,
+        });
+      }
+
+      const deleteRes = await dbPool.query<Pots>(
+        ` UPDATE ${tables.pots.tableName}
+          SET deleted_at = NOW()
+          WHERE id = $1
+          RETURNING *`,
+        [id]
+      );
+
+      await dbPool.query("COMMIT");
+      return deleteRes.rows[0];
     } catch (err: unknown) {
-      logger.error(`delete pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      await dbPool.query("ROLLBACK");
       throw err;
     }
   },
@@ -78,7 +104,7 @@ export const potRepository = {
         }
       }
 
-      let data = `SELECT * FROM ${tables.pots.tableName} WHERE ${where} ORDER BY created_at DESC`;
+      let data = `SELECT * FROM ${tables.pots.tableName} WHERE ${where} ${orderBy}`;
       const count = `SELECT COUNT(*)::int AS total FROM ${tables.pots.tableName} WHERE ${where}`;
 
       if (limit !== undefined && offset !== undefined) {
@@ -117,15 +143,77 @@ export const potRepository = {
     }
   },
 
-  async update(id: number, data: PotsInput): Promise<null | Pots> {
+  async updateTotalSaved(id: number, data: PotsInput): Promise<null | Pots> {
     try {
       const res = await dbPool.query<Pots>(
         ` UPDATE ${tables.pots.tableName} SET amount = $1, updated_at = NOW()
-          WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.amount, data.id]
+          WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.total_saved, id]
       );
       return res.rows[0] ?? null;
     } catch (err: unknown) {
       logger.error(`Update pot failed [potId=${String(id)}]: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+  async deposit(id: number, amount: number): Promise<Pots | null> {
+    try {
+      await dbPool.query("BEGIN");
+      const potRes = await dbPool.query<Pots>(
+        ` UPDATE ${tables.pots.tableName}
+          SET total_saved = total_saved + $1, updated_at = NOW()
+          WHERE id = $2 AND deleted_at IS NULL
+          RETURNING *`,
+        [amount, id]
+      );
+
+      const pot = potRes.rows[0];
+      if (!pot) throw new Error("Pot not found");
+
+      await transactionRepository.create({
+        amount,
+        category: pot.name,
+        transaction_type: "expense",
+        date: new Date(),
+        sender: pot.name,
+      });
+
+      await dbPool.query("COMMIT");
+      return pot;
+    } catch (err: unknown) {
+      await dbPool.query("ROLLBACK");
+      logger.error(`pot deposit failed: ${getErrorMessage(err)}`);
+      throw err;
+    }
+  },
+
+   async withdraw(id: number, amount: number): Promise<Pots | null> {
+     try {
+      await dbPool.query("BEGIN");
+      const potRes = await dbPool.query<Pots>(
+        ` UPDATE ${tables.pots.tableName}
+          SET total_saved = total_saved - $1, updated_at = NOW()
+          WHERE id = $2 AND deleted_at IS NULL AND total_saved >= $1
+          RETURNING *`,
+        [amount, id]
+      );
+
+      const pot = potRes.rows[0];
+      if (!pot) throw new Error("Insufficient funds or pot not found");
+
+      await transactionRepository.create({
+        amount,
+        category: pot.name,
+        transaction_type: "income",
+        date: new Date(),
+        sender: pot.name,
+      });
+
+      await dbPool.query("COMMIT");
+      return pot;
+    } catch (err: unknown) {
+      await dbPool.query("ROLLBACK");
+      logger.error(`pot withdraw failed: ${getErrorMessage(err)}`);
       throw err;
     }
   },

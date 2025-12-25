@@ -17,8 +17,9 @@
 				v-for="pot in pots"
 				:key="pot.id"
 				:pot="pot"
-				@edit="(id) => onEditPot(String(id))"
-				@delete="(id) => onDeletePot(String(id))"
+				@edit="onEditPot"
+				@delete="onDeletePot"
+				@refresh="fetchPots"
 			/>
 		</div>
 	</div>
@@ -40,7 +41,9 @@ const loading = ref<boolean>(false);
 const fetchPots = async (): Promise<void> => {
 	try {
 		loading.value = true;
-		const res = await $fetch<PotsResponse>('http://localhost:3001/v1/pots');
+		const res = await $fetch<PotsResponse>('http://localhost:3001/v1/pots', {
+			method: 'GET',
+		});
 		pots.value = res.data;
 		console.log(pots.value);
 	}
@@ -52,12 +55,11 @@ const fetchPots = async (): Promise<void> => {
 	}
 };
 
-const editPot = async (id: string): Promise<void> => {
+const editPot = async (id: number): Promise<void> => {
 	try {
 		loading.value = true;
 		const data = await $fetch<Array<PotResource>>(`http://localhost:3001/v1/pots/${id}`);
 		pots.value = data;
-		console.log(pots.value);
 	}
 	catch (err: unknown) {
 		console.error('Failed to edit pot:', err);
@@ -67,12 +69,13 @@ const editPot = async (id: string): Promise<void> => {
 	}
 };
 
-const deletePot = async (id: string): Promise<void> => {
+const deletePot = async (id: number): Promise<void> => {
 	try {
 		loading.value = true;
-		const res = await $fetch<PotsResponse>(`http://localhost:3001/v1/pots/${id}`);
+		const res = await $fetch<PotsResponse>(`http://localhost:3001/v1/pots/${id}`, {
+			method: 'DELETE',
+		});
 		pots.value = res.data;
-		console.log(pots.value);
 	}
 	catch (err: unknown) {
 		console.error('Failed to delete pot:', err);
@@ -82,14 +85,13 @@ const deletePot = async (id: string): Promise<void> => {
 	}
 };
 
-const onEditPot = async (id: string): Promise<void> => {
+const onEditPot = async (id: number): Promise<void> => {
 	await editPot(id);
 };
 
-const onDeletePot = async (id: string): Promise<void> => {
+const onDeletePot = async (id: number): Promise<void> => {
 	await deletePot(id);
 };
-
 const onPotCreated = async (): Promise<void> => {
 	await fetchPots();
 };

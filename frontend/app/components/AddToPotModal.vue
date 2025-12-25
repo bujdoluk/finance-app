@@ -45,7 +45,7 @@
 				class="cursor-pointer w-full flex justify-center p-4"
 				size="lg"
 				:loading="loading"
-				@click="updatePot"
+				@click="submit"
 			/>
 		</template>
 	</UModal>
@@ -53,11 +53,11 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { Pot } from '~~/utils/types/api';
+import type { PotResource } from '~~/utils/types/api';
 
 const props = defineProps<{
 	modalState: 'deposit' | 'withdraw';
-	pot: Pot;
+	pot: PotResource;
 }>();
 
 const emit = defineEmits<{
@@ -67,7 +67,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const open = ref(false);
 const loading = ref<boolean>(false);
-const amount = ref<number>();
+const amount = ref<number | null>(null);
 
 const title = computed(() => {
 	if (props.modalState === 'deposit') {
@@ -92,23 +92,32 @@ const footerButtonLabel = computed(() => {
 	return t('components.AddToPotModal.widthdraw.buttons.confirm');
 });
 
-const updatePot = async (): Promise<void> => {
+const endpoint = computed(() =>
+	props.modalState === 'deposit'
+		? `/v1/pots/${props.pot.id}/deposit`
+		: `/v1/pots/${props.pot.id}/withdraw`,
+);
+
+const submit = async (): Promise<void> => {
+	if (!amount.value || amount.value <= 0) return;
+
 	try {
 		loading.value = true;
-		await $fetch(`http://localhost:3001/v1/pots/${props.pot.id}`, {
-			method: 'PATCH',
-			body: {
-				amount: amount.value,
-			},
+
+		await $fetch(`http://localhost:3001${endpoint.value}`, {
+			method: 'POST',
+			body: { amount: amount.value },
 		});
+
+		emit('updated');
+		open.value = false;
+		amount.value = null;
 	}
 	catch (err: unknown) {
-		console.error('Failed to save to pot:', err);
+		console.error('Pot update failed:', err);
 	}
 	finally {
 		loading.value = false;
-		emit('updated');
-		open.value = false;
 	}
 };
 </script>

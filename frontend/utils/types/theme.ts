@@ -1,4 +1,10 @@
-type ThemeColor
+export type ThemeSelectItem = {
+	label: string;
+	value: ThemeColor;
+	chip: { color: ThemeColor };
+};
+
+export type ThemeColor
 	= | 'secondary-green'
 		| 'secondary-yellow'
 		| 'secondary-cyan'

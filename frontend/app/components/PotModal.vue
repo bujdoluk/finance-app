@@ -33,17 +33,28 @@
 							aria-live="polite"
 							role="status"
 						>
-							{{ potName?.length }}/{{ maxLength }}
+							{{ potName?.length || 0 }}/{{ maxLength }}
 						</div>
 					</template>
 				</UInput>
+
 				<span class="text-xs font-medium">{{ t('components.potModal.add.target') }}</span>
 				<UInputNumber
 					v-model="target"
 					orientation="vertical"
 					class="cursor-pointer"
 					placeholder="$"
+					@input="validateTarget"
+					@keydown.enter.prevent="submit"
 				/>
+
+				<span
+					v-if="targetError"
+					class="text-xs text-secondary-red red mt-1"
+				>
+					{{ targetError }}
+				</span>
+
 				<span class="text-xs font-medium">{{ t('components.potModal.add.theme') }}</span>
 				<USelect
 					v-model="theme"
@@ -54,7 +65,7 @@
 					<template #leading="{ modelValue, ui }">
 						<UChip
 							v-if="modelValue"
-							v-bind="getChip(modelValue)"
+							:color="getChip(modelValue)?.color || 'neutral'"
 							inset
 							standalone
 							:size="(ui.itemLeadingChipSize() as ChipProps['size'])"
@@ -73,15 +84,16 @@
 				class="cursor-pointer w-full flex justify-center p-4"
 				size="lg"
 				:loading="loading"
-				@click="createPot"
+				@click="submit"
 			/>
 		</template>
 	</UModal>
 </template>
 
 <script setup lang="ts">
-import type { ChipProps, SelectItem } from '@nuxt/ui';
+import type { ChipProps } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
+import type { ThemeColor, ThemeSelectItem } from '../../utils/types/theme';
 
 const props = defineProps<{
 	modalState: 'add' | 'edit' | 'delete';
@@ -93,171 +105,69 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const open = ref(false);
-const potName = ref();
+const potName = ref<string>('');
+const target = ref<number | undefined>();
 const loading = ref<boolean>(false);
 
-const themes = ref([
-	{
-		label: 'Green',
-		value: 'Green',
-		chip: {
-			color: 'secondary-green',
-		},
-	},
-	{
-		label: 'Yellow',
-		value: 'Yellow',
-		chip: {
-			color: 'secondary-yellow',
-		},
-	},
-	{
-		label: 'Cyan',
-		value: 'Cyan',
-		chip: {
-			color: 'secondary-cyan',
-		},
-	},
-	{
-		label: 'Navy',
-		value: 'Navy',
-		chip: {
-			color: 'secondary-navy',
-		},
-	},
-	{
-		label: 'Red',
-		value: 'Red',
-		chip: {
-			color: 'secondary-red',
-		},
-	},
-	{
-		label: 'Purple',
-		value: 'Purple',
-		chip: {
-			color: 'secondary-purple',
-		},
-	},
-	{
-		label: 'Turquoise',
-		value: 'Turquoise',
-		chip: {
-			color: 'other-turqoise',
-		},
-	},
-	{
-		label: 'Purple',
-		value: 'Purple',
-		chip: {
-			color: 'secondary-purple',
-		},
-	},
-	{
-		label: 'Brown',
-		value: 'Brown',
-		chip: {
-			color: 'other-brown',
-		},
-	},
-	{
-		label: 'Magenta',
-		value: 'Magenta',
-		chip: {
-			color: 'other-magenta',
-		},
-	},
-	{
-		label: 'Blue',
-		value: 'Blue',
-		chip: {
-			color: 'other-blue',
-		},
-	},
-	{
-		label: 'Navy Gray',
-		value: 'Navy Gray',
-		chip: {
-			color: 'other-navy-gray',
-		},
-	},
-	{
-		label: 'Army Green',
-		value: 'Army Green',
-		chip: {
-			color: 'other-army-green',
-		},
-	},
-	{
-		label: 'Pink',
-		value: 'Pink',
-		chip: {
-			color: 'other-pink',
-		},
-	},
-	{
-		label: 'Gold',
-		value: 'Gold',
-		chip: {
-			color: 'other-gold',
-		},
-	},
-	{
-		label: 'Orange',
-		value: 'Orange',
-		chip: {
-			color: 'other-orange',
-		},
-	},
-] satisfies SelectItem[]);
+const themes = ref<ThemeSelectItem[]>([
+	{ label: 'Green', value: 'secondary-green', chip: { color: 'secondary-green' } },
+	{ label: 'Yellow', value: 'secondary-yellow', chip: { color: 'secondary-yellow' } },
+	{ label: 'Cyan', value: 'secondary-cyan', chip: { color: 'secondary-cyan' } },
+	{ label: 'Navy', value: 'secondary-navy', chip: { color: 'secondary-navy' } },
+	{ label: 'Red', value: 'secondary-red', chip: { color: 'secondary-red' } },
+	{ label: 'Purple', value: 'secondary-purple', chip: { color: 'secondary-purple' } },
+	{ label: 'Pink', value: 'other-pink', chip: { color: 'other-pink' } },
+	{ label: 'Turquoise', value: 'other-turquoise', chip: { color: 'other-turquoise' } },
+	{ label: 'Brown', value: 'other-brown', chip: { color: 'other-brown' } },
+	{ label: 'Magenta', value: 'other-magenta', chip: { color: 'other-magenta' } },
+	{ label: 'Blue', value: 'other-blue', chip: { color: 'other-blue' } },
+	{ label: 'Navy Gray', value: 'other-navy-gray', chip: { color: 'other-navy-gray' } },
+	{ label: 'Army Green', value: 'other-army-green', chip: { color: 'other-army-green' } },
+	{ label: 'Gold', value: 'other-gold', chip: { color: 'other-gold' } },
+	{ label: 'Orange', value: 'other-orange', chip: { color: 'other-orange' } },
+]);
 
-const theme = ref(themes.value[0]?.value);
+const theme = ref<ThemeColor>(themes.value[0]?.value ?? 'neutral');
 
-const getChip = (color: string) => {
+const getChip = (color: ThemeColor) => {
 	return themes.value.find(theme => theme.value === color)?.chip;
 };
 
 const maxLength = 50;
-const target = ref();
 
 const title = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.potModal.add.title');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.potModal.edit.title');
-	}
-	else {
-		return t('components.potModal.delete.title', { pot: potName });
-	}
+	if (props.modalState === 'add') return t('components.potModal.add.title');
+	if (props.modalState === 'edit') return t('components.potModal.edit.title');
+	return t('components.potModal.delete.title', { pot: potName.value });
 });
 
 const description = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.potModal.add.description');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.potModal.edit.description');
-	}
-	else {
-		return t('components.potModal.delete.description');
-	}
+	if (props.modalState === 'add') return t('components.potModal.add.description');
+	if (props.modalState === 'edit') return t('components.potModal.edit.description');
+	return t('components.potModal.delete.description');
 });
 
 const footerButtonLabel = computed(() => {
-	if (props.modalState === 'add') {
-		return t('components.potModal.add.buttons.addPot');
-	}
-	else if (props.modalState === 'edit') {
-		return t('components.potModal.edit.buttons.saveChanges');
-	}
-	else {
-		return t('components.potModal.delete.buttons.confirmDeletion');
-	}
+	if (props.modalState === 'add') return t('components.potModal.add.buttons.addPot');
+	if (props.modalState === 'edit') return t('components.potModal.edit.buttons.saveChanges');
+	return t('components.potModal.delete.buttons.confirmDeletion');
 });
 
-const createPot = async (): Promise<void> => {
+const targetError = ref<string | null>(null);
+
+const validateTarget = () => {
+	if (target.value === null || target.value === undefined || target.value <= 0) {
+		targetError.value = t('components.potModal.add.errorMessages.invalidTarget');
+		return false;
+	}
+	targetError.value = null;
+	return true;
+};
+
+const submit = async (): Promise<void> => {
 	try {
+		if (!validateTarget()) return;
+
 		loading.value = true;
 		await $fetch('http://localhost:3001/v1/pots', {
 			method: 'POST',
@@ -267,14 +177,14 @@ const createPot = async (): Promise<void> => {
 				target: target.value,
 			},
 		});
+		emit('created');
+		open.value = false;
 	}
 	catch (err: unknown) {
 		console.error('Failed to create pot:', err);
 	}
 	finally {
 		loading.value = false;
-		emit('created');
-		open.value = false;
 	}
 };
 </script>

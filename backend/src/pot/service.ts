@@ -16,9 +16,7 @@ export const potService = {
 
   async delete(id: number): Promise<null | Pots> {
     try {
-      const pot = await potRepository.getById(id);
-      if (!pot) return null;
-      return await potRepository.delete(id);
+      return await potRepository.deleteWithRefund(id);
     } catch (err: unknown) {
       logger.error(`deletePot error [id=${String(id)}]: ${getErrorMessage(err)}`);
       throw err;
@@ -32,18 +30,12 @@ export const potService = {
         throw new Error(`Validation failed: ${JSON.stringify(validationErrors)}`);
       }
 
-      const existing = await potRepository.getById(id);
-      if (!existing) return null;
-
-      const { amount } = body;
+      const amount = body.amount;
       if (amount === undefined) {
         throw new Error("Amount is missing after validation");
       }
 
-      return await potRepository.update(id, {
-        ...existing,
-        total_saved: existing.total_saved + amount,
-      });
+      return await potRepository.deposit(id, amount);
     } catch (err: unknown) {
       logger.error(`deposit error [id=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
       throw err;
@@ -67,16 +59,6 @@ export const potService = {
       throw err;
     }
   },
- async updatePot(id: number, body: PotsInput): Promise<null | Pots> {
-    try {
-      const existingPot = await potRepository.getById(id);
-      if (!existingPot) return null;
-      return await potRepository.update(id, { ...existingPot, ...body });
-    } catch (err: unknown) {
-      logger.error(`updatePot error [id=${String(id)}]: ${getErrorMessage(err)}`);
-      throw err;
-    }
-  },
 
   async withdraw(id: number, body: PotsInput): Promise<null | Pots> {
     try {
@@ -85,22 +67,12 @@ export const potService = {
         throw new Error(`Validation failed: ${JSON.stringify(validationErrors)}`);
       }
 
-      const existing = await potRepository.getById(id);
-      if (!existing) return null;
-
-      const { amount } = body;
+      const amount = body.amount;
       if (amount === undefined) {
         throw new Error("Amount is missing after validation");
       }
 
-      if (existing.total_saved < amount) {
-        return null; 
-      }
-
-      return await potRepository.update(id, {
-        ...existing,
-        total_saved: existing.total_saved - amount,
-      });
+      return await potRepository.withdraw(id, amount);
     } catch (err: unknown) {
       logger.error(`withdraw error [id=${String(id)}, amount=${String(body.amount)}]: ${getErrorMessage(err)}`);
       throw err;

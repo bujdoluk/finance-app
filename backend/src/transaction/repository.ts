@@ -6,7 +6,7 @@ export const transactionRepository = {
   async create(transaction: TransactionsInput): Promise<Transactions> {
     try {
       const res = await dbPool.query<Transactions>(
-        ` INSERT INTO ${tables.transactions.tableName} (amount, category, date, sender, sender_picture, created_at, updated_at)
+        ` INSERT INTO ${tables.transactions.tableName} (amount, category, transaction_type, date, sender, sender_picture, created_at, updated_at)
           VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
           RETURNING *`,
         [

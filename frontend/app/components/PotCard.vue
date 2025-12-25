@@ -44,7 +44,7 @@
 				{{ percentage }}%
 			</div>
 			<div class="text-sm">
-				{{ t('components.potCard.target', { target: 150 }) }}
+				{{ t('components.potCard.target', { target: props.pot.attributes.target }) }}
 			</div>
 		</div>
 
@@ -52,10 +52,12 @@
 			<AddToPotModal
 				:pot="pot"
 				:modal-state="'deposit'"
+				@updated="$emit('refresh')"
 			/>
 			<AddToPotModal
 				:pot="pot"
 				:modal-state="'withdraw'"
+				@updated="$emit('refresh')"
 			/>
 		</div>
 	</UCard>
@@ -77,8 +79,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	(e: 'edit', id: number): void;
-	(e: 'delete', value: string): void;
+	(e: 'edit' | 'delete', id: number): void;
+	(e: 'refresh'): void;
 }>();
 
 const { t } = useI18n();
@@ -89,13 +91,13 @@ const buttons = computed<DropdownMenuItem[]>(() => [
 	{
 		label: t('components.potCard.delete'),
 		onSelect(): void {
-			emit('delete', props.pot.id.toString());
+			emit('delete', Number(props.pot.id));
 		},
 	},
 	{
 		label: t('components.potCard.edit'),
 		onSelect(): void {
-			emit('edit', props.pot.id);
+			emit('edit', Number(props.pot.id));
 		},
 	},
 ]);
