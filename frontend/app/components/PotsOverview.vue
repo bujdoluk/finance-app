@@ -4,7 +4,7 @@
 			<div class="text-xl font-medium">
 				{{ t('components.potsOverview.title') }}
 				<UTooltip
-					v-if="potsCount > 0"
+					v-if="potsCount > CONSTANTS.MIN_POTS"
 					:content="{
 						align: 'center',
 						side: 'top',
@@ -71,13 +71,13 @@ import type { PotResource } from '../../utils/types/api';
 import { useI18n } from 'vue-i18n';
 import PotsMoneyIcon from '../../public/pots-money.svg';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
+import { CONSTANTS } from '../../utils/constants';
 
 const props = defineProps<{
 	pots: PotResource[];
 }>();
 
-const MAX_POTS = 4;
 const { t } = useI18n();
-const visiblePots = computed(() => props.pots.slice(0, MAX_POTS));
-const potsCount = computed(() => props.pots.length - MAX_POTS);
+const visiblePots = computed((): PotResource[] => props.pots.slice(0, CONSTANTS.MAX_POTS_DISPLAYED));
+const potsCount = computed((): number => props.pots.length - CONSTANTS.MAX_POTS_DISPLAYED);
 </script>

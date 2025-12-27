@@ -60,13 +60,13 @@
 import type { TransactionResource } from '../../utils/types/api';
 import { useI18n } from 'vue-i18n';
 import dayjs from 'dayjs';
+import { CONSTANTS } from '../../utils/constants';
 
 const props = defineProps<{
 	transactions: TransactionResource[];
 }>();
 
-const MAX_TRANSACTIONS = 4;
 const { t } = useI18n();
-const visibleTransactions = computed(() => props.transactions.slice(0, MAX_TRANSACTIONS));
-const transactionsCount = computed(() => props.transactions.length - MAX_TRANSACTIONS);
+const visibleTransactions = computed((): TransactionResource[] => props.transactions.slice(0, CONSTANTS.MAX_TRANSACTIONS_DISPLAYED));
+const transactionsCount = computed((): number => props.transactions.length - CONSTANTS.MAX_TRANSACTIONS_DISPLAYED);
 </script>

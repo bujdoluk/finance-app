@@ -4,7 +4,7 @@
 			<div class="text-xl font-medium">
 				{{ t('components.budgetsOverview.title') }}
 				<UTooltip
-					v-if="budgetsCount > 0"
+					v-if="budgetsCount > CONSTANTS.MIN_BUDGETS"
 					:content="{
 						align: 'center',
 						side: 'top',
@@ -59,13 +59,13 @@ import BudgetChart from '~/components/BudgetChart.client.vue';
 import type { BudgetResource } from '../../utils/types/api';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
 import { useI18n } from 'vue-i18n';
+import { CONSTANTS } from '~~/utils/constants';
 
 const props = defineProps<{
 	budgets: BudgetResource[];
 }>();
 
-const MAX_BUDGETS = 4;
 const { t } = useI18n();
-const visibleBudgets = computed(() => props.budgets.slice(0, MAX_BUDGETS));
-const budgetsCount = computed(() => props.budgets.length - MAX_BUDGETS);
+const visibleBudgets = computed((): BudgetResource[] => props.budgets.slice(0, CONSTANTS.MAX_BUDGETS_DISPLAYED));
+const budgetsCount = computed((): number => props.budgets.length - CONSTANTS.MAX_BUDGETS_DISPLAYED);
 </script>

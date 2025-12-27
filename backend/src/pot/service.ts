@@ -1,3 +1,4 @@
+import transactionRepository from "@/transaction/repository";
 import { Pots, PotsInput } from "../../database/dbSchema";
 import logger, { getErrorMessage } from "../utils/logger/logger";
 import potRepository  from "./repository";
@@ -33,6 +34,14 @@ export const potService = {
       const amount = body.amount;
       if (amount === undefined) {
         throw new Error("Amount is missing after validation");
+      }
+
+      const income = await transactionRepository.getIncome();
+      const expenses = await transactionRepository.getExpenses();
+      const balance = income - expenses;
+
+      if (balance < amount) {
+        throw new Error("Insufficient balance to deposit into pot");
       }
 
       return await potRepository.deposit(id, amount);

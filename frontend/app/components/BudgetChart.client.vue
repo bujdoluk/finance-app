@@ -25,9 +25,9 @@ const props = defineProps<{
 	budgets: BudgetResource[];
 }>();
 
-const series = computed(() => props.budgets.map((budget: BudgetResource) => Number(budget.attributes.amount)));
-const total = computed(() => series.value.reduce((sum: number, val: number) => sum + val, 0));
-const colors = computed(() => props.budgets.map(b => b.attributes.theme));
+const series = computed((): number[] => props.budgets.map((budget: BudgetResource) => Number(budget.attributes.amount)));
+const total = computed((): number => series.value.reduce((sum: number, val: number) => sum + val, 0));
+const colors = computed((): string[] => props.budgets.map((budget: BudgetResource) => budget.attributes.theme));
 
 const chartData = computed(() => ({
 	theme: {

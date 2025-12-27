@@ -76,7 +76,7 @@
 				<div class="flex w-full items-center pb-4 lg:justify-between">
 					<UInput
 						:model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string"
-						placeholder="Search bill ..."
+						:placeholder="t('pages.bills.searchPlaceholder')"
 						class="mr-2 min-w-50"
 						@update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
 					/>

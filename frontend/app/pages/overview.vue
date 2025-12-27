@@ -92,7 +92,7 @@
 
 							<div class="grid flex-1 grid-cols-2 gap-2 max-h-40">
 								<div
-									v-for="i in 4"
+									v-for="i in CONSTANTS.MAX_POTS_DISPLAYED"
 									:key="i"
 									class="flex p-2"
 								>
@@ -126,7 +126,7 @@
 
 						<div class="flex flex-col gap-4 flex-1 overflow-y-auto">
 							<div
-								v-for="i in 4"
+								v-for="i in CONSTANTS.MAX_TRANSACTIONS_DISPLAYED"
 								:key="i"
 								class="flex justify-between items-center"
 							>
@@ -165,7 +165,7 @@
 
 							<div class="flex flex-col justify-center pb-2 flex-1 gap-2">
 								<div
-									v-for="i in 4"
+									v-for="i in CONSTANTS.MAX_BUDGETS_DISPLAYED"
 									:key="i"
 									class="flex p-2 items-center gap-2"
 								>
@@ -196,7 +196,7 @@
 
 						<div class="flex flex-col gap-2 flex-1">
 							<div
-								v-for="i in 3"
+								v-for="i in CONSTANTS.MAX_BILLS_DISPLAYED"
 								:key="i"
 								class="flex justify-between rounded-lg bg-beige-100 p-2"
 							>
@@ -233,6 +233,7 @@ import type {
 } from '../../utils/types/api';
 import TransactionsOverview from '~/components/TransactionsOverview.vue';
 import type { PaginationState } from '@tanstack/vue-table';
+import { CONSTANTS } from '~~/utils/constants';
 
 definePageMeta({
 	layout: 'dashboard',

@@ -34,7 +34,8 @@
             "latestSpending": "Latest Spending",
             "seeAll": "See All",
             "edit": "Edit Budget",
-            "delete": "Delete Budget"
+            "delete": "Delete Budget",
+            "spendExceeded": "Spend exceeded!"
         },
         "loginForm": {
             "title": "Login",
@@ -157,7 +158,7 @@
             }
         },
         "potCard": {
-            "targetExceeded": "🎉 Target exceeded!",
+            "targetExceeded": "Target exceeded!",
             "target": "Target of ${target}",
             "totalSaved": "Total saved",
             "delete": "Delete Pot",
@@ -201,7 +202,8 @@
                     "ztoa": "Z to A",
                     "highest": "Highest",
                     "lowest": "Lowest"
-                }  
+                },
+                "searchPlaceholder": "Search bills..."  
             }
         }
     },

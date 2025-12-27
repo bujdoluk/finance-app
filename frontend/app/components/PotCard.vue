@@ -91,16 +91,16 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const progress = computed(() => {
+const progress = computed((): number => {
 	const target = props.pot.attributes.target;
 	const total_saved = props.pot.attributes.total_saved;
 	if (!target || target <= 0) return 0;
 	return Math.min((total_saved / target) * 100, 100);
 });
 
-const percentage = computed(() => Math.min((savedPercentage.value), 100).toFixed(2));
+const percentage = computed((): string => Math.min((savedPercentage.value), 100).toFixed(2));
 
-const savedPercentage = computed(() => {
+const savedPercentage = computed((): number => {
 	const target = props.pot.attributes.target;
 	const total_saved = props.pot.attributes.total_saved;
 	if (!target || target <= 0) return 0;

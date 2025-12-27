@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import type { ChipProps } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
+import { CONSTANTS } from '~~/utils/constants';
 import type { ThemeColor, ThemeSelectItem } from '~~/utils/types/theme';
 
 const props = defineProps<{
@@ -90,6 +91,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const appConfig = useAppConfig();
 const open = ref<boolean>(false);
 const budgetCategoryName = ref<string>();
 const maximumSpending = ref<number | undefined>();
@@ -140,7 +142,7 @@ const footerButtonLabel = computed(() => {
 const maximumSpendingError = ref<string | null>(null);
 
 const validateMaximumSpeding = () => {
-	if (maximumSpending.value === null || maximumSpending.value === undefined || maximumSpending.value <= 0) {
+	if (maximumSpending.value === null || maximumSpending.value === undefined || maximumSpending.value <= CONSTANTS.MIN_BUDGETS) {
 		maximumSpendingError.value = t('components.budgetModal.add.errorMessages.invalidMaximumSpending');
 		return false;
 	}
@@ -152,7 +154,7 @@ const submit = async (): Promise<void> => {
 	try {
 		if (!validateMaximumSpeding()) return;
 		loading.value = true;
-		await $fetch('http://localhost:3001/v1/budgets', {
+		await $fetch(`${appConfig.api}/budgets`, {
 			method: 'POST',
 			body: {
 				name: budgetCategoryName.value,

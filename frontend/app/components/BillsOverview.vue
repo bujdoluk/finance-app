@@ -4,7 +4,7 @@
 			<div class="text-xl font-medium">
 				{{ t('components.billsOverview.title') }}
 				<UTooltip
-					v-if="billsCount > 0"
+					v-if="billsCount > CONSTANTS.MIN_BILLS_DISPLAYED"
 					:content="{
 						align: 'center',
 						side: 'top',
@@ -40,15 +40,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Bill } from '../../utils/types/api';
+import type { BillResource } from '../../utils/types/api';
 import { useI18n } from 'vue-i18n';
+import { CONSTANTS } from '../../utils/constants';
 
 const props = defineProps<{
-	bills: Bill[];
+	bills: BillResource[];
 }>();
 
-const MAX_BILLS = 3;
 const { t } = useI18n();
-const visibleBills = computed(() => props.bills.slice(0, MAX_BILLS));
-const billsCount = computed(() => props.bills.length - MAX_BILLS);
+const visibleBills = computed((): BillResource[] => props.bills.slice(0, CONSTANTS.MAX_BILLS_DISPLAYED));
+const billsCount = computed((): number => props.bills.length - CONSTANTS.MAX_BILLS_DISPLAYED);
 </script>

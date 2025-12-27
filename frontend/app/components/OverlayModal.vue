@@ -14,13 +14,13 @@
 </template>
 
 <script setup lang="ts">
-const visible = ref(false);
+const visible = ref<boolean>(false);
 
-const open = () => {
+const open = (): void => {
 	visible.value = true;
 };
 
-const close = () => {
+const close = (): void => {
 	visible.value = false;
 };
 

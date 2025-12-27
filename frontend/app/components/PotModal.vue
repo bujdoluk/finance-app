@@ -22,7 +22,7 @@
 				<span class="text-xs font-medium">{{ t('components.potModal.add.potName') }}</span>
 				<UInput
 					v-model="potName"
-					:maxlength="maxLength"
+					:maxlength="CONSTANTS.MAX_POT_NAME_LENGTH"
 					aria-describedby="character-count"
 					:ui="{ trailing: 'pointer-events-none' }"
 				>
@@ -33,7 +33,7 @@
 							aria-live="polite"
 							role="status"
 						>
-							{{ potName?.length || 0 }}/{{ maxLength }}
+							{{ potName?.length || 0 }}/{{ CONSTANTS.MAX_POT_NAME_LENGTH }}
 						</div>
 					</template>
 				</UInput>
@@ -44,7 +44,6 @@
 					orientation="vertical"
 					class="cursor-pointer"
 					placeholder="$"
-					@input="validateTarget"
 					@keydown.enter.prevent="submit"
 				/>
 
@@ -94,6 +93,7 @@
 import type { ChipProps } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
 import type { ThemeColor, ThemeSelectItem } from '../../utils/types/theme';
+import { CONSTANTS } from '~~/utils/constants';
 
 const props = defineProps<{
 	modalState: 'add' | 'edit' | 'delete';
@@ -104,6 +104,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const appConfig = useAppConfig();
 const open = ref<boolean>(false);
 const potName = ref<string>('');
 const target = ref<number | undefined>();
@@ -133,21 +134,19 @@ const getChip = (color: ThemeColor) => {
 	return themes.value.find(theme => theme.value === color)?.chip;
 };
 
-const maxLength = 50;
-
-const title = computed(() => {
+const title = computed((): string => {
 	if (props.modalState === 'add') return t('components.potModal.add.title');
 	if (props.modalState === 'edit') return t('components.potModal.edit.title');
 	return t('components.potModal.delete.title', { pot: potName.value });
 });
 
-const description = computed(() => {
+const description = computed((): string => {
 	if (props.modalState === 'add') return t('components.potModal.add.description');
 	if (props.modalState === 'edit') return t('components.potModal.edit.description');
 	return t('components.potModal.delete.description');
 });
 
-const footerButtonLabel = computed(() => {
+const footerButtonLabel = computed((): string => {
 	if (props.modalState === 'add') return t('components.potModal.add.buttons.addPot');
 	if (props.modalState === 'edit') return t('components.potModal.edit.buttons.saveChanges');
 	return t('components.potModal.delete.buttons.confirmDeletion');
@@ -155,7 +154,7 @@ const footerButtonLabel = computed(() => {
 
 const targetError = ref<string | null>(null);
 
-const validateTarget = () => {
+const validateTarget = (): boolean => {
 	if (target.value === null || target.value === undefined || target.value <= 0) {
 		targetError.value = t('components.potModal.add.errorMessages.invalidTarget');
 		return false;
@@ -169,7 +168,7 @@ const submit = async (): Promise<void> => {
 		if (!validateTarget()) return;
 
 		loading.value = true;
-		await $fetch('http://localhost:3001/v1/pots', {
+		await $fetch(`${appConfig.api}/pots`, {
 			method: 'POST',
 			body: {
 				name: potName.value,

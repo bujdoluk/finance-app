@@ -55,6 +55,7 @@ import { useUserStore } from '~/stores/userStore';
 import type { NavigationMenuItem } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
 import type OverlayModal from '~/components/OverlayModal.vue';
+import { CONSTANTS } from '~~/utils/constants';
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -63,8 +64,8 @@ const overlay = ref<typeof OverlayModal | null>(null);
 
 const timeOfDay = computed(() => {
 	const hour = new Date().getHours();
-	if (hour >= 5 && hour < 12) return t('layouts.dashboard.morning');
-	if (hour >= 12 && hour < 20) return t('layouts.dashboard.afternoon');
+	if (hour >= CONSTANTS.MORNING_START && hour < CONSTANTS.MORNING_END) return t('layouts.dashboard.morning');
+	if (hour >= CONSTANTS.AFTERNOON_START && hour < CONSTANTS.AFTERNOON_END) return t('layouts.dashboard.afternoon');
 	return t('layouts.dashboard.evening');
 });
 

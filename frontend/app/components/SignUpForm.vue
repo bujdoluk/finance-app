@@ -62,7 +62,7 @@ const { t } = useI18n();
 const router = useRouter();
 const appConfig = useAppConfig();
 const overlay = ref<typeof OverlayModal>();
-const show = ref(false);
+const show = ref<boolean>(false);
 const error = ref<string | null>(null);
 
 const fields: AuthFormField[] = [

@@ -34,11 +34,23 @@
 		</div>
 
 		<UProgress
-			v-model="value"
+			v-model="progress"
 			size="xl"
 			class="py-1"
 			:color="themeHexToColorNameMap[budget.attributes.theme]"
 		/>
+
+		<div class="h-4 text-xs font-medium text-green-600 mt-1">
+			<span :class="{ invisible: spendPercentage <= 100 }">
+				{{ t('components.budgetCard.spendExceeded') }}
+			</span>
+		</div>
+
+		<div class="flex items-center justify-between w-full py-2">
+			<div class="text-xs font-bold">
+				{{ percentage }}%
+			</div>
+		</div>
 
 		<div class="flex py-1">
 			<div class="flex w-1/2">
@@ -120,29 +132,50 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import dayjs from 'dayjs';
 import type { BudgetResource } from '../../utils/types/api';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
+import { CONSTANTS } from '../../utils/constants';
+
+definePageMeta({
+	layout: 'dashboard',
+});
 
 const props = defineProps<{
 	budget: BudgetResource;
 }>();
 
 const emit = defineEmits<{
-	(e: 'edit', id: number): void;
-	(e: 'delete', value: string): void;
+	(e: 'edit' | 'delete', id: number): void;
+	(e: 'refresh'): void;
 }>();
 
 const { t } = useI18n();
+
+const progress = computed((): number => {
+	const target = props.budget.attributes.amount;
+	const total_saved = props.budget.attributes.maximum_spending;
+	if (!target || target <= CONSTANTS.MIN_TARGET) return CONSTANTS.MIN_TARGET;
+	return Math.min((total_saved / target) * CONSTANTS.MAX_BUDGET_PERCENTAGE, CONSTANTS.MAX_BUDGET_PERCENTAGE);
+});
+
+const percentage = computed((): string => Math.min((spendPercentage.value), CONSTANTS.MAX_BUDGET_PERCENTAGE).toFixed(2));
+
+const spendPercentage = computed((): number => {
+	const target = props.budget.attributes.amount;
+	const total_saved = props.budget.attributes.maximum_spending;
+	if (!target || target <= CONSTANTS.MIN_TARGET) return CONSTANTS.MIN_TARGET;
+	return (total_saved / target) * CONSTANTS.MAX_BUDGET_PERCENTAGE;
+});
 
 const buttons = computed<DropdownMenuItem[]>(() => [
 	{
 		label: t('components.budgetCard.delete'),
 		onSelect(): void {
-			emit('delete', props.budget.id.toString());
+			emit('delete', Number(props.budget.id));
 		},
 	},
 	{
 		label: t('components.budgetCard.edit'),
 		onSelect(): void {
-			emit('edit', props.budget.id);
+			emit('edit', Number(props.budget.id));
 		},
 	},
 ]);

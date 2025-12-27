@@ -34,6 +34,13 @@
 					class="cursor-pointer"
 					placeholder="$"
 				/>
+
+				<span
+					v-if="amountError"
+					class="text-xs text-secondary-red red mt-1"
+				>
+					{{ amountError }}
+				</span>
 			</div>
 		</template>
 
@@ -53,6 +60,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import appConfig from '~/app.config';
 import type { PotResource } from '~~/utils/types/api';
 
 const props = defineProps<{
@@ -65,37 +73,30 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const open = ref(false);
+const open = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const amount = ref<number | null>(null);
+const amountError = ref<string | null>(null);
 
-const title = computed(() => {
-	if (props.modalState === 'deposit') {
-		return t('components.AddToPotModal.deposit.title', { name: props.pot.attributes.name });
-	}
-	else {
-		return t('components.AddToPotModal.widthdraw.title', { name: props.pot.attributes.name });
-	}
+const title = computed((): string => {
+	if (props.modalState === 'deposit') return t('components.AddToPotModal.deposit.title', { name: props.pot.attributes.name });
+	return t('components.AddToPotModal.widthdraw.title', { name: props.pot.attributes.name });
 });
 
-const description = computed(() => {
-	if (props.modalState === 'deposit') {
-		return t('components.AddToPotModal.deposit.description');
-	}
+const description = computed((): string => {
+	if (props.modalState === 'deposit') return t('components.AddToPotModal.deposit.description');
 	return t('components.AddToPotModal.widthdraw.description');
 });
 
-const footerButtonLabel = computed(() => {
-	if (props.modalState === 'deposit') {
-		return t('components.AddToPotModal.deposit.buttons.confirm');
-	}
+const footerButtonLabel = computed((): string => {
+	if (props.modalState === 'deposit') return t('components.AddToPotModal.deposit.buttons.confirm');
 	return t('components.AddToPotModal.widthdraw.buttons.confirm');
 });
 
 const endpoint = computed(() =>
 	props.modalState === 'deposit'
-		? `/v1/pots/${props.pot.id}/deposit`
-		: `/v1/pots/${props.pot.id}/withdraw`,
+		? `/pots/${props.pot.id}/deposit`
+		: `/pots/${props.pot.id}/withdraw`,
 );
 
 const submit = async (): Promise<void> => {
@@ -104,7 +105,7 @@ const submit = async (): Promise<void> => {
 	try {
 		loading.value = true;
 
-		await $fetch(`http://localhost:3001${endpoint.value}`, {
+		await $fetch(`${appConfig.api}${endpoint.value}`, {
 			method: 'POST',
 			body: { amount: amount.value },
 		});
@@ -114,10 +115,30 @@ const submit = async (): Promise<void> => {
 		amount.value = null;
 	}
 	catch (err: unknown) {
-		console.error('Pot update failed:', err);
+		amountError.value = null;
+
+		const jsonApiError = (err as any)?.data?.errors?.[0]?.detail
+			|| (err as any)?.response?._data?.errors?.[0]?.detail;
+
+		if (jsonApiError) {
+			amountError.value = jsonApiError;
+		}
+		else if (err instanceof Error) {
+			amountError.value = err.message;
+		}
+		else {
+			amountError.value = 'An unknown error occurred';
+		}
 	}
 	finally {
 		loading.value = false;
 	}
 };
+
+watch(open, (): void => {
+	if (open.value) {
+		amountError.value = null;
+		amount.value = null;
+	}
+});
 </script>

@@ -42,7 +42,7 @@ export const potRepository = {
 
       const deleteRes = await dbPool.query<Pots>(
         ` UPDATE ${tables.pots.tableName}
-          SET deleted_at = NOW()
+          SET total_saved = 0, deleted_at = NOW(), updated_at = NOW()
           WHERE id = $1
           RETURNING *`,
         [id]
@@ -146,7 +146,7 @@ export const potRepository = {
   async updateTotalSaved(id: number, data: PotsInput): Promise<null | Pots> {
     try {
       const res = await dbPool.query<Pots>(
-        ` UPDATE ${tables.pots.tableName} SET amount = $1, updated_at = NOW()
+        ` UPDATE ${tables.pots.tableName} SET total_saved = $1, updated_at = NOW()
           WHERE id = $2 AND deleted_at IS NULL RETURNING *`, [data.total_saved, id]
       );
       return res.rows[0] ?? null;
