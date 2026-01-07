@@ -17,8 +17,8 @@
     ]
   },
   "scripts": {
-    "dev": "tsx --watch index.ts",
-    "start": "node --env-file .env dist/index.js",
+    "dev": "tsx --watch main.ts",
+    "start": "node --env-file .env dist/main.js",
     "build": "tsc -p tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",

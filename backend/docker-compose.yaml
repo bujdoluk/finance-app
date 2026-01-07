@@ -3,7 +3,7 @@ services:
   database:
     image: postgres:15
     container_name: database
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_HOST: "database"
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
@@ -14,11 +14,17 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   api:
     build: .
     container_name: api
-    restart: always
+    restart: unless-stopped
     environment:
       PORT: '${APP_PORT}'
       POSTGRES_HOST: "${POSTGRES_HOST}"
@@ -31,14 +37,15 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     volumes:
       - logs_data:/logs 
 
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -51,10 +58,14 @@ services:
     image: alpine
     container_name: logs
     command: ["sh", "-c", "tail -F /logs/app.log"]
-    restart: always
+    restart: unless-stopped
     volumes:
       - logs_data:/logs
+    depends_on:
+      - api
 
 volumes:
   postgres_data:
   logs_data:
+
+

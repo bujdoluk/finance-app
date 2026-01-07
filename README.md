@@ -47,7 +47,11 @@ DISCLAIMER
 
 ### RUN BE app via docker
 
-- `docker_compose up --build -d`
+- `docker-compose up --build -d`
+
+### STOP BE app via docker
+
+- `docker-compose stop`
 
 ### CREATE migrations and seeds
 

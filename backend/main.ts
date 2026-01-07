@@ -3,22 +3,46 @@ import { Application } from "./bootstrap";
 const port = Number(process.env.APP_PORT ?? 3001);
 const app = new Application(port);
 
-const shutdown = async (signal: string) => {
-  console.log(`${signal} signal received.`);
+let isShuttingDown: boolean = false;
+
+const gracefulShutdown = async (signal: string) => {
+  if (isShuttingDown) {
+    return;
+  }
+
+  isShuttingDown = true;
+  console.log(`${signal} received. Starting graceful shutdown...`);
 
   const timeout = setTimeout(() => {
-    console.error("Shutdown taking too long. Forcing exit...");
+    console.error("Graceful shutdown timed out. Forcing exit.");
     process.exit(1);
-  }, 3000);
+  }, 10_000);
 
   timeout.unref();
 
-  await app.stop();
-  clearTimeout(timeout);
-  process.exit(0);
-};
+  try {
+    await app.stop();
+    console.log("Shutdown completed cleanly.");
+    process.exitCode = 0; 
+  } catch (err: unknown) {
+    console.error("Error during graceful shutdown:", err);
+    process.exit(1);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  gracefulShutdown("uncaughtException");
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection:", err);
+  gracefulShutdown("unhandledRejection");
+});
 
 app.start();
