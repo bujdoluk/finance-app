@@ -25,4 +25,7 @@ export const CONSTANTS = Object.freeze({
 	AFTERNOON_END: 20,
 	NIGHT_START: 20,
 	NIGHT_END: 5,
+
+	// TOAST
+	DURATION: 5000,
 });

@@ -7,7 +7,7 @@ import { createError, createErrorDocument, joiToErrors } from "../utils/jsonapi/
 import logger, { formatValidationMessage, getErrorMessage } from "../utils/logger/logger";
 import { mapToPotResource, mapToPotsResponse } from "./mapper";
 import potService from "./service";
-import { createPotSchema, depositWithdrawSchema, updatePotSchema } from "./validation";
+import { createPotSchema, depositWithdrawSchema } from "./validation";
 
 const formatValidationErrors = (errors: Joi.ValidationErrorItem[]): string => {
   return errors.map(e => formatValidationMessage(e.message)).join(" ");
@@ -73,7 +73,12 @@ export const createPot = async (req: Request<unknown, unknown, PotsInput>, res: 
     }
 
     const pot = await potService.create(value);
-    return res.status(StatusCodes.CREATED).json({ message: "Pot created", pot: mapToPotResource(pot) });
+     return res.status(StatusCodes.CREATED).json({
+      data: mapToPotResource(pot), 
+      meta: {
+        message: "Pot created successfully", 
+      },
+    });
   } catch (err: unknown) {
     logger.error(`createPot error: ${getErrorMessage(err)}`);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(

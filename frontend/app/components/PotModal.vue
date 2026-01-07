@@ -94,6 +94,8 @@ import type { ChipProps } from '@nuxt/ui';
 import { useI18n } from 'vue-i18n';
 import type { ThemeColor, ThemeSelectItem } from '../../utils/types/theme';
 import { CONSTANTS } from '~~/utils/constants';
+import { useToastHandler } from '~/composables/useToastHandler';
+import type { PotResource } from '~~/utils/types/api';
 
 const props = defineProps<{
 	modalState: 'add' | 'edit' | 'delete';
@@ -163,12 +165,24 @@ const validateTarget = (): boolean => {
 	return true;
 };
 
+const { showToast } = useToastHandler();
+
+export interface JsonApiMeta {
+	message?: string;
+	[key: string]: unknown;
+}
+
+export interface JsonApiResponse<T> {
+	data: T;
+	meta?: JsonApiMeta;
+}
+
 const submit = async (): Promise<void> => {
 	try {
 		if (!validateTarget()) return;
 
 		loading.value = true;
-		await $fetch(`${appConfig.api}/pots`, {
+		const data = await $fetch<JsonApiResponse<PotResource>>(`${appConfig.api}/pots`, {
 			method: 'POST',
 			body: {
 				name: potName.value,
@@ -178,9 +192,17 @@ const submit = async (): Promise<void> => {
 		});
 		emit('created');
 		open.value = false;
+
+		throw Error();
+		showToast('SUCCESS', data.meta?.message ?? 'Pot created successfully', {
+			icon: 'i-lucide-check-circle',
+		});
 	}
 	catch (err: unknown) {
 		console.error('Failed to create pot:', err);
+		showToast('ERROR', err.forEach(e => e.detail), {
+			icon: 'i-lucide-x-circle',
+		});
 	}
 	finally {
 		loading.value = false;
@@ -191,4 +213,11 @@ const onClose = (): void => {
 	if (loading.value) return;
 	open.value = false;
 };
+
+watch(open, (): void => {
+	if (open.value) {
+		target.value = 0;
+		potName.value = '';
+	}
+});
 </script>

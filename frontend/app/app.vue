@@ -4,7 +4,9 @@
 			:delay-duration="800"
 			:skip-delay-duration="500"
 		>
-			<NuxtPage />
+			<UApp>
+				<NuxtPage />
+			</UApp>
 		</TooltipProvider>
 	</NuxtLayout>
 </template>

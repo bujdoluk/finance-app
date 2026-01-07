@@ -66,6 +66,7 @@ const editPot = async (id: number): Promise<void> => {
 	}
 	finally {
 		loading.value = false;
+		await fetchPots();
 	}
 };
 
@@ -82,6 +83,7 @@ const deletePot = async (id: number): Promise<void> => {
 	}
 	finally {
 		loading.value = false;
+		await fetchPots();
 	}
 };
 

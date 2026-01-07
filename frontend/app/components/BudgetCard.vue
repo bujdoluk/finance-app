@@ -130,6 +130,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui';
 import dayjs from 'dayjs';
+import { useI18n } from 'vue-i18n';
 import type { BudgetResource } from '../../utils/types/api';
 import { themeHexToColorNameMap } from '../../utils/types/theme';
 import { CONSTANTS } from '../../utils/constants';
