@@ -67,17 +67,23 @@ export const billRepository = {
       }
 
       // Pagination 
-      const limit = Number(query?.['page[limit]']);
-      const offset = Number(query?.['page[offset]']);
+      const countParams = [...params];
+      let limit: number | undefined = Number(query?.['page[limit]']);
+      let offset: number | undefined = Number(query?.['page[offset]']);
+      if (isNaN(limit) || limit <= 0) limit = undefined;
+      if (isNaN(offset) || offset < 0) offset = undefined;
 
-      params.push(limit, offset);
-
-      const data = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ${orderBy} LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      let data = `SELECT * FROM ${tables.bills.tableName} WHERE ${where} ${orderBy}`;
       const count = `SELECT COUNT(*)::int AS total FROM ${tables.bills.tableName} WHERE ${where}`;
+
+      if (limit !== undefined) {
+        params.push(limit, offset ?? 0);
+        data += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
+      }
 
       const [dataRes, countRes] = await Promise.all([
         dbPool.query<Bills>(data, params),
-        dbPool.query<{ total: number }>(count, params.slice(0, params.length - 2)),
+        dbPool.query<{ total: number }>(count, countParams),
       ]);
 
       await dbPool.query('COMMIT');

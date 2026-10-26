@@ -202,7 +202,7 @@ const columns: TableColumn<TransactionColumnDefinition>[] = [
 
 			const formatted = new Intl.NumberFormat('en-US', {
 				style: 'currency',
-				currency: 'EUR',
+				currency: 'USD',
 			}).format(amount);
 
 			return h('div', {

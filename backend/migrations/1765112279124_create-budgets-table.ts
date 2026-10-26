@@ -37,7 +37,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('budgets', 'budgets_set_updated_at');
-  pgm.dropFunction('set_updated_at', []);
   pgm.dropIndex('budgets', 'name');
   pgm.dropIndex('budgets', 'created_at');
   pgm.dropTable('budgets', { ifExists: true });

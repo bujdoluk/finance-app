@@ -8,7 +8,7 @@
 			<template #header>
 				<div>
 					<NuxtImg
-						src="../../public/finance.png"
+						src="/finance.png"
 						alt="Finance app logo"
 					/>
 				</div>

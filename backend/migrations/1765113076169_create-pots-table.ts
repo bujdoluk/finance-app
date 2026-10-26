@@ -39,7 +39,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('pots', 'pots_set_updated_at');
-  pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('pots', 'name');
   pgm.dropIndex('pots', 'theme');
   pgm.dropIndex('pots', 'created_at');

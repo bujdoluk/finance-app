@@ -1,27 +1,37 @@
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-const transporter = nodemailer.createTransport({
-  auth: {
-    pass: '1a2b3c4d5e6f7g',
-    user: '1a2b3c4d5e6f7g',
-  },
-  host: 'live.smtp.mailtrap.io',
-  port: 587,
-  secure: false // use SSL
-});
+export interface EmailOptions {
+  subject: string;
+  text: string;
+  to: string;
+}
 
-const mailOptions = {
-  from: 'yourusername@email.com',
-  subject: 'Sending Email using Node.js',
-  text: 'That was easy!',
-  to: 'yourfriend@email.com'
+const createTransporter = () => {
+  const { SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER } = process.env;
+
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) {
+    throw new Error('SMTP_HOST, SMTP_USER and SMTP_PASSWORD must be set to send emails');
+  }
+
+  const port = Number(SMTP_PORT ?? 587);
+
+  return nodemailer.createTransport({
+    auth: {
+      pass: SMTP_PASSWORD,
+      user: SMTP_USER,
+    },
+    host: SMTP_HOST,
+    port,
+    secure: port === 465 // implicit TLS, otherwise STARTTLS
+  });
 };
 
-transporter.sendMail(mailOptions, function(error: Error | null, info: SMTPTransport.SentMessageInfo){
-  if (error) {
-    console.log('Error:', error);
-  } else {
-    console.log('Email sent:', info.response);
-  }
-});
+export const sendEmail = async (options: EmailOptions): Promise<SMTPTransport.SentMessageInfo> => {
+  const transporter = createTransporter();
+
+  return transporter.sendMail({
+    ...options,
+    from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
+  });
+};

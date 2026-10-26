@@ -41,7 +41,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('transactions', 'transactions_set_updated_at');
-  pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('transactions', 'category');
   pgm.dropIndex("transactions", "transaction_type");
   pgm.dropIndex('transactions', 'sender');

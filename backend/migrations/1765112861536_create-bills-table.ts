@@ -40,7 +40,6 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
 
 export async function down(pgm: MigrationBuilder): Promise<void> {
   pgm.dropTrigger('bills', 'bills_set_updated_at');
-  pgm.dropFunction('set_updated_at', []); 
   pgm.dropIndex('bills', 'name');
   pgm.dropIndex('bills', 'due_date');
   pgm.dropIndex('bills', 'status');
