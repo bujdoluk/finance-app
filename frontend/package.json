@@ -16,29 +16,28 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxt/eslint": "1.11.0",
-    "@nuxt/icon": "2.1.0",
-    "@nuxt/image": "2.0.0",
-    "@nuxt/ui": "4.2.1",
-    "@nuxtjs/i18n": "10.2.1",
-    "@pinia/nuxt": "0.11.3",
-    "apexcharts": "5.3.6",
-    "dayjs": "1.11.19",
-    "nuxt": "4.2.1",
-    "nuxt-lucide-icons": "2.0.0",
-    "nuxt-svgo": "4.2.6",
-    "reka-ui": "2.6.1",
-    "vue": "3.5.25",
-    "vue-router": "4.6.3",
-    "vue3-apexcharts": "1.10.0",
-    "zod": "4.1.13"
+    "@nuxt/icon": "2.6.1",
+    "@nuxt/image": "2.2.0",
+    "@nuxt/ui": "4.12.0",
+    "@nuxtjs/i18n": "10.6.0",
+    "@pinia/nuxt": "1.0.3",
+    "apexcharts": "8.5.0",
+    "dayjs": "1.11.23",
+    "nuxt": "4.6.2",
+    "nuxt-lucide-icons": "2.1.0",
+    "nuxt-svgo": "5.3.0",
+    "reka-ui": "2.11.0",
+    "vue": "3.5.44",
+    "vue-router": "5.4.0",
+    "vue3-apexcharts": "1.11.3",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@iconify-json/mdi": "1.2.3",
-    "@nuxt/eslint": "1.10.0",
-    "@nuxt/eslint-config": "1.10.0",
-    "autoprefixer": "10.4.22",
-    "eslint": "9.39.1",
-    "typescript": "5.9.3"
+    "@nuxt/eslint": "1.17.0",
+    "@nuxt/eslint-config": "1.17.0",
+    "autoprefixer": "10.6.1",
+    "eslint": "10.13.0",
+    "typescript": "6.0.3"
   }
 }
